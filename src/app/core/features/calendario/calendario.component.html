@@ -1,0 +1,11 @@
+<!-- Filtros -->
+<button (click)="filtrar()">Todos</button>
+<button *ngFor="let t of tipos" (click)="filtrar(t.id)">{{ t.nombre }}</button>
+
+<!-- Tarjetas -->
+<div *ngFor="let a of actividades" class="card">
+  <h3>{{ a.nombre }}</h3>
+  <span class="badge">{{ a.tipo }}</span>
+  <p>{{ a.fecha | date:'dd/MM/yyyy' }} — {{ a.horaInicio }} a {{ a.horaFin }}</p>
+  <p>{{ a.descripcion }}</p>
+</div>
