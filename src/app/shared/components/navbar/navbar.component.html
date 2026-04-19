@@ -1,0 +1,20 @@
+<nav>
+  <a class="nav-brand" routerLink="/">
+    <img class="logo-unpa" src="he-logo-unpa.svg" alt="UNPA"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="nav-brand-text">
+      <span>UNPA</span>
+      <small>Eventos Universitarios</small>
+    </div>
+  </a>
+
+  <div class="nav-right">
+    @if (mostrarRegresar) {
+      <a [routerLink]="rutaRegresar" class="nav-link">← Regresar</a>
+    }
+    <div class="user-btn">
+      <div class="user-avatar">{{ inicialesUsuario }}</div>
+      {{ nombreUsuario }}
+    </div>
+  </div>
+</nav>
