@@ -1,11 +1,262 @@
-<!-- Filtros -->
-<button (click)="filtrar()">Todos</button>
-<button *ngFor="let t of tipos" (click)="filtrar(t.id)">{{ t.nombre }}</button>
+<div class="page-wrapper">
 
-<!-- Tarjetas -->
-<div *ngFor="let a of actividades" class="card">
-  <h3>{{ a.nombre }}</h3>
-  <span class="badge">{{ a.tipo }}</span>
-  <p>{{ a.fecha | date:'dd/MM/yyyy' }} — {{ a.horaInicio }} a {{ a.horaFin }}</p>
-  <p>{{ a.descripcion }}</p>
+  <!-- ══════════════════════════════════════
+       NAVBAR
+  ══════════════════════════════════════ -->
+  <nav class="navbar">
+    <a class="nav-brand" href="#">
+      <img class="logo-unpa" src="he-logo-unpa.svg" alt="UNPA Logo">
+      <div>
+        <span class="brand-name">UNPA</span>
+        <small class="brand-sub">Eventos Universitarios</small>
+      </div>
+    </a>
+
+    <div class="nav-center">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Buscar eventos, conferencias, talleres..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearch()"
+      >
+      <button class="btn btn-primary" (click)="onSearch()">Buscar</button>
+    </div>
+
+    <div class="nav-right">
+      <button class="btn btn-outline">+ Publicar Evento</button>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       HERO
+  ══════════════════════════════════════ -->
+  <div class="hero">
+    <h1>Descubre los Eventos de tu Universidad</h1>
+    <p>Congresos, talleres, conferencias y más — todo en un solo lugar</p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       HIGHLIGHTED — evento fijo destacado
+  ══════════════════════════════════════ -->
+  <div class="highlighted-section">
+    <div class="highlighted-card">
+      <div class="highlighted-img">
+        <span class="highlighted-emoji">🖥️</span>
+      </div>
+      <div class="highlighted-body">
+        <span class="highlighted-badge">⭐ Destacado</span>
+        <h2>Foro de Computación 2026</h2>
+        <p>El encuentro anual de estudiantes y profesionales de tecnología de la UNPA.
+           Ponencias, talleres prácticos y networking con líderes del sector.</p>
+        <div class="highlighted-meta">
+          <span class="meta-tag">📅 11 de Noviembre, 2026</span>
+          <span class="meta-tag">📍 Auditorio Principal</span>
+          <span class="meta-tag">👥 150 lugares</span>
+          <span class="meta-tag">🕐 09:00 – 17:00 hrs</span>
+        </div>
+        <button class="register-btn">Inscribirme al evento</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       AGENDA HEADER + CONTROLES
+  ══════════════════════════════════════ -->
+  <div class="agenda-header-wrap">
+    <h2 class="agenda-title">{{ agendaTitle }}</h2>
+    <div class="agenda-controls">
+      <button class="strip-nav-btn" (click)="shiftStrip(-1)" title="Semana anterior">&#8249;</button>
+      <button class="strip-nav-btn" (click)="shiftStrip(1)"  title="Semana siguiente">&#8250;</button>
+
+      <div class="view-toggle" style="position:relative">
+        <button class="toggle-btn active" title="Vista cuadrícula">⊞</button>
+        <button class="toggle-btn" title="Abrir calendario" (click)="toggleMiniCal()">📅</button>
+
+        <!-- MINI CALENDARIO -->
+        <div class="mini-cal" *ngIf="miniCalOpen">
+          <div class="mini-cal-header">
+            <button class="mini-nav-btn" (click)="shiftMonth(-1)">&#8249;</button>
+            <span class="mini-cal-title">{{ miniCalTitle }}</span>
+            <button class="mini-nav-btn" (click)="shiftMonth(1)">&#8250;</button>
+          </div>
+          <div class="mini-cal-days-header">
+            <span *ngFor="let d of DAYS_HEADER">{{ d }}</span>
+          </div>
+          <div class="mini-cal-grid">
+            <div
+              *ngFor="let day of miniCalDays"
+              class="mini-cal-day"
+              [class.other-month]="day.otherMonth"
+              [class.today]="day.isToday"
+              [class.selected]="day.isSelected"
+              [class.past]="day.isPast"
+              [class.has-event]="day.hasEvent"
+              (click)="selectMiniDay(day)"
+            >
+              {{ day.num > 0 ? day.num : '' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       CALENDAR STRIP
+  ══════════════════════════════════════ -->
+  <div class="calendar-strip">
+    <div class="calendar-strip-inner">
+      <div
+        *ngFor="let pill of pills"
+        class="day-pill"
+        [class.active]="pill.isSelected"
+        [class.today-pill]="pill.isToday && !pill.isSelected"
+        (click)="selectDay(pill)"
+        (mouseenter)="tooltipPos($event, pillEl)"
+        #pillEl
+      >
+        <div class="day-name">{{ pill.dayName }}</div>
+        <div class="day-num">{{ pill.dayNum }}</div>
+        <div class="day-dot" *ngIf="pill.eventos.length > 0; else emptyDot"></div>
+        <ng-template #emptyDot><div class="day-dot-empty"></div></ng-template>
+
+        <!-- Tooltip -->
+        <div class="day-tooltip">
+          <span class="tooltip-date">
+            {{ pill.dayName }} {{ pill.dayNum }}
+          </span>
+          <ng-container *ngIf="pill.eventos.length > 0; else noEvents">
+            <div class="tooltip-event" *ngFor="let ev of pill.eventos">
+              <span class="tooltip-dot"></span>
+              <span>{{ ev }}</span>
+            </div>
+          </ng-container>
+          <ng-template #noEvents>
+            <span class="tooltip-empty">Sin actividades</span>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       FILTROS DE CATEGORÍA
+  ══════════════════════════════════════ -->
+  <div class="filters-bar">
+    <h3 class="filters-label">Filtrar:</h3>
+    <button
+      class="filter-chip"
+      [class.active]="!categoriaSeleccionada"
+      (click)="selectCategoria()"
+    >Todos</button>
+    <button
+      class="filter-chip"
+      *ngFor="let cat of categorias"
+      [class.active]="categoriaSeleccionada === cat.idCategoria"
+      (click)="selectCategoria(cat)"
+    >
+      {{ getEmoji(cat.nombre) }} {{ cat.nombre }}
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SECCIÓN EVENTOS
+  ══════════════════════════════════════ -->
+  <div class="events-section">
+    <div class="section-header">
+      <h2>Eventos Próximos</h2>
+      <div class="events-pagination">
+        <button class="strip-nav-btn" (click)="shiftEvents(-1)" [disabled]="eventsPage === 0">&#8249;</button>
+        <span class="page-label" *ngIf="totalPages > 0">{{ eventsPage + 1 }} / {{ totalPages }}</span>
+        <button class="strip-nav-btn" (click)="shiftEvents(1)" [disabled]="eventsPage >= totalPages - 1">&#8250;</button>
+      </div>
+    </div>
+
+    <!-- Estado: cargando -->
+    <div class="state-box" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Cargando eventos...</p>
+    </div>
+
+    <!-- Estado: error -->
+    <div class="state-box error-box" *ngIf="error && !loading">
+      <span style="font-size:2rem">⚠️</span>
+      <p>No se pudo conectar con el servidor.</p>
+      <button class="btn btn-primary" (click)="loadActividades()">Reintentar</button>
+    </div>
+
+    <!-- Estado: sin resultados -->
+    <div class="state-box" *ngIf="!loading && !error && filteredEvents.length === 0">
+      <span style="font-size:2rem">🔍</span>
+      <p>No se encontraron eventos.</p>
+    </div>
+
+    <!-- Grid de cards -->
+    <div class="events-grid" *ngIf="!loading && !error && filteredEvents.length > 0">
+      <div
+        class="event-card"
+        *ngFor="let ev of pagedEvents; let i = index"
+        [style.animation-delay]="(i * 0.07) + 's'"
+        [class.past-card]="isPast(ev)"
+      >
+        <!-- Imagen / color de portada -->
+        <div
+          class="event-card-img"
+          [style.background]="ev.imagenPortada ? 'none' : getColor(ev.categoria)"
+        >
+          <img
+            *ngIf="ev.imagenPortada"
+            [src]="ev.imagenPortada"
+            [alt]="ev.nombre"
+            class="event-cover-img"
+          >
+          <span *ngIf="!ev.imagenPortada" class="event-emoji">{{ getEmoji(ev.categoria) }}</span>
+          <span class="category-badge" [class.past-badge]="isPast(ev)">
+            {{ isPast(ev) ? 'Pasado' : ev.categoria }}
+          </span>
+          <button class="save-btn" (click)="$event.stopPropagation()">🔖</button>
+        </div>
+
+        <!-- Cuerpo -->
+        <div class="event-card-body">
+          <h3>{{ ev.nombre }}</h3>
+          <p>{{ ev.descripcion }}</p>
+          <div class="event-meta">
+            🕐 {{ formatHora(ev.horaInicio) }} – {{ formatHora(ev.horaFin) }}
+          </div>
+          <div class="event-card-footer">
+            <span class="event-date">📅 {{ formatFecha(ev.fechaActividad) }}</span>
+            <span class="event-tipo">{{ ev.tipo }}</span>
+          </div>
+          <button
+            class="register-btn"
+            [disabled]="isPast(ev)"
+            [class.disabled-btn]="isPast(ev)"
+          >
+            {{ isPast(ev) ? 'Evento finalizado' : 'Inscribirme' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       STATS BAR
+  ══════════════════════════════════════ -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-num">{{ actividades.length }}</span>
+      <span class="stat-label">Eventos disponibles</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">{{ categorias.length }}</span>
+      <span class="stat-label">Categorías</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">{{ filteredEvents.length }}</span>
+      <span class="stat-label">Resultados filtrados</span>
+    </div>
+  </div>
+
 </div>
