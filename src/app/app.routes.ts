@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { CalendarioComponent } from './core/features/calendario/calendario.component';
+import { CalendarioComponent } from './features/calendario/calendario.component';
 
 export const routes: Routes = [
   { path: '',          redirectTo: 'calendario', pathMatch: 'full' },

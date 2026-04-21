@@ -1,8 +1,8 @@
 import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Actividad, Categoria, CATEGORIA_COLOR, CATEGORIA_EMOJI } from '../../models/actividad.model';
-import { ActividadService } from '../../services/actividades.service';
+import { Actividad, Categoria, CATEGORIA_COLOR, CATEGORIA_EMOJI } from '../../core/models/actividad.model';
+import { ActividadService } from '../../core/services/actividades.service';
 
  
 interface DayPill {
@@ -128,7 +128,8 @@ export class CalendarioComponent implements OnInit {
  
   applyFilter(): void {
     const q = this.searchQuery.toLowerCase();
- 
+    const selKey = this.dateKey(this.selectedDate);
+
     this.filteredEvents = this.actividades.filter(ev => {
       const mQ = !q
         || ev.nombre.toLowerCase().includes(q)
