@@ -85,8 +85,6 @@ export class RegistrarActividadComponent implements OnInit {
     this.catalogo.getCategorias().subscribe(d => this.categorias = d);
     this.catalogo.getDepartamentos().subscribe(d => this.departamentos = d);
     this.catalogo.getCarreras().subscribe(d => this.carreras = d);
-    this.catalogo.getEspacios().subscribe(d => this.espacios = d);
-    this.catalogo.getMobiliario().subscribe(d => this.mobiliario = d);
   }
 
   onCategoriaChange(event: Event): void {
@@ -187,6 +185,11 @@ export class RegistrarActividadComponent implements OnInit {
   siguiente(): void {
     if (!this.validarPasoActual()) return;
     this.pasoActual++;
+
+    // Al entrar al paso 3, recargar recursos filtrados por horario
+    if (this.pasoActual === 3) {
+      this.cargarRecursosDisponibles();
+    }
   }
 
   anterior(): void {
@@ -324,6 +327,32 @@ export class RegistrarActividadComponent implements OnInit {
 
   getNombreTipo(id: any): string {
     return this.tipos.find(t => t.idTipo === +id)?.nombre ?? '—';
+  }
+
+
+  // NUEVO
+  cargarRecursosDisponibles(): void {
+    const fecha      = this.form.get('fechaActividad')?.value;
+    const horaInicio = this.form.get('horaInicio')?.value;
+    const horaFin    = this.form.get('horaFin')?.value;
+
+    if (!fecha || !horaInicio || !horaFin) return;
+    if (this.form.hasError('horaInvalida')) return;
+
+    // Formato requerido: HH:mm:ss
+    const inicio = horaInicio + ':00';
+    const fin    = horaFin + ':00';
+
+    this.catalogo.getEspacios(fecha, inicio, fin)
+      .subscribe(d => this.espacios = d);
+
+    this.catalogo.getMobiliario(fecha, inicio, fin)
+      .subscribe(d => this.mobiliario = d);
+  }
+
+
+  getMaxCantidad(idRecurso: number): number {
+    return this.mobiliario.find(m => m.idRecurso === idRecurso)?.cantidadDisponible ?? 1;
   }
 
 

@@ -79,6 +79,7 @@
   width: calc(100% - 2.8rem);
   height: 2px;
   background: var(--primary-light);
+  z-index: 0;   /* ← línea detrás */
 }
 .step-item.done::after { background: var(--primary); }
 .step-num {
@@ -90,11 +91,20 @@
   color: var(--gray);
   background: var(--white);
   flex-shrink: 0; z-index: 1;
+  z-index: 2;        /* ← círculo encima de la línea */
+  position: relative; /* ← necesario para que z-index funcione */
   transition: all 0.3s;
 }
 .step-item.active .step-num { background: var(--primary); border-color: var(--primary); color: white; }
 .step-item.done .step-num   { background: var(--accent);  border-color: var(--accent);  color: white; }
-.step-label { font-size: 0.78rem; font-weight: 600; color: var(--gray); white-space: nowrap; }
+.step-label { 
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gray);
+  white-space: nowrap;
+  position: relative; /* ← también necesario */
+  z-index: 2;         /* ← texto encima de la línea */
+}
 .step-item.active .step-label { color: var(--accent); }
 .step-item.done   .step-label { color: var(--primary-dark); }
 

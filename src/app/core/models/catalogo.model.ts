@@ -27,6 +27,7 @@ export interface EspacioRecurso {
   descripcion?: string;
   capacidad: number;
   ubicacion: string;
+  disponible: boolean; // Nuevo
 }
 
 export interface MobiliarioRecurso {
@@ -34,4 +35,6 @@ export interface MobiliarioRecurso {
   nombre: string;
   descripcion?: string;
   cantidad: number;
+  cantidadTotal: number;        // ← renombrado
+  cantidadDisponible: number;   // ← nuevo
 }

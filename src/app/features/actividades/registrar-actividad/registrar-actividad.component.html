@@ -1,6 +1,6 @@
 <app-navbar
-  nombreUsuario="Carlos H."
-  inicialesUsuario="CH"
+  nombreUsuario="MC. Sandro"
+  inicialesUsuario="S"
   rutaRegresar="/"
   [mostrarRegresar]="true">
 </app-navbar>
@@ -26,7 +26,7 @@
           @if (pasoActual > paso) { ✓ } @else { {{ paso }} }
         </div>
         <div>
-          <div class="step-label">
+          <div class="step-label" style="padding-bottom: 40px;">
             @switch (paso) {
               @case (1) { Información General }
               @case (2) { Fecha y Hora }
@@ -45,20 +45,27 @@
 
   <!-- BANNER INFO -->
   <div class="info-banner">
-    <div class="icon">ℹ️</div>
+    <div class="icon">
+      <span class="material-symbols-rounded">info</span>
+    </div>
     <p><strong>¿Cómo funciona?</strong> Una vez enviada tu solicitud, el Vicerrector recibirá una notificación. El tiempo de respuesta es de 2 a 5 días hábiles.</p>
   </div>
 
   <!-- ERROR GLOBAL -->
   @if (errorGlobal) {
-    <div class="alert-error">⚠️ {{ errorGlobal }}</div>
+    <div class="alert-error">
+      <span class="material-symbols-rounded">warning</span>
+      {{ errorGlobal }}
+    </div>
   }
 
   <!-- ── PASO 1: INFORMACIÓN GENERAL ── -->
   @if (pasoActual === 1) {
     <div class="form-section anim">
       <div class="section-header">
-        <div class="section-icon">📌</div>
+        <div class="section-icon">
+          <span class="material-symbols-rounded">push_pin</span>
+        </div>
         <div>
           <h3>Información General</h3>
           <p>Datos básicos del evento</p>
@@ -109,7 +116,7 @@
     <div class="step-nav">
       <span></span>
       <button class="btn btn-primary" (click)="siguiente()">
-        Siguiente →
+        Siguiente
       </button>
     </div>
   }
@@ -118,7 +125,9 @@
   @if (pasoActual === 2) {
     <div class="form-section anim">
       <div class="section-header">
-        <div class="section-icon">📅</div>
+        <div class="section-icon">
+          <span class="material-symbols-rounded">calendar_month</span>
+        </div>
         <div>
           <h3>Fecha y Hora</h3>
           <p>Cuándo se realizará el evento</p>
@@ -154,8 +163,8 @@
     </div>
 
     <div class="step-nav">
-      <button class="btn btn-ghost" (click)="anterior()">← Anterior</button>
-      <button class="btn btn-primary" (click)="siguiente()">Siguiente →</button>
+      <button class="btn btn-ghost" (click)="anterior()">Anterior</button>
+      <button class="btn btn-primary" (click)="siguiente()">Siguiente</button>
     </div>
   }
 
@@ -163,7 +172,9 @@
   @if (pasoActual === 3) {
     <div class="form-section anim">
       <div class="section-header">
-        <div class="section-icon">🏫</div>
+        <div class="section-icon">
+          <span class="material-symbols-rounded">groups</span>
+        </div>
         <div>
           <h3>Organizadores</h3>
           <p>Carreras o áreas administrativas que organizan el evento</p>
@@ -194,12 +205,18 @@
 
         <!-- Lista de organizadores seleccionados -->
         @if (organizadoresArray.length === 0) {
-          <p class="empty-hint">⚠️ Agrega al menos un organizador.</p>
+          <p class="empty-hint">
+            <span class="material-symbols-rounded">warning</span>
+            Agrega al menos un organizador.
+          </p>
         }
         <div class="tags-list">
           @for (org of organizadoresArray.controls; track $index) {
             <div class="tag">
-              <span>{{ org.value._tipo === 'carrera' ? '🎓' : '🏢' }} {{ org.value._nombre }}</span>
+              <span class="material-symbols-rounded tag-icon">
+                {{ org.value._tipo === 'carrera' ? 'school' : 'corporate_fare' }}
+              </span>
+              {{ org.value._nombre }}
               <button type="button" (click)="quitarOrganizador($index)">✕</button>
             </div>
           }
@@ -211,7 +228,9 @@
     <!-- ESPACIOS -->
     <div class="form-section anim" style="animation-delay:.07s">
       <div class="section-header">
-        <div class="section-icon">🏛️</div>
+        <div class="section-icon">
+          <span class="material-symbols-rounded">meeting_room</span>
+        </div>
         <div>
           <h3>Espacios Requeridos</h3>
           <p>Auditorios, canchas, salas...</p>
@@ -223,8 +242,10 @@
           <select (change)="onSelectRecurso($event, 'ESPACIO')">
             <option value="">— Selecciona un espacio —</option>
             @for (e of espacios; track e.idRecurso) {
-              <option [value]="e.idRecurso + '|' + e.nombre">
+              <option [value]="e.idRecurso + '|' + e.nombre"
+                      [disabled]="!e.disponible">
                 {{ e.nombre }} (Cap. {{ e.capacidad }}) — {{ e.ubicacion }}
+                @if (!e.disponible) { — NO DISPONIBLE }
               </option>
             }
           </select>
@@ -233,7 +254,7 @@
           @for (r of recursosArray.controls; track $index) {
             @if (r.value._tipo === 'ESPACIO') {
               <div class="tag resource-tag">
-                <span>🏛️ {{ r.value._nombre }}</span>
+                <span>{{ r.value._nombre }}</span>
                 <button type="button" (click)="quitarRecurso($index)">✕</button>
               </div>
             }
@@ -245,7 +266,9 @@
     <!-- MOBILIARIO -->
     <div class="form-section anim" style="animation-delay:.14s">
       <div class="section-header">
-        <div class="section-icon">🪑</div>
+        <div class="section-icon">
+          <span class="material-symbols-rounded">chair</span>
+        </div>
         <div>
           <h3>Mobiliario Requerido</h3>
           <p>Sillas, mesas, proyectores, micrófonos...</p>
@@ -257,8 +280,11 @@
           <select (change)="onSelectRecurso($event, 'MOBILIARIO')">
             <option value="">— Selecciona mobiliario —</option>
             @for (m of mobiliario; track m.idRecurso) {
-              <option [value]="m.idRecurso + '|' + m.nombre">
-                {{ m.nombre }} (Disponibles: {{ m.cantidad }})
+              <option [value]="m.idRecurso + '|' + m.nombre"
+                      [disabled]="m.cantidadDisponible === 0">
+                {{ m.nombre }}
+                — Disponibles: {{ m.cantidadDisponible }} / {{ m.cantidadTotal }}
+                @if (m.cantidadDisponible === 0) { — NO DISPONIBLE }
               </option>
             }
           </select>
@@ -271,12 +297,13 @@
               @for (r of recursosArray.controls; track $index) {
                 @if (r.value._tipo === 'MOBILIARIO') {
                   <div class="resource-row" [formGroupName]="$index">
-                    <span>🪑 {{ r.value._nombre }}</span>
+                    <span>{{ r.value._nombre }}</span>
                     <div class="qty-control">
                       <button type="button"
                         (click)="cambiarCantidad($index, -1)">−</button>
                       <input type="number" formControlName="cantidadRequerida"
-                             min="1" style="width:55px;text-align:center">
+                        [max]="getMaxCantidad(r.value.idRecurso)"
+                        min="1" style="width:55px;text-align:center">
                       <button type="button"
                         (click)="cambiarCantidad($index, 1)">+</button>
                     </div>
@@ -294,7 +321,9 @@
     <!-- IMAGEN PORTADA -->
     <div class="form-section anim" style="animation-delay:.21s">
       <div class="section-header">
-        <div class="section-icon">🖼️</div>
+        <div class="section-icon">
+          <span class="material-symbols-rounded">image</span>
+        </div>
         <div>
           <h3>Imagen de Portada</h3>
           <p>Opcional — se mostrará en el calendario público</p>
@@ -307,7 +336,9 @@
                (drop)="onDrop($event)">
             <input type="file" accept="image/jpeg,image/png,image/webp"
                    (change)="onPortadaSeleccionada($event)">
-            <span class="upload-icon">🖼️</span>
+            <div class="upload-icon">
+              <span class="material-symbols-rounded">image</span>
+            </div>
             <div class="upload-text">Arrastra una imagen o haz clic para seleccionar</div>
             <div class="upload-sub">PNG, JPG o WEBP · Máx. 5 MB</div>
           </div>
@@ -327,8 +358,8 @@
     </div>
 
     <div class="step-nav">
-      <button class="btn btn-ghost" (click)="anterior()">← Anterior</button>
-      <button class="btn btn-primary" (click)="siguiente()">Siguiente →</button>
+      <button class="btn btn-ghost" (click)="anterior()">Anterior</button>
+      <button class="btn btn-primary" (click)="siguiente()">Siguiente</button>
     </div>
   }
 
@@ -336,7 +367,9 @@
   @if (pasoActual === 4) {
     <div class="form-section anim">
       <div class="section-header">
-        <div class="section-icon">📋</div>
+        <div class="section-icon">
+          <span class="material-symbols-rounded">send</span>
+        </div>
         <div>
           <h3>Resumen de la Solicitud</h3>
           <p>Revisa los datos antes de enviar</p>
@@ -397,9 +430,14 @@
         Tu solicitud será revisada por el Vicerrector en 2–5 días hábiles.
       </div>
       <div class="submit-actions">
-        <button class="btn btn-ghost" (click)="anterior()">← Revisar</button>
+        <button class="btn btn-ghost" (click)="anterior()">Revisar</button>
         <button class="btn btn-primary" (click)="enviar()" [disabled]="cargando">
-          @if (cargando) { ⏳ Enviando... } @else { 📨 Enviar Solicitud }
+          @if (cargando) {
+            <span class="material-symbols-rounded">hourglass_top</span>
+            Enviando...
+          } @else {
+            Enviar Solicitud
+          }
         </button>
       </div>
     </div>
@@ -411,7 +449,9 @@
 @if (enviado && actividadCreada) {
   <div class="modal-overlay open">
     <div class="success-modal">
-      <div class="success-ring">📨</div>
+      <div class="success-ring">
+        <span class="material-symbols-rounded">mail</span>
+      </div>
       <h2>¡Solicitud Enviada!</h2>
       <p>Tu solicitud ha sido enviada al <strong>Vicerrector</strong> para su revisión.</p>
       <div class="ticket-box">
@@ -429,7 +469,10 @@
         </div>
         <div class="ticket-row">
           <span>Estado</span>
-          <strong style="color:var(--warn)">⏳ En revisión</strong>
+          <strong style="color:var(--warn)">
+            <span class="material-symbols-rounded">hourglass_top</span>
+            En revisión
+          </strong>
         </div>
       </div>
       <div class="modal-actions">

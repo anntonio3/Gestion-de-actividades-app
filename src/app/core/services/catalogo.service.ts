@@ -30,11 +30,19 @@ export class CatalogoService {
     return this.http.get<Carrera[]>(`${this.base}/carreras`);
   }
 
-  getEspacios(): Observable<EspacioRecurso[]> {
-    return this.http.get<EspacioRecurso[]>(`${this.base}/recursos/espacios`);
+  getEspacios(fecha?: string, horaInicio?: string, horaFin?: string): Observable<EspacioRecurso[]> {
+    let params = '';
+    if (fecha && horaInicio && horaFin) {
+      params = `?fecha=${fecha}&horaInicio=${horaInicio}&horaFin=${horaFin}`;
+    }
+    return this.http.get<EspacioRecurso[]>(`${this.base}/recursos/espacios${params}`);
   }
 
-  getMobiliario(): Observable<MobiliarioRecurso[]> {
-    return this.http.get<MobiliarioRecurso[]>(`${this.base}/recursos/mobiliario`);
+  getMobiliario(fecha?: string, horaInicio?: string, horaFin?: string): Observable<MobiliarioRecurso[]> {
+    let params = '';
+    if (fecha && horaInicio && horaFin) {
+      params = `?fecha=${fecha}&horaInicio=${horaInicio}&horaFin=${horaFin}`;
+    }
+    return this.http.get<MobiliarioRecurso[]>(`${this.base}/recursos/mobiliario${params}`);
   }
 }
