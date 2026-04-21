@@ -42,7 +42,7 @@
   <div class="highlighted-section">
     <div class="highlighted-card">
       <div class="highlighted-img">
-        <span class="highlighted-emoji">🖥️</span>
+        <img src="computacion.jpg" alt="Imagen del evento destacado" class="highlighted-event-img">
       </div>
       <div class="highlighted-body">
         <span class="highlighted-badge">⭐ Destacado</span>
@@ -55,7 +55,6 @@
           <span class="meta-tag">👥 150 lugares</span>
           <span class="meta-tag">🕐 09:00 – 17:00 hrs</span>
         </div>
-        <button class="register-btn">Inscribirme al evento</button>
       </div>
     </div>
   </div>
@@ -165,7 +164,7 @@
   ══════════════════════════════════════ -->
   <div class="events-section">
     <div class="section-header">
-      <h2>Eventos Próximos</h2>
+      <h2>{{ tituloSeccion }}</h2>
       <div class="events-pagination">
         <button class="strip-nav-btn" (click)="shiftEvents(-1)" [disabled]="eventsPage === 0">&#8249;</button>
         <span class="page-label" *ngIf="totalPages > 0">{{ eventsPage + 1 }} / {{ totalPages }}</span>
@@ -215,7 +214,6 @@
           <span class="category-badge" [class.past-badge]="isPast(ev)">
             {{ isPast(ev) ? 'Pasado' : ev.categoria }}
           </span>
-          <button class="save-btn" (click)="$event.stopPropagation()">🔖</button>
         </div>
 
         <!-- Cuerpo -->
@@ -229,13 +227,10 @@
             <span class="event-date">📅 {{ formatFecha(ev.fechaActividad) }}</span>
             <span class="event-tipo">{{ ev.tipo }}</span>
           </div>
-          <button
-            class="register-btn"
-            [disabled]="isPast(ev)"
-            [class.disabled-btn]="isPast(ev)"
-          >
-            {{ isPast(ev) ? 'Evento finalizado' : 'Inscribirme' }}
-          </button>
+          <div class="event-status" [class.status-past]="isPast(ev)">
+            <span class="status-dot"></span>
+            {{ isPast(ev) ? 'Evento finalizado' : 'Próximamente' }}
+          </div>
         </div>
       </div>
     </div>

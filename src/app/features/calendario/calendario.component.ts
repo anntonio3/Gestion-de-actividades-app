@@ -49,7 +49,7 @@ export class CalendarioComponent implements OnInit {
  
   // ── Strip ──────────────────────────────────────────────
   stripOffset  = -1;          // offset del primer pill respecto a hoy
-  STRIP_VISIBLE = 14;
+  STRIP_VISIBLE = 11;
   pills: DayPill[] = [];
  
   // ── Fecha seleccionada ─────────────────────────────────
@@ -68,9 +68,13 @@ export class CalendarioComponent implements OnInit {
  
   // ── Paginación eventos ─────────────────────────────────
   eventsPage      = 0;
-  EVENTS_PER_PAGE = 6;
+  EVENTS_PER_PAGE = 8;
   filteredEvents: Actividad[] = [];
   totalPages      = 0;
+
+  // NUEVO
+  paginas: Actividad[][] = [];
+  paginaFuturosInicio = 0;
  
   // ── Helpers expuestos a la plantilla ──────────────────
   catEmoji  = CATEGORIA_EMOJI;
@@ -126,35 +130,65 @@ export class CalendarioComponent implements OnInit {
     this.applyFilter();
   }
  
-  applyFilter(): void {
-    const q = this.searchQuery.toLowerCase();
-    const selKey = this.dateKey(this.selectedDate);
+ applyFilter(): void {
+  const q = this.searchQuery.toLowerCase();
 
-    this.filteredEvents = this.actividades.filter(ev => {
-      const mQ = !q
-        || ev.nombre.toLowerCase().includes(q)
-        || ev.descripcion.toLowerCase().includes(q);
-      return mQ;
-    });
- 
-    // Ordenar: futuros/hoy primero, pasados al final
-    this.filteredEvents.sort((a, b) => {
-      const da = new Date(a.fechaActividad);
-      const db = new Date(b.fechaActividad);
-      const aF = da >= this.todayRef;
-      const bF = db >= this.todayRef;
-      if (aF && !bF) return -1;
-      if (!aF && bF) return  1;
-      return da.getTime() - db.getTime();
-    });
- 
-    this.eventsPage  = 0;
-    this.totalPages  = Math.ceil(this.filteredEvents.length / this.EVENTS_PER_PAGE);
+  // Filtrado por búsqueda
+  const filtrados = this.actividades.filter(ev => {
+    return !q
+      || ev.nombre.toLowerCase().includes(q)
+      || ev.descripcion.toLowerCase().includes(q);
+  });
+
+  // Ordenar SIEMPRE por fecha cronológica ascendente
+  filtrados.sort((a, b) => {
+    const da = new Date(a.fechaActividad + 'T00:00:00').getTime();
+    const db = new Date(b.fechaActividad + 'T00:00:00').getTime();
+    if (da !== db) return da - db;
+    return a.horaInicio.localeCompare(b.horaInicio);
+  });
+
+  this.filteredEvents = filtrados;
+  this.calcularPaginas();
   }
- 
+
+  /**
+   * Reagrupa los eventos en páginas SEPARANDO pasados de futuros.
+   * Las páginas con eventos pasados van antes (índices menores)
+   * y las páginas con futuros van después.
+   */
+  private calcularPaginas(): void {
+    const refKey = this.dateKey(this.selectedDate);
+
+    const pasados = this.filteredEvents.filter(ev =>
+      this.dateKey(new Date(ev.fechaActividad + 'T00:00:00')) < refKey
+    );
+    const futuros = this.filteredEvents.filter(ev =>
+      this.dateKey(new Date(ev.fechaActividad + 'T00:00:00')) >= refKey
+    );
+
+    // Construir páginas: primero todas las de pasados, luego las de futuros
+    this.paginas = [];
+    for (let i = 0; i < pasados.length; i += this.EVENTS_PER_PAGE) {
+      this.paginas.push(pasados.slice(i, i + this.EVENTS_PER_PAGE));
+    }
+    // Índice donde inician las páginas de futuros
+    this.paginaFuturosInicio = this.paginas.length;
+
+    for (let i = 0; i < futuros.length; i += this.EVENTS_PER_PAGE) {
+      this.paginas.push(futuros.slice(i, i + this.EVENTS_PER_PAGE));
+    }
+
+    this.totalPages = this.paginas.length;
+    // Posicionarse en la primera página de futuros (o última si no hay futuros)
+    this.eventsPage = futuros.length > 0
+      ? this.paginaFuturosInicio
+      : Math.max(0, this.totalPages - 1);
+  }
+
+
   get pagedEvents(): Actividad[] {
-    const start = this.eventsPage * this.EVENTS_PER_PAGE;
-    return this.filteredEvents.slice(start, start + this.EVENTS_PER_PAGE);
+    return this.paginas[this.eventsPage] ?? [];
   }
  
   shiftEvents(dir: number): void {
@@ -165,7 +199,9 @@ export class CalendarioComponent implements OnInit {
   }
  
   isPast(ev: Actividad): boolean {
-    return new Date(ev.fechaActividad) < this.todayRef;
+    // Combinar fecha + hora de fin del evento
+    const finEvento = new Date(ev.fechaActividad + 'T' + ev.horaFin);
+    return finEvento < new Date();
   }
  
   occupancyClass(ev: Actividad): string {
@@ -217,7 +253,7 @@ export class CalendarioComponent implements OnInit {
   }
  
   shiftStrip(dir: number): void {
-    this.stripOffset += dir * 7;
+    this.stripOffset += dir * 3; // para navegar en el calendar strip
     this.buildStrip();
   }
  
@@ -238,6 +274,7 @@ export class CalendarioComponent implements OnInit {
     this.buildStrip();
     this.buildMiniCal();
     this.closeMiniCal();
+    this.applyFilter();   // ← NUEVO: reposiciona los eventos en el día seleccionado
   }
  
   get agendaTitle(): string {
@@ -346,4 +383,12 @@ export class CalendarioComponent implements OnInit {
       this.miniCalOpen = false;
     }
   }
+
+  //NUEVO
+  get tituloSeccion(): string {
+    return this.eventsPage < this.paginaFuturosInicio
+      ? 'Eventos Pasados'
+      : 'Eventos Próximos';
+  }
+
 }
