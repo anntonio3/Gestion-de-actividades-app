@@ -45,6 +45,8 @@ export class RegistrarActividadComponent implements OnInit {
 
   form!: FormGroup;
 
+  mostrarInfo = false;
+
   ngOnInit(): void {
     this.construirForm();
     this.cargarCatalogos();
@@ -353,6 +355,11 @@ export class RegistrarActividadComponent implements OnInit {
 
   getMaxCantidad(idRecurso: number): number {
     return this.mobiliario.find(m => m.idRecurso === idRecurso)?.cantidadDisponible ?? 1;
+  }
+
+
+  toggleInfo(): void {
+    this.mostrarInfo = !this.mostrarInfo;
   }
 
 

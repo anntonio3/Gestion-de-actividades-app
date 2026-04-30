@@ -1,55 +1,74 @@
 <app-navbar
-  nombreUsuario="MC. Sandro"
-  inicialesUsuario="S"
+  nombreUsuario="Carlos H."
+  inicialesUsuario="CH"
   rutaRegresar="/"
-  [mostrarRegresar]="true">
+  [mostrarRegresar]="true"
+  titulo="Registrar Nuevo Evento">    <!-- ← NUEVO -->
 </app-navbar>
 
-<!-- PAGE HEADER -->
+<!-- HEADER UNIFICADO -->
 <div class="page-header">
   <div class="page-header-inner">
-    <div class="badge">Solicitud a Vicerrectoría</div>
-    <h1>Registrar Nuevo Evento</h1>
-    <p>Completa el formulario con los detalles del evento. Tu solicitud será revisada por el Vicerrector.</p>
-  </div>
-</div>
 
-<!-- STEPS -->
-<div class="steps-bar">
-  <div class="steps-card">
-    @for (paso of [1,2,3,4]; track paso) {
-      <div class="step-item"
-           [class.active]="pasoActual === paso"
-           [class.done]="pasoActual > paso"
-           (click)="irPaso(paso)">
-        <div class="step-num">
-          @if (pasoActual > paso) { ✓ } @else { {{ paso }} }
-        </div>
-        <div>
-          <div class="step-label" style="padding-bottom: 40px;">
-            @switch (paso) {
-              @case (1) { Información General }
-              @case (2) { Fecha y Hora }
-              @case (3) { Organizadores y Recursos }
-              @case (4) { Envío }
-            }
+    <!-- STEPS -->
+    <div class="steps-bar">
+      <div class="steps-card">
+        @for (paso of [1,2,3,4]; track paso) {
+          <div class="step-item"
+               [class.active]="pasoActual === paso"
+               [class.done]="pasoActual > paso"
+               (click)="irPaso(paso)">
+            <div class="step-num">
+              @if (pasoActual > paso) { ✓ } @else { {{ paso }} }
+            </div>
+            <div>
+              <div class="step-label" style="padding-bottom: 30px;">
+                @switch (paso) {
+                  @case (1) { Información General }
+                  @case (2) { Fecha y Hora }
+                  @case (3) { Organizadores y Recursos }
+                  @case (4) { Envío }
+                }
+              </div>
+            </div>
           </div>
-        </div>
+        }
+
+        <!-- Botón de info dentro del card, a la derecha -->
+        <button type="button"
+                class="info-icon-btn"
+                [class.active]="mostrarInfo"
+                (click)="toggleInfo()">
+          <span class="material-symbols-rounded">info</span>
+        </button>
+
+        <!-- Panel desplegable de info -->
+        @if (mostrarInfo) {
+          <div class="info-overlay" (click)="toggleInfo()"></div>
+          <div class="info-panel">
+            <div class="info-panel-header">
+              <span class="material-symbols-rounded">info</span>
+              <strong>¿Cómo funciona?</strong>
+              <button type="button" class="info-close" (click)="toggleInfo()">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+            <p>
+              Una vez enviada tu solicitud, el Vicerrector recibirá una notificación
+              para revisar los detalles. El tiempo de respuesta es de
+              <strong>2 a 5 días hábiles</strong>. Podrás consultar el estado de tu
+              solicitud desde tu perfil.
+            </p>
+          </div>
+        }
       </div>
-    }
+    </div>
+
   </div>
 </div>
 
 <!-- FORM -->
 <div class="form-wrapper" [formGroup]="form">
-
-  <!-- BANNER INFO -->
-  <div class="info-banner">
-    <div class="icon">
-      <span class="material-symbols-rounded">info</span>
-    </div>
-    <p><strong>¿Cómo funciona?</strong> Una vez enviada tu solicitud, el Vicerrector recibirá una notificación. El tiempo de respuesta es de 2 a 5 días hábiles.</p>
-  </div>
 
   <!-- ERROR GLOBAL -->
   @if (errorGlobal) {

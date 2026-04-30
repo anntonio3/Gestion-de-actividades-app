@@ -88,3 +88,15 @@ nav {
   font-size: 0.8rem;
   color: white;
 }
+
+.nav-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: var(--accent);
+  margin: 0;
+  white-space: nowrap;
+}
+

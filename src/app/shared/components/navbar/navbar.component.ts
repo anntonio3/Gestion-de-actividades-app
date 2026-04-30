@@ -14,4 +14,5 @@ export class NavbarComponent {
   @Input() inicialesUsuario: string = 'U';
   @Input() rutaRegresar: string = '/';
   @Input() mostrarRegresar: boolean = true;
+  @Input() titulo: string = '';   // ← NUEVO
 }
