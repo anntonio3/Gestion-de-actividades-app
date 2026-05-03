@@ -1,19 +1,16 @@
 import { Routes } from '@angular/router';
+import { CalendarioComponent } from './features/calendario/calendario.component';
 
 export const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'actividades/registrar',
-    pathMatch: 'full'
-  },
+  { path: '',          redirectTo: 'calendario', pathMatch: 'full' },
+
+  { path: 'calendario', component: CalendarioComponent },
   {
     path: 'actividades/registrar',
     loadComponent: () =>
       import('./features/actividades/registrar-actividad/registrar-actividad.component')
         .then(m => m.RegistrarActividadComponent)
   },
-  {
-    path: '**',
-    redirectTo: 'actividades/registrar'
-  }
+  { path: '**',        redirectTo: 'calendario' }
 ];
+ 
