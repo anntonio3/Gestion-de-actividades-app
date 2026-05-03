@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ActualizarActividadRequest, SolicitudActividad } from '../../shared/models/actividad.model';
+import { ActualizarActividadRequest, SolicitudActividad } from '../models/actividad.model';
 
 @Injectable({ providedIn: 'root' })
 export class ActividadService {

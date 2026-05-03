@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActividadService } from '../../../core/services/actividad.service';
-import { ActualizarActividadRequest, SolicitudActividad } from '../../../shared/models/actividad.model';
+import { ActualizarActividadRequest, SolicitudActividad } from '../../../core/models/actividad.model';
 
 type TabId = 'aprobadas' | 'rechazadas' | 'pendientes';
 
