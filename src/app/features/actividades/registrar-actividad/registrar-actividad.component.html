@@ -1,0 +1,502 @@
+<app-navbar
+  nombreUsuario="Carlos H."
+  inicialesUsuario="CH"
+  rutaRegresar="/"
+  [mostrarRegresar]="true"
+  titulo="Registrar Nuevo Evento">    <!-- ← NUEVO -->
+</app-navbar>
+
+<!-- HEADER UNIFICADO -->
+<div class="page-header">
+  <div class="page-header-inner">
+
+    <!-- STEPS -->
+    <div class="steps-bar">
+      <div class="steps-card">
+        @for (paso of [1,2,3,4]; track paso) {
+          <div class="step-item"
+               [class.active]="pasoActual === paso"
+               [class.done]="pasoActual > paso"
+               (click)="irPaso(paso)">
+            <div class="step-num">
+              @if (pasoActual > paso) { ✓ } @else { {{ paso }} }
+            </div>
+            <div>
+              <div class="step-label" style="padding-bottom: 30px;">
+                @switch (paso) {
+                  @case (1) { Información General }
+                  @case (2) { Fecha y Hora }
+                  @case (3) { Organizadores y Recursos }
+                  @case (4) { Envío }
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Botón de info dentro del card, a la derecha -->
+        <button type="button"
+                class="info-icon-btn"
+                [class.active]="mostrarInfo"
+                (click)="toggleInfo()">
+          <span class="material-symbols-rounded">info</span>
+        </button>
+
+        <!-- Panel desplegable de info -->
+        @if (mostrarInfo) {
+          <div class="info-overlay" (click)="toggleInfo()"></div>
+          <div class="info-panel">
+            <div class="info-panel-header">
+              <span class="material-symbols-rounded">info</span>
+              <strong>¿Cómo funciona?</strong>
+              <button type="button" class="info-close" (click)="toggleInfo()">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+            <p>
+              Una vez enviada tu solicitud, el Vicerrector recibirá una notificación
+              para revisar los detalles. El tiempo de respuesta es de
+              <strong>2 a 5 días hábiles</strong>. Podrás consultar el estado de tu
+              solicitud desde tu perfil.
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="form-wrapper" [formGroup]="form">
+
+  <!-- ERROR GLOBAL -->
+  @if (errorGlobal) {
+    <div class="alert-error">
+      <span class="material-symbols-rounded">warning</span>
+      {{ errorGlobal }}
+    </div>
+  }
+
+  <!-- ── PASO 1: INFORMACIÓN GENERAL ── -->
+  @if (pasoActual === 1) {
+    <div class="form-section anim">
+      <div class="section-header">
+        <div class="section-icon">
+          <span class="material-symbols-rounded">push_pin</span>
+        </div>
+        <div>
+          <h3>Información General</h3>
+          <p>Datos básicos del evento</p>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <div class="form-group full-width" [class.has-error]="invalido('nombre')">
+          <label>Nombre del Evento <span class="required-dot"></span></label>
+          <input type="text" formControlName="nombre"
+                 placeholder="Ej: Congreso Internacional de Ingeniería 2026"
+                 maxlength="200">
+          <span class="hint">{{ campo('nombre')?.value?.length ?? 0 }} / 200</span>
+          <span class="error-msg">El nombre es obligatorio.</span>
+        </div>
+
+        <div class="form-group" [class.has-error]="invalido('idCategoria')">
+          <label>Categoría <span class="required-dot"></span></label>
+          <select formControlName="idCategoria" (change)="onCategoriaChange($event)">
+            <option value="">— Selecciona una categoría —</option>
+            @for (cat of categorias; track cat.idCategoria) {
+              <option [value]="cat.idCategoria">{{ cat.nombre }}</option>
+            }
+          </select>
+          <span class="error-msg">Selecciona una categoría.</span>
+        </div>
+
+        <div class="form-group" [class.has-error]="invalido('idTipo')">
+          <label>Tipo de Evento <span class="required-dot"></span></label>
+          <select formControlName="idTipo">
+            <option value="">— Primero selecciona categoría —</option>
+            @for (tipo of tipos; track tipo.idTipo) {
+              <option [value]="tipo.idTipo">{{ tipo.nombre }}</option>
+            }
+          </select>
+          <span class="error-msg">Selecciona el tipo de evento.</span>
+        </div>
+
+        <div class="form-group full-width" [class.has-error]="invalido('descripcion')">
+          <label>Descripción del Evento</label>
+          <textarea formControlName="descripcion" rows="4"
+                    placeholder="Describe el objetivo, a quién va dirigido, actividades principales..."></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <span></span>
+      <button class="btn btn-primary" (click)="siguiente()">
+        Siguiente
+      </button>
+    </div>
+  }
+
+  <!-- ── PASO 2: FECHA Y HORA ── -->
+  @if (pasoActual === 2) {
+    <div class="form-section anim">
+      <div class="section-header">
+        <div class="section-icon">
+          <span class="material-symbols-rounded">calendar_month</span>
+        </div>
+        <div>
+          <h3>Fecha y Hora</h3>
+          <p>Cuándo se realizará el evento</p>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <div class="form-group" [class.has-error]="invalido('fechaActividad')">
+          <label>Fecha del Evento <span class="required-dot"></span></label>
+          <input type="date" formControlName="fechaActividad">
+          <span class="error-msg">Selecciona una fecha válida.</span>
+        </div>
+
+        <div class="form-group" [class.has-error]="invalido('horaInicio')">
+          <label>Hora de Inicio <span class="required-dot"></span></label>
+          <input type="time" formControlName="horaInicio">
+          <span class="error-msg">La hora de inicio es obligatoria.</span>
+        </div>
+
+        <div class="form-group" [class.has-error]="invalido('horaFin') || form.hasError('horaInvalida')">
+          <label>Hora de Fin <span class="required-dot"></span></label>
+          <input type="time" formControlName="horaFin">
+          @if (form.hasError('horaInvalida')) {
+            <span class="error-msg" style="display:block">
+              La hora de fin debe ser posterior a la de inicio.
+            </span>
+          } @else {
+            <span class="error-msg">La hora de fin es obligatoria.</span>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-ghost" (click)="anterior()">Anterior</button>
+      <button class="btn btn-primary" (click)="siguiente()">Siguiente</button>
+    </div>
+  }
+
+  <!-- ── PASO 3: ORGANIZADORES Y RECURSOS ── -->
+  @if (pasoActual === 3) {
+    <div class="form-section anim">
+      <div class="section-header">
+        <div class="section-icon">
+          <span class="material-symbols-rounded">groups</span>
+        </div>
+        <div>
+          <h3>Organizadores</h3>
+          <p>Carreras o áreas administrativas que organizan el evento</p>
+        </div>
+      </div>
+      <div class="section-body single-col">
+
+        <div class="two-col">
+          <div class="form-group">
+            <label>Agregar Carrera</label>
+            <select (change)="onSelectOrganizador($event, 'carrera')">
+              <option value="">— Selecciona una carrera —</option>
+              @for (c of carreras; track c.idCarrera) {
+                <option [value]="c.idCarrera + '|' + c.nombre">{{ c.nombre }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Agregar Área Administrativa</label>
+            <select (change)="onSelectOrganizador($event, 'departamento')">
+              <option value="">— Selecciona un área —</option>
+              @for (d of departamentos; track d.idDepartamento) {
+                <option [value]="d.idDepartamento + '|' + d.nombre">{{ d.nombre }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Lista de organizadores seleccionados -->
+        @if (organizadoresArray.length === 0) {
+          <p class="empty-hint">
+            <span class="material-symbols-rounded">warning</span>
+            Agrega al menos un organizador.
+          </p>
+        }
+        <div class="tags-list">
+          @for (org of organizadoresArray.controls; track $index) {
+            <div class="tag">
+              <span class="material-symbols-rounded tag-icon">
+                {{ org.value._tipo === 'carrera' ? 'school' : 'corporate_fare' }}
+              </span>
+              {{ org.value._nombre }}
+              <button type="button" (click)="quitarOrganizador($index)">✕</button>
+            </div>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ESPACIOS -->
+    <div class="form-section anim" style="animation-delay:.07s">
+      <div class="section-header">
+        <div class="section-icon">
+          <span class="material-symbols-rounded">meeting_room</span>
+        </div>
+        <div>
+          <h3>Espacios Requeridos</h3>
+          <p>Auditorios, canchas, salas...</p>
+        </div>
+      </div>
+      <div class="section-body single-col">
+        <div class="form-group">
+          <label>Agregar Espacio</label>
+          <select (change)="onSelectRecurso($event, 'ESPACIO')">
+            <option value="">— Selecciona un espacio —</option>
+            @for (e of espacios; track e.idRecurso) {
+              <option [value]="e.idRecurso + '|' + e.nombre"
+                      [disabled]="!e.disponible">
+                {{ e.nombre }} (Cap. {{ e.capacidad }}) — {{ e.ubicacion }}
+                @if (!e.disponible) { — NO DISPONIBLE }
+              </option>
+            }
+          </select>
+        </div>
+        <div class="tags-list">
+          @for (r of recursosArray.controls; track $index) {
+            @if (r.value._tipo === 'ESPACIO') {
+              <div class="tag resource-tag">
+                <span>{{ r.value._nombre }}</span>
+                <button type="button" (click)="quitarRecurso($index)">✕</button>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- MOBILIARIO -->
+    <div class="form-section anim" style="animation-delay:.14s">
+      <div class="section-header">
+        <div class="section-icon">
+          <span class="material-symbols-rounded">chair</span>
+        </div>
+        <div>
+          <h3>Mobiliario Requerido</h3>
+          <p>Sillas, mesas, proyectores, micrófonos...</p>
+        </div>
+      </div>
+      <div class="section-body single-col">
+        <div class="form-group">
+          <label>Agregar Mobiliario</label>
+          <select (change)="onSelectRecurso($event, 'MOBILIARIO')">
+            <option value="">— Selecciona mobiliario —</option>
+            @for (m of mobiliario; track m.idRecurso) {
+              <option [value]="m.idRecurso + '|' + m.nombre"
+                      [disabled]="m.cantidadDisponible === 0">
+                {{ m.nombre }}
+                — Disponibles: {{ m.cantidadDisponible }} / {{ m.cantidadTotal }}
+                @if (m.cantidadDisponible === 0) { — NO DISPONIBLE }
+              </option>
+            }
+          </select>
+        </div>
+
+        <!-- Cantidad por recurso de mobiliario -->
+        @if (getMobiliarioSeleccionado().length > 0) {
+          <div class="resource-list" [formGroup]="form">
+            <ng-container formArrayName="recursos">
+              @for (r of recursosArray.controls; track $index) {
+                @if (r.value._tipo === 'MOBILIARIO') {
+                  <div class="resource-row" [formGroupName]="$index">
+                    <span>{{ r.value._nombre }}</span>
+                    <div class="qty-control">
+                      <button type="button"
+                        (click)="cambiarCantidad($index, -1)">−</button>
+                      <input type="number" formControlName="cantidadRequerida"
+                        [max]="getMaxCantidad(r.value.idRecurso)"
+                        min="1" style="width:55px;text-align:center">
+                      <button type="button"
+                        (click)="cambiarCantidad($index, 1)">+</button>
+                    </div>
+                    <button type="button" class="remove-btn"
+                            (click)="quitarRecurso($index)">✕</button>
+                  </div>
+                }
+              }
+            </ng-container>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- IMAGEN PORTADA -->
+    <div class="form-section anim" style="animation-delay:.21s">
+      <div class="section-header">
+        <div class="section-icon">
+          <span class="material-symbols-rounded">image</span>
+        </div>
+        <div>
+          <h3>Imagen de Portada</h3>
+          <p>Opcional — se mostrará en el calendario público</p>
+        </div>
+      </div>
+      <div class="section-body single-col">
+        @if (!previewPortada) {
+          <div class="file-upload-area"
+               (dragover)="$event.preventDefault()"
+               (drop)="onDrop($event)">
+            <input type="file" accept="image/jpeg,image/png,image/webp"
+                   (change)="onPortadaSeleccionada($event)">
+            <div class="upload-icon">
+              <span class="material-symbols-rounded">image</span>
+            </div>
+            <div class="upload-text">Arrastra una imagen o haz clic para seleccionar</div>
+            <div class="upload-sub">PNG, JPG o WEBP · Máx. 5 MB</div>
+          </div>
+        } @else {
+          <div class="file-preview visible">
+            <img class="preview-img" [src]="previewPortada" alt="preview">
+            <div class="file-info">
+              <div class="file-name">{{ archivoPortada?.name }}</div>
+              <div class="file-size">{{ formatBytes(archivoPortada?.size ?? 0) }}</div>
+            </div>
+            <button class="remove-file" type="button" (click)="quitarPortada()">
+              ✕ Quitar
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-ghost" (click)="anterior()">Anterior</button>
+      <button class="btn btn-primary" (click)="siguiente()">Siguiente</button>
+    </div>
+  }
+
+  <!-- ── PASO 4: RESUMEN Y ENVÍO ── -->
+  @if (pasoActual === 4) {
+    <div class="form-section anim">
+      <div class="section-header">
+        <div class="section-icon">
+          <span class="material-symbols-rounded">send</span>
+        </div>
+        <div>
+          <h3>Resumen de la Solicitud</h3>
+          <p>Revisa los datos antes de enviar</p>
+        </div>
+      </div>
+      <div class="section-body single-col">
+
+        <div class="resumen-grid">
+          <div class="resumen-item">
+            <span class="resumen-label">Evento</span>
+            <span class="resumen-value">{{ campo('nombre')?.value }}</span>
+          </div>
+          <div class="resumen-item">
+            <span class="resumen-label">Tipo</span>
+            <span class="resumen-value">
+              {{ getNombreTipo(campo('idTipo')?.value) }}
+            </span>
+          </div>
+          <div class="resumen-item">
+            <span class="resumen-label">Fecha</span>
+            <span class="resumen-value">{{ campo('fechaActividad')?.value }}</span>
+          </div>
+          <div class="resumen-item">
+            <span class="resumen-label">Horario</span>
+            <span class="resumen-value">
+              {{ campo('horaInicio')?.value }} — {{ campo('horaFin')?.value }}
+            </span>
+          </div>
+          <div class="resumen-item">
+            <span class="resumen-label">Organizadores</span>
+            <span class="resumen-value">
+              @for (o of organizadoresArray.controls; track $index) {
+                <span class="tag small">{{ o.value._nombre }}</span>
+              }
+            </span>
+          </div>
+          <div class="resumen-item">
+            <span class="resumen-label">Recursos</span>
+            <span class="resumen-value">
+              @for (r of recursosArray.controls; track $index) {
+                <span class="tag small">
+                  {{ r.value._nombre }}
+                  @if (r.value._tipo === 'MOBILIARIO') {
+                    × {{ r.value.cantidadRequerida }}
+                  }
+                </span>
+              }
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="submit-area">
+      <div class="submit-info">
+        <strong>¿Listo para enviar?</strong>
+        Tu solicitud será revisada por el Vicerrector en 2–5 días hábiles.
+      </div>
+      <div class="submit-actions">
+        <button class="btn btn-ghost" (click)="anterior()">Revisar</button>
+        <button class="btn btn-primary" (click)="enviar()" [disabled]="cargando">
+          @if (cargando) {
+            <span class="material-symbols-rounded">hourglass_top</span>
+            Enviando...
+          } @else {
+            Enviar Solicitud
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- MODAL ÉXITO -->
+@if (enviado && actividadCreada) {
+  <div class="modal-overlay open">
+    <div class="success-modal">
+      <div class="success-ring">
+        <span class="material-symbols-rounded">mail</span>
+      </div>
+      <h2>¡Solicitud Enviada!</h2>
+      <p>Tu solicitud ha sido enviada al <strong>Vicerrector</strong> para su revisión.</p>
+      <div class="ticket-box">
+        <div class="ticket-row">
+          <span>Número de solicitud</span>
+          <span class="ticket-id">#{{ actividadCreada.idActividad }}</span>
+        </div>
+        <div class="ticket-row">
+          <span>Evento</span>
+          <strong>{{ actividadCreada.nombre }}</strong>
+        </div>
+        <div class="ticket-row">
+          <span>Enviado a</span>
+          <strong>Vicerrectoría Académica</strong>
+        </div>
+        <div class="ticket-row">
+          <span>Estado</span>
+          <strong style="color:var(--warn)">
+            <span class="material-symbols-rounded">hourglass_top</span>
+            En revisión
+          </strong>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" (click)="nuevaSolicitud()">Nueva Solicitud</button>
+      </div>
+    </div>
+  </div>
+}
