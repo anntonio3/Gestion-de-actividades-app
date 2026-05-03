@@ -1,4 +1,4 @@
-export interface Actividad {
+export interface ActividadPublica {
   id: number;
   nombre: string;
   descripcion: string;
@@ -10,10 +10,35 @@ export interface Actividad {
   imagenPortada?: string;   // url opcional
 }
 
-export interface Categoria {
-  idCategoria: number;
+export interface ActividadResponse {
+  idActividad: number;
+  nombreProfesor: string;
+  tipoActividad: string;
   nombre: string;
+  descripcion?: string;
+  fechaActividad: string;
+  horaInicio: string;
+  horaFin: string;
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+  fechaRegistro: string;
+  urlPortada?: string;
+  organizadores: string[];
+  recursos: RecursoResumen[];
+  categoria: string;        // nombre de la categoría
 }
+
+export interface ActividadRequest {
+  idProfesor: number;
+  idTipo: number;
+  nombre: string;
+  descripcion?: string;
+  fechaActividad: string;   // 'YYYY-MM-DD'
+  horaInicio: string;       // 'HH:mm:ss'
+  horaFin: string;          // 'HH:mm:ss'
+  recursos: RecursoRequest[];
+  organizadores: OrganizadorRequest[];
+}
+
 
 export const CATEGORIA_EMOJI: Record<string, string> = {
   'Tecnología':  '💻',
@@ -43,17 +68,7 @@ export interface RecursoRequest {
   cantidadRequerida: number;
 }
 
-export interface ActividadRequest {
-  idProfesor: number;
-  idTipo: number;
-  nombre: string;
-  descripcion?: string;
-  fechaActividad: string;   // 'YYYY-MM-DD'
-  horaInicio: string;       // 'HH:mm:ss'
-  horaFin: string;          // 'HH:mm:ss'
-  recursos: RecursoRequest[];
-  organizadores: OrganizadorRequest[];
-}
+
 
 export interface RecursoResumen {
   idRecurso: number;
@@ -62,18 +77,3 @@ export interface RecursoResumen {
   cantidadRequerida: number;
 }
 
-export interface ActividadResponse {
-  idActividad: number;
-  nombreProfesor: string;
-  tipoActividad: string;
-  nombre: string;
-  descripcion?: string;
-  fechaActividad: string;
-  horaInicio: string;
-  horaFin: string;
-  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
-  fechaRegistro: string;
-  urlPortada?: string;
-  organizadores: string[];
-  recursos: RecursoResumen[];
-}

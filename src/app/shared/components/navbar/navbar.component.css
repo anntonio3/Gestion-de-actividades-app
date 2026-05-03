@@ -100,3 +100,21 @@ nav {
   white-space: nowrap;
 }
 
+.nav-1{
+  position: absolute;
+  left: 30%;
+  color: var(--accent);
+  margin: 0;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.nav-2{
+  position: absolute;
+  left: 70%;
+  color: var(--accent);
+  margin: 0;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+

@@ -1,8 +1,10 @@
 import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Actividad, Categoria, CATEGORIA_COLOR, CATEGORIA_EMOJI } from '../../core/models/actividad.model';
-import { ActividadService } from '../../core/services/actividades.service';
+import { ActividadPublica, CATEGORIA_COLOR, CATEGORIA_EMOJI } from '../../core/models/actividad.model';
+import { ActividadService } from '../../core/services/calendario_actividades.service';
+import { Categoria } from '../../core/models/catalogo.model';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 
  
 interface DayPill {
@@ -29,7 +31,7 @@ interface MiniCalDay {
 @Component({
   selector: 'app-calendario',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css'],
   providers: [DatePipe]
@@ -37,7 +39,7 @@ interface MiniCalDay {
 export class CalendarioComponent implements OnInit {
  
   // ── Datos ──────────────────────────────────────────────
-  actividades: Actividad[]  = [];
+  actividades: ActividadPublica[]  = [];
   categorias:  Categoria[]  = [];
   loading = true;
   error   = false;
@@ -69,11 +71,11 @@ export class CalendarioComponent implements OnInit {
   // ── Paginación eventos ─────────────────────────────────
   eventsPage      = 0;
   EVENTS_PER_PAGE = 8;
-  filteredEvents: Actividad[] = [];
+  filteredEvents: ActividadPublica[] = [];
   totalPages      = 0;
 
   // NUEVO
-  paginas: Actividad[][] = [];
+  paginas: ActividadPublica[][] = [];
   paginaFuturosInicio = 0;
  
   // ── Helpers expuestos a la plantilla ──────────────────
@@ -187,7 +189,7 @@ export class CalendarioComponent implements OnInit {
   }
 
 
-  get pagedEvents(): Actividad[] {
+  get pagedEvents(): ActividadPublica[] {
     return this.paginas[this.eventsPage] ?? [];
   }
  
@@ -198,13 +200,13 @@ export class CalendarioComponent implements OnInit {
     }
   }
  
-  isPast(ev: Actividad): boolean {
+  isPast(ev: ActividadPublica): boolean {
     // Combinar fecha + hora de fin del evento
     const finEvento = new Date(ev.fechaActividad + 'T' + ev.horaFin);
     return finEvento < new Date();
   }
  
-  occupancyClass(ev: Actividad): string {
+  occupancyClass(ev: ActividadPublica): string {
     // No tenemos seats en el DTO real, devolvemos verde por defecto
     return 'dot-green';
   }

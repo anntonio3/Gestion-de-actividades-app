@@ -1,5 +1,5 @@
 <nav>
-  <a class="nav-brand" routerLink="/">
+  <a class="nav-brand" routerLink="/calendario">
     <img class="logo-unpa" src="he-logo-unpa.svg" alt="UNPA"
       onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
     <div class="nav-brand-text">
@@ -12,6 +12,14 @@
   @if (titulo) {
     <h1 class="nav-title">{{ titulo }}</h1>
   }
+
+  <div>
+    <a routerLink="/calendario" class="nav-1">Calendario</a>
+  </div>
+
+  <div>
+    <a routerLink="/actividades/registrar" class="nav-2">Registrar</a>
+  </div>
 
   <div class="nav-right">
     @if (mostrarRegresar) {

@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup,
          FormArray, Validators, AbstractControl } from '@angular/forms';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { CatalogoService } from '../../../core/services/catalogo.service';
-import { ActividadService } from '../../../core/services/actividad.service';
+import { ActividadService } from '../../../core/services/registro_actividad.service';
 import {
   Categoria, TipoActividad, Departamento,
   Carrera, EspacioRecurso, MobiliarioRecurso

@@ -3,30 +3,13 @@
   <!-- ══════════════════════════════════════
        NAVBAR
   ══════════════════════════════════════ -->
-  <nav class="navbar">
-    <a class="nav-brand" href="#">
-      <img class="logo-unpa" src="he-logo-unpa.svg" alt="UNPA Logo">
-      <div>
-        <span class="brand-name">UNPA</span>
-        <small class="brand-sub">Eventos Universitarios</small>
-      </div>
-    </a>
-
-    <div class="nav-center">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Buscar eventos, conferencias, talleres..."
-        [(ngModel)]="searchQuery"
-        (input)="onSearch()"
-      >
-      <button class="btn btn-primary" (click)="onSearch()">Buscar</button>
-    </div>
-
-    <div class="nav-right">
-      <button class="btn btn-outline">+ Publicar Evento</button>
-    </div>
-  </nav>
+  <app-navbar
+    nombreUsuario="Carlos H."
+    inicialesUsuario="CH"
+    rutaRegresar="/"
+    [mostrarRegresar]="true"
+    titulo="Calendario de Actividades">    <!-- ← NUEVO -->
+  </app-navbar>
 
   <!-- ══════════════════════════════════════
        HERO
