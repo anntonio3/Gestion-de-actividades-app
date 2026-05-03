@@ -1,1 +1,25 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --primary: #71B6A7;
+  --primary-dark: #4e9688;
+  --primary-light: #a8d5cc;
+  --primary-bg: #f0f9f7;
+  --accent: #2D5F58;
+  --dark: #1a2e2b;
+  --gray: #6b7c79;
+  --light: #f7faf9;
+  --white: #ffffff;
+  --card-shadow: 0 4px 24px rgba(113,182,167,0.15);
+  --card-shadow-hover: 0 12px 40px rgba(113,182,167,0.28);
+  --danger: #e05c5c;
+  --success: #4CAF50;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--light);
+  color: var(--dark);
+  min-height: 100vh;
+}

@@ -1,0 +1,282 @@
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="/">
+    <div class="logo-icon ">
+      <img src="assets/images/logo-unpa.svg" alt="logo">
+
+    </div>
+    <div>
+      <span>UNPA</span>
+      <small>Eventos Universitarios</small>
+    </div>
+  </a>
+  <!-- por ahora es fijo, luego se integrara con el sistema de autenticación -->
+  <div class="nav-right">
+    <div class="user-pill">
+      <div class="user-avatar">ID3</div>
+      profesor
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1>Mis Publicaciones</h1>
+      <p>Historial de todas tus solicitudes de eventos</p>
+    </div>
+    <div class="header-stats" *ngIf="!cargando && !error">
+      <div class="hstat">
+        <span class="num">{{ aprobadas.length }}</span>
+        <span class="lbl">Aprobados</span>
+      </div>
+      <div class="hstat">
+        <span class="num">{{ rechazadas.length }}</span>
+        <span class="lbl">Rechazados</span>
+      </div>
+      <div class="hstat">
+        <span class="num">{{ pendientes.length }}</span>
+        <span class="lbl">Pendientes</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ESTADO: cargando -->
+<div class="tabs-wrap" *ngIf="cargando">
+  <div class="tabs-card">
+    <div class="empty-state">
+      <span class="icon">⏳</span>
+      <p>Cargando solicitudes...</p>
+    </div>
+  </div>
+</div>
+
+<!-- ESTADO: error -->
+<div class="tabs-wrap" *ngIf="!cargando && error">
+  <div class="tabs-card">
+    <div class="empty-state">
+      <span class="icon">⚠️</span>
+      <p style="color:var(--danger)">{{ error }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap" *ngIf="!cargando && !error">
+  <div class="tabs-card">
+
+    <div class="tabs-header">
+      <button class="tab-btn" [class.active]="tabActiva === 'aprobadas'"
+              (click)="cambiarTab('aprobadas')">
+        Aprobados / Publicados
+        <span class="tab-count" [class.active]="tabActiva === 'aprobadas'">
+          {{ aprobadas.length }}
+        </span>
+      </button>
+      <button class="tab-btn" [class.active]="tabActiva === 'rechazadas'"
+              (click)="cambiarTab('rechazadas')">
+        No Aprobados
+        <span class="tab-count" [class.active]="tabActiva === 'rechazadas'">
+          {{ rechazadas.length }}
+        </span>
+      </button>
+      <button class="tab-btn" [class.active]="tabActiva === 'pendientes'"
+              (click)="cambiarTab('pendientes')">
+        Pendientes
+        <span class="tab-count" [class.active]="tabActiva === 'pendientes'">
+          {{ pendientes.length }}
+        </span>
+      </button>
+    </div>
+
+    <div class="tab-body">
+
+      <!-- Buscador -->
+      <div class="content-controls">
+        <input type="text" [(ngModel)]="busqueda" placeholder="Buscar evento...">
+      </div>
+
+      <!-- Lista de solicitudes -->
+      <div class="sol-list" *ngIf="listaActiva.length > 0">
+        <div class="sol-card" *ngFor="let s of listaActiva" (click)="abrirDetalle(s)">
+
+          <div class="sol-emoji">📋</div>
+
+          <div class="sol-info">
+            <h3>{{ s.nombre }}</h3>
+            <p>{{ s.descripcion }}</p>
+            <div class="sol-meta">
+              <span class="smeta"> {{ s.fechaActividad }}</span>
+              <span class="smeta"> {{ s.horaInicio }} – {{ s.horaFin }}</span>
+            </div>
+            <div class="reason-box" *ngIf="s.estado === 'RECHAZADA' && s.motivoRechazo">
+               {{ s.motivoRechazo }}
+            </div>
+          </div>
+
+          <div class="sol-status">
+            <span class="status-pill" [ngClass]="'status-' + estadoClass(s.estado)">
+              {{ estadoLabel(s.estado) }}
+            </span>
+            <!-- Indicador de edición rápida para pendientes -->
+            <div class="edit-hint" *ngIf="s.estado === 'PENDIENTE'">Editable</div>
+            <div class="sol-date">ID: {{ s.idActividad }}</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="listaActiva.length === 0">
+        <span class="icon">
+          {{ tabActiva === 'rechazadas' ? '✨' : '📭' }}
+        </span>
+        <p *ngIf="tabActiva === 'aprobadas'">No tienes solicitudes aprobadas aún.</p>
+        <p *ngIf="tabActiva === 'rechazadas'">¡Ninguna solicitud rechazada!</p>
+        <p *ngIf="tabActiva === 'pendientes'">No tienes solicitudes pendientes.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<!-- <div class="cta-wrap" *ngIf="!cargando && !error">
+  <button class="btn-primary-cta">Crear Nueva Solicitud</button>
+</div> -->
+
+
+<!-- ========================================================
+     MODAL DE DETALLE / EDICIÓN
+     ======================================================== -->
+<div class="modal-overlay" [class.open]="detalle !== null" (click)="cerrarDetalle($event)">
+  <div class="detail-modal" *ngIf="detalle" (click)="$event.stopPropagation()">
+
+    <!-- ── Cabecera del modal ── -->
+    <div class="modal-top">
+      <h2>{{ modoEdicion ? 'Editar Actividad' : detalle.nombre }}</h2>
+      <button class="modal-close" (click)="cerrarDetalle()">✕</button>
+    </div>
+
+    <!-- ── MODO DETALLE ── -->
+    <ng-container *ngIf="!modoEdicion">
+
+      <div style="margin-bottom:1rem; display:flex; align-items:center; gap:.8rem; flex-wrap:wrap;">
+        <span class="status-pill" [ngClass]="'status-' + estadoClass(detalle.estado)">
+          {{ estadoLabel(detalle.estado) }}
+        </span>
+        <!-- Botón Editar: solo visible si PENDIENTE -->
+        <button class="btn-editar" *ngIf="detalle.estado === 'PENDIENTE'" (click)="abrirEdicion()">
+           Editar
+        </button>
+        <!-- Tooltip informativo si no es editable -->
+        <span class="no-editable-hint"
+              *ngIf="detalle.estado !== 'PENDIENTE'">
+           Solo se pueden editar actividades pendientes
+        </span>
+      </div>
+
+      <!-- Banner de éxito tras editar -->
+      <div class="alert-success" *ngIf="exitoEdicion">
+         Actividad actualizada correctamente.
+      </div>
+
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label>Fecha</label>
+          <p>{{ detalle.fechaActividad }}</p>
+        </div>
+        <div class="modal-field">
+          <label>Horario</label>
+          <p>{{ detalle.horaInicio }} – {{ detalle.horaFin }}</p>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label>Descripción</label>
+        <p>{{ detalle.descripcion }}</p>
+      </div>
+
+      <div class="modal-field">
+        <label>Registrada el</label>
+        <p>{{ detalle.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+
+      <div class="modal-field" *ngIf="detalle.fechaActualizacion">
+        <label>Última modificación</label>
+        <p>{{ detalle.fechaActualizacion | date:'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+
+      <div *ngIf="detalle.estado === 'RECHAZADA' && detalle.motivoRechazo">
+        <div class="modal-field"><label>Motivo de rechazo</label></div>
+        <div class="reason-box"> {{ detalle.motivoRechazo }}</div>
+      </div>
+
+    </ng-container>
+
+    <!-- ── MODO EDICIÓN ── -->
+    <ng-container *ngIf="modoEdicion">
+
+      <div class="edit-form">
+
+        <!-- Aviso de estado -->
+        <div class="alert-info">
+          ℹ️ Solo puedes editar actividades en estado <strong>Pendiente</strong>.
+          Los cambios se guardarán con la fecha y hora actuales.
+        </div>
+
+        <!-- Error de edición -->
+        <div class="alert-error" *ngIf="errorEdicion">
+           {{ errorEdicion }}
+        </div>
+
+        <!-- Nombre -->
+        <div class="form-field">
+          <label for="edit-nombre">Nombre <span class="req">*</span></label>
+          <input id="edit-nombre" type="text" [(ngModel)]="formEdicion.nombre"
+                 placeholder="Nombre del evento" maxlength="200">
+        </div>
+
+        <!-- Descripción -->
+        <div class="form-field">
+          <label for="edit-desc">Descripción</label>
+          <textarea id="edit-desc" [(ngModel)]="formEdicion.descripcion"
+                    placeholder="Describe brevemente la actividad" rows="3"></textarea>
+        </div>
+
+        <!-- Fecha -->
+        <div class="form-field">
+          <label for="edit-fecha">Fecha de la actividad <span class="req">*</span></label>
+          <input id="edit-fecha" type="date" [(ngModel)]="formEdicion.fechaActividad">
+        </div>
+
+        <!-- Horario -->
+        <div class="form-row">
+          <div class="form-field">
+            <label for="edit-inicio">Hora inicio <span class="req">*</span></label>
+            <input id="edit-inicio" type="time" [(ngModel)]="formEdicion.horaInicio">
+          </div>
+          <div class="form-field">
+            <label for="edit-fin">Hora fin <span class="req">*</span></label>
+            <input id="edit-fin" type="time" [(ngModel)]="formEdicion.horaFin">
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions">
+          <button class="btn-cancelar" (click)="cancelarEdicion()" [disabled]="guardando">
+            Cancelar
+          </button>
+          <button class="btn-guardar" (click)="guardarEdicion()" [disabled]="guardando">
+            {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        </div>
+
+      </div>
+
+    </ng-container>
+
+  </div>
+</div>
