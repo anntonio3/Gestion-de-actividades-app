@@ -11,6 +11,12 @@ export const routes: Routes = [
       import('./features/actividades/registrar-actividad/registrar-actividad.component')
         .then(m => m.RegistrarActividadComponent)
   },
+  {
+    path: 'mis-publicaciones',
+    loadComponent: () =>
+      import('./features/actividades/mis-solicitudes/mis-solicitudes.component')
+        .then(m => m.MisSolicitudesComponent)
+  },
   { path: '**',        redirectTo: 'calendario' }
 ];
  
