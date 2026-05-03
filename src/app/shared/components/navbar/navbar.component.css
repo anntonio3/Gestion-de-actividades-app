@@ -107,6 +107,7 @@ nav {
   margin: 0;
   white-space: nowrap;
   transform: translateX(-50%);
+  text-decoration: none;
 }
 
 .nav-2{
@@ -116,5 +117,6 @@ nav {
   margin: 0;
   white-space: nowrap;
   transform: translateX(-50%);
+  text-decoration: none;
 }
 

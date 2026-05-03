@@ -1,15 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActividadService } from '../../../core/services/actividad.service';
 import { ActualizarActividadRequest, SolicitudActividad } from '../../../core/models/actividad.model';
+import { ActividadService } from '../../../core/services/actividad.service';
+import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 
 type TabId = 'aprobadas' | 'rechazadas' | 'pendientes';
 
 @Component({
   selector: 'app-mis-solicitudes',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './mis-solicitudes.component.html',
   styleUrls: ['./mis-solicitudes.component.css']
 })
