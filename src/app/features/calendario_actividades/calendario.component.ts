@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActividadPublica, CATEGORIA_COLOR, CATEGORIA_EMOJI } from '../../core/models/actividad.model';
-import { ActividadService } from '../../core/services/calendario_actividades.service';
+import { ActividadService } from '../../core/services/calendario-actividades.service';
 import { Categoria } from '../../core/models/catalogo.model';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 

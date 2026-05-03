@@ -1,23 +1,11 @@
 <!-- NAV -->
-<nav>
-  <a class="nav-brand" href="/">
-    <div class="logo-icon ">
-      <img src="assets/images/logo-unpa.svg" alt="logo">
-
-    </div>
-    <div>
-      <span>UNPA</span>
-      <small>Eventos Universitarios</small>
-    </div>
-  </a>
-  <!-- por ahora es fijo, luego se integrara con el sistema de autenticación -->
-  <div class="nav-right">
-    <div class="user-pill">
-      <div class="user-avatar">ID3</div>
-      profesor
-    </div>
-  </div>
-</nav>
+<app-navbar
+  nombreUsuario="Carlos H."
+  inicialesUsuario="CH"
+  rutaRegresar="/"
+  [mostrarRegresar]="true"
+  titulo="Mis Solicitudes">    <!-- ← NUEVO -->
+</app-navbar>
 
 <!-- PAGE HEADER -->
 <div class="page-header">
