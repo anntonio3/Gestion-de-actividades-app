@@ -1,0 +1,184 @@
+<div class="modal-overlay open" (click)="cerrarSiOverlay($event)">
+  <div class="modal-card">
+
+    <!-- Cabecera -->
+    <div class="modal-top">
+      <div>
+        <span class="modal-tag">Punto #{{ idPunto }}</span>
+        <h2>{{ modoEdicion ? 'Editar espacio' : 'Registrar espacio' }}</h2>
+      </div>
+      <button class="modal-close" (click)="cerrar()">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <!-- Stepper -->
+    @if (!cargando) {
+      <div class="stepper">
+        <div class="step-item" [class.active]="pasoActual === 1" [class.done]="pasoActual > 1">
+          <div class="step-num">
+            @if (pasoActual > 1) {
+              <span class="material-symbols-rounded">check</span>
+            } @else {
+              1
+            }
+          </div>
+          <span class="step-label">Datos del espacio</span>
+        </div>
+        <div class="step-line" [class.done]="pasoActual > 1"></div>
+        <div class="step-item" [class.active]="pasoActual === 2">
+          <div class="step-num">2</div>
+          <span class="step-label">Equipamiento</span>
+        </div>
+      </div>
+    }
+
+    <!-- Cargando detalle (solo edicion) -->
+    @if (cargando) {
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Cargando datos...</p>
+      </div>
+    }
+
+    <!-- Form -->
+    @if (!cargando) {
+      <form [formGroup]="form" (ngSubmit)="guardar()">
+
+        @if (errorGlobal) {
+          <div class="alert-error">
+            <span class="material-symbols-rounded">warning</span>
+            {{ errorGlobal }}
+          </div>
+        }
+
+        <!-- ── PASO 1: DATOS DEL ESPACIO ── -->
+        @if (pasoActual === 1) {
+          <div class="seccion anim">
+            <h3 class="seccion-titulo">
+              <span class="material-symbols-rounded">meeting_room</span>
+              Datos del espacio
+            </h3>
+
+            <div class="form-grid">
+              <div class="form-field full" [class.has-error]="invalido('nombre')">
+                <label>Nombre <span class="req">*</span></label>
+                <input type="text" formControlName="nombre"
+                       placeholder="Ej. Auditorio Principal" maxlength="150">
+                <span class="error-msg">El nombre es obligatorio.</span>
+              </div>
+
+              <div class="form-field full">
+                <label>Descripción</label>
+                <textarea formControlName="descripcion" rows="2"
+                          placeholder="Describe brevemente el espacio"
+                          maxlength="250"></textarea>
+              </div>
+
+              <div class="form-field" [class.has-error]="invalido('capacidad')">
+                <label>Capacidad <span class="req">*</span></label>
+                <input type="number" formControlName="capacidad"
+                       placeholder="Ej. 100" min="1">
+                <span class="error-msg">Indica una capacidad válida.</span>
+              </div>
+
+              <div class="form-field" [class.has-error]="invalido('ubicacion')">
+                <label>Ubicación <span class="req">*</span></label>
+                <input type="text" formControlName="ubicacion"
+                       placeholder="Ej. Edificio central" maxlength="150">
+                <span class="error-msg">La ubicación es obligatoria.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acciones paso 1 -->
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" (click)="cerrar()">
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-primary" (click)="siguientePaso()">
+              Siguiente
+              <span class="material-symbols-rounded">arrow_forward</span>
+            </button>
+          </div>
+        }
+
+        <!-- ── PASO 2: EQUIPAMIENTO ── -->
+        @if (pasoActual === 2) {
+          <div class="seccion anim">
+            <div class="seccion-header">
+              <h3 class="seccion-titulo">
+                <span class="material-symbols-rounded">chair</span>
+                Equipamiento del espacio
+              </h3>
+              <button type="button" class="btn-add" (click)="agregarEquipamiento()">
+                <span class="material-symbols-rounded">add</span>
+                Agregar
+              </button>
+            </div>
+
+            @if (equipamientoArray.length === 0) {
+              <p class="empty-hint">
+                <span class="material-symbols-rounded">info</span>
+                Sin equipamiento registrado. Es opcional, puedes guardar sin agregar nada.
+              </p>
+            }
+
+            <div class="equip-list" formArrayName="equipamiento">
+              @for (item of equipamientoArray.controls; track $index) {
+                <div class="equip-row" [formGroupName]="$index">
+                  <div class="equip-fields">
+                    <div class="form-field">
+                      <label>Mobiliario <span class="req">*</span></label>
+                      <select formControlName="idRecurso">
+                        <option [ngValue]="null">— Selecciona —</option>
+                        @for (m of recursosDisponibles($index); track m.idRecurso) {
+                          <option [ngValue]="m.idRecurso">{{ m.nombre }}</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div class="form-field qty-field">
+                      <label>Cantidad <span class="req">*</span></label>
+                      <input type="number" formControlName="cantidad" min="1">
+                    </div>
+                  </div>
+
+                  <div class="form-field">
+                    <label>Características</label>
+                    <input type="text" formControlName="caracteristicas"
+                           placeholder="Ej. Sillas plegables fijas en gradas"
+                           maxlength="300">
+                  </div>
+
+                  <button type="button" class="btn-remove" (click)="quitarEquipamiento($index)">
+                    <span class="material-symbols-rounded">delete</span>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Acciones paso 2 -->
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" (click)="pasoAnterior()" [disabled]="guardando">
+              <span class="material-symbols-rounded">arrow_back</span>
+              Anterior
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="guardando">
+              @if (guardando) {
+                <span class="material-symbols-rounded">hourglass_top</span>
+                Guardando...
+              } @else {
+                <span class="material-symbols-rounded">save</span>
+                {{ modoEdicion ? 'Guardar cambios' : 'Registrar espacio' }}
+              }
+            </button>
+          </div>
+        }
+
+      </form>
+    }
+
+  </div>
+</div>

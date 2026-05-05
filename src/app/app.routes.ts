@@ -17,6 +17,12 @@ export const routes: Routes = [
       import('./features/actividades/mis-solicitudes/mis-solicitudes.component')
         .then(m => m.MisSolicitudesComponent)
   },
+  {
+    path: 'admin/espacios',
+    loadComponent: () =>
+      import('./features/admin/mapa-espacios/mapa-espacios.component')
+        .then(m => m.MapaEspaciosComponent)
+  },
   { path: '**',        redirectTo: 'calendario' }
 ];
  
