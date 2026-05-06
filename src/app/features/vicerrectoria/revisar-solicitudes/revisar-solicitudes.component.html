@@ -1,0 +1,436 @@
+<app-navbar
+  [nombreUsuario]="sesion.getNombreAdmin()"
+  [inicialesUsuario]="sesion.getInicialesAdmin()"
+  rutaRegresar="/calendario"
+  [mostrarRegresar]="true"
+  titulo="Revisar Solicitudes">
+</app-navbar>
+
+<!-- ════════════════════════════════════════════
+     PAGE HEADER: ahora aloja la barra de filtros
+════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="page-header-inner">
+
+    <!-- Barra de filtros: busqueda + 3 selects en una fila -->
+    <div class="filters-bar">
+      <div class="search-wrap">
+        <span class="material-symbols-rounded">search</span>
+        <input type="text"
+               [formControl]="busquedaCtrl"
+               placeholder="Buscar por nombre o profesor...">
+      </div>
+
+      <div class="select-wrap">
+        <label>Estado</label>
+        <select [value]="filtroEstado" (change)="onEstadoChange($event)">
+          <option value="TODOS">Todos</option>
+          <option value="PENDIENTE">Pendiente</option>
+          <option value="APROBADA">Aprobada</option>
+          <option value="RECHAZADA">Rechazada</option>
+        </select>
+      </div>
+
+      <div class="select-wrap">
+        <label>Categoria</label>
+        <select [value]="filtroCategoria ?? ''" (change)="onCategoriaChange($event)">
+          <option value="">Todas</option>
+          @for (cat of categorias; track cat.idCategoria) {
+            <option [value]="cat.idCategoria">{{ cat.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="select-wrap">
+        <label>Carrera</label>
+        <select [value]="filtroCarrera ?? ''" (change)="onCarreraChange($event)">
+          <option value="">Todas</option>
+          @for (c of carreras; track c.idCarrera) {
+            <option [value]="c.idCarrera">{{ c.nombre }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     CONTENIDO
+════════════════════════════════════════════ -->
+<div class="main-content">
+
+  <!-- Stat-cards como filtros rapidos por estado -->
+  @if (!cargando && !error) {
+    <div class="header-stats">
+      <button class="hstat" type="button"
+              [class.active]="filtroEstado === 'TODOS'"
+              (click)="setEstado('TODOS')">
+        <span class="num">{{ statTotal }}</span>
+        <span class="lbl">Total</span>
+      </button>
+      <button class="hstat" type="button"
+              [class.active]="filtroEstado === 'PENDIENTE'"
+              (click)="setEstado('PENDIENTE')">
+        <span class="num">{{ statPendientes }}</span>
+        <span class="lbl">Pendientes</span>
+      </button>
+      <button class="hstat" type="button"
+              [class.active]="filtroEstado === 'APROBADA'"
+              (click)="setEstado('APROBADA')">
+        <span class="num">{{ statAprobadas }}</span>
+        <span class="lbl">Aprobadas</span>
+      </button>
+      <button class="hstat" type="button"
+              [class.active]="filtroEstado === 'RECHAZADA'"
+              (click)="setEstado('RECHAZADA')">
+        <span class="num">{{ statRechazadas }}</span>
+        <span class="lbl">Rechazadas</span>
+      </button>
+    </div>
+  }
+
+  <!-- ESTADO: cargando -->
+  @if (cargando) {
+    <div class="state-box">
+      <div class="spinner"></div>
+      <p>Cargando solicitudes...</p>
+    </div>
+  }
+
+  <!-- ESTADO: error -->
+  @if (!cargando && error) {
+    <div class="state-box error-box">
+      <span class="material-symbols-rounded big">error</span>
+      <p>{{ error }}</p>
+      <button class="btn btn-primary" (click)="cargarSolicitudes()">Reintentar</button>
+    </div>
+  }
+
+  <!-- ESTADO: vacio -->
+  @if (!cargando && !error && solicitudes.length === 0) {
+    <div class="state-box">
+      <span class="material-symbols-rounded big">search_off</span>
+      <p>No se encontraron solicitudes con esos filtros.</p>
+    </div>
+  }
+
+  <!-- LISTA -->
+  @if (!cargando && !error && solicitudes.length > 0) {
+    <div class="sol-list">
+      @for (s of solicitudesPagina; track s.idActividad) {
+        <div class="sol-card" (click)="abrirDetalle(s)">
+          <div class="sol-icon">
+            <span class="material-symbols-rounded">{{ iconoCategoria(s.categoria) }}</span>
+          </div>
+
+          <div class="sol-info">
+            <h3>{{ s.nombre }}</h3>
+            <p>{{ s.descripcion }}</p>
+            <div class="sol-meta">
+              <span class="smeta">
+                <span class="material-symbols-rounded">person</span>
+                {{ s.nombreProfesor }}
+              </span>
+              <span class="smeta">
+                <span class="material-symbols-rounded">calendar_month</span>
+                {{ formatFecha(s.fechaActividad) }}
+              </span>
+              <span class="smeta">
+                <span class="material-symbols-rounded">schedule</span>
+                {{ formatHora(s.horaInicio) }} – {{ formatHora(s.horaFin) }}
+              </span>
+              <span class="smeta">
+                <span class="material-symbols-rounded">inventory_2</span>
+                {{ s.totalRecursos }} recurso(s)
+              </span>
+            </div>
+            <div class="tag-row">
+              @if (s.tipoActividad) {
+                <span class="tag">{{ s.tipoActividad }}</span>
+              }
+              @for (org of s.organizadores; track org) {
+                <span class="tag">{{ org }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="sol-actions">
+            <span class="status-pill" [ngClass]="'status-' + estadoClase(s.estado)">
+              {{ estadoLabel(s.estado) }}
+            </span>
+            <button class="btn-detail" (click)="$event.stopPropagation(); abrirDetalle(s)">
+              <span class="material-symbols-rounded">visibility</span>
+              Ver detalle
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Paginacion -->
+    @if (totalPaginas > 1) {
+      <div class="pagination">
+        <span class="pagination-info">
+          Mostrando {{ rangoInicio }}–{{ rangoFin }} de {{ solicitudes.length }}
+        </span>
+        <div class="pagination-controls">
+          <button class="page-btn" type="button"
+                  [disabled]="paginaActual === 1"
+                  (click)="paginaAnterior()"
+                  aria-label="Pagina anterior">
+            <span class="material-symbols-rounded">chevron_left</span>
+          </button>
+
+          @for (p of paginasVisibles; track $index) {
+            @if (p === '...') {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button class="page-btn"
+                      type="button"
+                      [class.active]="p === paginaActual"
+                      (click)="irPagina(p)">
+                {{ p }}
+              </button>
+            }
+          }
+
+          <button class="page-btn" type="button"
+                  [disabled]="paginaActual === totalPaginas"
+                  (click)="paginaSiguiente()"
+                  aria-label="Pagina siguiente">
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- ════════════════════════════════════════════
+     MODAL DE DETALLE (US-10) — sin cambios
+════════════════════════════════════════════ -->
+@if (detalle || cargandoDetalle || errorDetalle) {
+  <div class="modal-overlay open" (click)="cerrarDetalle($event)">
+    <div class="detail-modal">
+
+      <div class="modal-header">
+        <h2>{{ detalle?.nombre ?? 'Cargando...' }}</h2>
+        <button class="modal-close" (click)="cerrarDetalle()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        @if (cargandoDetalle) {
+          <div class="state-box">
+            <div class="spinner"></div>
+            <p>Cargando detalle...</p>
+          </div>
+        }
+
+        @if (errorDetalle) {
+          <div class="alert-error">
+            <span class="material-symbols-rounded">error</span>
+            {{ errorDetalle }}
+          </div>
+        }
+
+        @if (detalle) {
+
+          @if (detalle.urlPortada) {
+            <div class="modal-portada">
+              <img [src]="detalle.urlPortada" [alt]="detalle.nombre">
+            </div>
+          }
+
+          <div class="status-row">
+            <span class="status-pill" [ngClass]="'status-' + estadoClase(detalle.estado)">
+              {{ estadoLabel(detalle.estado) }}
+            </span>
+            @if (detalle.estado !== 'PENDIENTE' && detalle.fechaRevision) {
+              <span class="revision-info">
+                <span class="material-symbols-rounded">history</span>
+                Revisada por {{ detalle.nombreVicerrector }} el
+                {{ detalle.fechaRevision | date:'dd/MM/yyyy HH:mm' }}
+              </span>
+            }
+          </div>
+
+          @if (detalle.conflictos.length > 0) {
+            <div class="alert-warn">
+              <div class="alert-warn-header">
+                <span class="material-symbols-rounded">warning</span>
+                <strong>{{ detalle.conflictos.length }} conflicto(s) de recursos detectado(s)</strong>
+              </div>
+              <ul>
+                @for (c of detalle.conflictos; track c.idRecurso) {
+                  <li><strong>{{ c.nombreRecurso }}:</strong> {{ c.mensaje }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          <div class="modal-grid">
+            <div class="modal-field">
+              <label>Profesor</label>
+              <p>{{ detalle.nombreProfesor }}</p>
+              <p class="sub">{{ detalle.correoProfesor }}</p>
+            </div>
+            <div class="modal-field">
+              <label>Categoria / Tipo</label>
+              <p>{{ detalle.categoria }} – {{ detalle.tipoActividad }}</p>
+            </div>
+            <div class="modal-field">
+              <label>Fecha</label>
+              <p>{{ formatFecha(detalle.fechaActividad) }}</p>
+            </div>
+            <div class="modal-field">
+              <label>Horario</label>
+              <p>{{ formatHora(detalle.horaInicio) }} – {{ formatHora(detalle.horaFin) }}</p>
+            </div>
+          </div>
+
+          <div class="modal-field full">
+            <label>Descripcion</label>
+            <p>{{ detalle.descripcion || 'Sin descripcion' }}</p>
+          </div>
+
+          <div class="modal-field full">
+            <label>Organizadores</label>
+            <div class="tag-row">
+              @for (org of detalle.organizadores; track org) {
+                <span class="tag">{{ org }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="modal-field full">
+            <label>Recursos solicitados</label>
+            <div class="recursos-list">
+              @for (r of detalle.recursos; track r.idRecurso) {
+                <div class="recurso-item"
+                     [class.conflicto]="detalle.conflictos.length > 0
+                                        && r.idRecurso === detalle.conflictos[0].idRecurso">
+                  <span class="material-symbols-rounded">{{ iconoRecurso(r.tipoRecurso) }}</span>
+                  <div class="recurso-info">
+                    <strong>{{ r.nombre }}</strong>
+                    @if (r.tipoRecurso === 'ESPACIO' && r.capacidad != null) {
+                      <span class="recurso-sub">
+                        <span class="material-symbols-rounded">groups</span>
+                        Capacidad: {{ r.capacidad }} personas
+                        @if (r.ubicacion) {
+                          <span class="dot-sep">·</span> {{ r.ubicacion }}
+                        }
+                      </span>
+                    }
+                    @if (r.tipoRecurso === 'MOBILIARIO' && r.cantidadInventario != null) {
+                      <span class="recurso-sub">
+                        <span class="material-symbols-rounded">inventory_2</span>
+                        Inventario total: {{ r.cantidadInventario }} unidades
+                      </span>
+                    }
+                  </div>
+                  <span class="recurso-cant">x{{ r.cantidadRequerida }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          @if (detalle.estado === 'RECHAZADA' && detalle.motivoRechazo) {
+            <div class="modal-field full">
+              <label>Motivo de rechazo</label>
+              <div class="motivo-box">{{ detalle.motivoRechazo }}</div>
+            </div>
+          }
+
+          @if (detalle.estado === 'APROBADA' && detalle.motivoRechazo) {
+            <div class="modal-field full">
+              <label>Comentario de aprobacion</label>
+              <div class="comentario-box">{{ detalle.motivoRechazo }}</div>
+            </div>
+          }
+        }
+      </div>
+
+      @if (detalle && detalle.estado === 'PENDIENTE') {
+        <div class="modal-footer">
+
+          @if (!decisionPendiente) {
+            <div class="modal-actions">
+              <button class="btn btn-ghost" (click)="cerrarDetalle()">Cerrar</button>
+              <button class="btn btn-danger" (click)="prepararDecision('RECHAZADA')">
+                <span class="material-symbols-rounded">close</span>
+                Rechazar
+              </button>
+              <button class="btn btn-success" (click)="prepararDecision('APROBADA')">
+                <span class="material-symbols-rounded">check</span>
+                Aprobar
+              </button>
+            </div>
+          }
+
+          @if (decisionPendiente) {
+            <div class="decision-area">
+              <label>
+                @if (decisionPendiente === 'APROBADA') {
+                  Comentario (opcional)
+                } @else {
+                  Motivo del rechazo <span class="req">*</span>
+                }
+              </label>
+              <textarea [formControl]="motivoCtrl"
+                        [placeholder]="decisionPendiente === 'APROBADA'
+                          ? 'Agrega un comentario opcional...'
+                          : 'Explica al profesor por que se rechaza la solicitud...'"
+                        rows="3"></textarea>
+
+              @if (errorDecision) {
+                <div class="alert-error inline">
+                  <span class="material-symbols-rounded">error</span>
+                  {{ errorDecision }}
+                </div>
+              }
+
+              <div class="modal-actions">
+                <button class="btn btn-ghost" (click)="cancelarDecision()" [disabled]="procesando">
+                  Cancelar
+                </button>
+                <button class="btn"
+                        [class.btn-success]="decisionPendiente === 'APROBADA'"
+                        [class.btn-danger]="decisionPendiente === 'RECHAZADA'"
+                        [disabled]="procesando"
+                        (click)="confirmarDecision()">
+                  @if (procesando) {
+                    <span class="material-symbols-rounded spin">progress_activity</span>
+                    Procesando...
+                  } @else {
+                    Confirmar {{ decisionPendiente === 'APROBADA' ? 'aprobacion' : 'rechazo' }}
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (detalle && detalle.estado !== 'PENDIENTE') {
+        <div class="modal-footer">
+          <div class="modal-actions">
+            <button class="btn btn-ghost" (click)="cerrarDetalle()">Cerrar</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (toastVisible) {
+  <div class="toast" [class.toast-error]="toastTipo === 'error'">
+    <span class="material-symbols-rounded">
+      {{ toastTipo === 'exito' ? 'check_circle' : 'error' }}
+    </span>
+    {{ toastMensaje }}
+  </div>
+}
