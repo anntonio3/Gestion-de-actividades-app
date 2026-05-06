@@ -1,0 +1,130 @@
+<div class="modal-overlay open" (click)="cerrarSiOverlay($event)">
+  <div class="modal-card">
+
+    <!-- Cabecera -->
+    <div class="modal-top">
+      <div>
+        @if (detalle) {
+          <span class="modal-tag">Punto #{{ detalle.etiquetaPunto }}</span>
+          <h2>{{ detalle.nombre }}</h2>
+        } @else {
+          <h2>Detalle del espacio</h2>
+        }
+      </div>
+      <button class="modal-close" (click)="cerrar()">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <!-- Cargando -->
+    @if (cargando) {
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Cargando información...</p>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (error && !cargando) {
+      <div class="alert-error">
+        <span class="material-symbols-rounded">warning</span>
+        {{ error }}
+      </div>
+    }
+
+    <!-- Detalle -->
+    @if (detalle && !cargando) {
+
+      <!-- Estado activo / inactivo -->
+      <div class="estado-row">
+        @if (detalle.activo) {
+          <span class="badge-estado activo">
+            <span class="material-symbols-rounded">check_circle</span>
+            Activo
+          </span>
+        } @else {
+          <span class="badge-estado inactivo">
+            <span class="material-symbols-rounded">pause_circle</span>
+            Inactivo
+          </span>
+        }
+      </div>
+
+      <!-- Datos del espacio -->
+      <div class="seccion">
+        <h3 class="seccion-titulo">
+          <span class="material-symbols-rounded">meeting_room</span>
+          Datos del espacio
+        </h3>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Capacidad</span>
+            <span class="info-value">
+              <span class="material-symbols-rounded">groups</span>
+              {{ detalle.capacidad }} personas
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Ubicación</span>
+            <span class="info-value">
+              <span class="material-symbols-rounded">location_on</span>
+              {{ detalle.ubicacion }}
+            </span>
+          </div>
+
+          @if (detalle.descripcion) {
+            <div class="info-item full">
+              <span class="info-label">Descripción</span>
+              <p class="info-text">{{ detalle.descripcion }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Equipamiento -->
+      <div class="seccion">
+        <h3 class="seccion-titulo">
+          <span class="material-symbols-rounded">chair</span>
+          Equipamiento del espacio
+          <span class="contador">{{ detalle.equipamiento.length }}</span>
+        </h3>
+
+        @if (detalle.equipamiento.length === 0) {
+          <p class="empty-equip">
+            <span class="material-symbols-rounded">inventory_2</span>
+            Este espacio no tiene equipamiento registrado.
+          </p>
+        } @else {
+          <ul class="equip-list">
+            @for (eq of detalle.equipamiento; track eq.idRecurso) {
+              <li class="equip-item">
+                <div class="equip-main">
+                  <span class="equip-cant">{{ eq.cantidad }}</span>
+                  <span class="equip-nombre">{{ eq.nombreRecurso }}</span>
+                </div>
+                @if (eq.caracteristicas) {
+                  <p class="equip-carac">{{ eq.caracteristicas }}</p>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <!-- Acciones -->
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="cerrar()">
+          Cerrar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="onEditar()">
+          <span class="material-symbols-rounded">edit</span>
+          Editar
+        </button>
+      </div>
+
+    }
+
+  </div>
+</div>

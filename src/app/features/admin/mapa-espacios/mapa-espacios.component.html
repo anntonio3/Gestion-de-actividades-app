@@ -11,7 +11,7 @@
   <div class="page-header-inner">
     <div>
       <h1>Mapa de Espacios UNPA</h1>
-      <p>Haz click en un círculo para registrar o editar un espacio físico</p>
+      <p>Haz click en un círculo para ver, registrar o editar un espacio físico</p>
     </div>
     @if (!cargando && !error) {
       <div class="header-stats">
@@ -59,7 +59,7 @@
     </div>
   </div>
 
-  <!-- ESTADO: cargando -->
+  <!-- ESTADOS -->
   @if (cargando) {
     <div class="state-box">
       <div class="spinner"></div>
@@ -67,7 +67,6 @@
     </div>
   }
 
-  <!-- ESTADO: error -->
   @if (error && !cargando) {
     <div class="state-box error-box">
       <span class="material-symbols-rounded" style="font-size:2rem">warning</span>
@@ -88,11 +87,12 @@
             [class.asignado]="punto.idEspacio !== null && punto.activo"
             [class.vacio]="punto.idEspacio === null"
             [class.inactivo]="punto.idEspacio !== null && !punto.activo"
+            [class.small]="esPequeno(punto)"
             [style.left.%]="punto.coordX"
             [style.top.%]="punto.coordY"
             (click)="onClickPunto(punto, $event)"
-            [title]="punto.nombreEspacio || 'Punto vacío #' + punto.etiqueta">
-            {{ punto.etiqueta }}
+            [attr.aria-label]="punto.nombreEspacio || 'Punto vacío #' + punto.etiqueta">
+            <span class="circulo-num">{{ punto.etiqueta }}</span>
           </button>
         }
       </div>
@@ -125,21 +125,30 @@
         </span>
         {{ puntoSeleccionado.activo ? 'Desactivar' : 'Activar' }}
       </button>
-      <button class="btn btn-primary" (click)="abrirModalEdicion()">
-        <span class="material-symbols-rounded">edit</span>
-        Editar
+      <button class="btn btn-primary" (click)="abrirModalDetalle()">
+        <span class="material-symbols-rounded">visibility</span>
+        Ver
       </button>
     </div>
   </div>
 }
 
-<!-- MODAL DE ALTA / EDICION -->
-@if (modalAbierto) {
+<!-- MODAL DE DETALLE (solo lectura) -->
+@if (modalDetalleAbierto) {
+  <app-modal-detalle
+    [idEspacio]="idEspacioDetalle"
+    (editar)="onEditarDesdeDetalle()"
+    (cerrado)="onCerrarDetalle()">
+  </app-modal-detalle>
+}
+
+<!-- MODAL DE ALTA / EDICIÓN -->
+@if (modalEdicionAbierto) {
   <app-modal-espacio
     [idPunto]="idPuntoModal"
     [idEspacio]="idEspacioModal"
     [modoEdicion]="modoEdicion"
     (guardado)="onGuardado()"
-    (cerrado)="onCerrarModal()">
+    (cerrado)="onCerrarModalEdicion()">
   </app-modal-espacio>
 }

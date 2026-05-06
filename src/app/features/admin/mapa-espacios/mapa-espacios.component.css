@@ -139,22 +139,28 @@
   border-radius: 50%;
   border: none;
   font-family: 'DM Sans', sans-serif;
-  font-size: .82rem;
-  font-weight: 700;
   cursor: pointer;
   transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all .2s;
+  transition: width .2s, height .2s, transform .2s, box-shadow .2s;
   box-shadow: 0 2px 8px rgba(0,0,0,.25);
   z-index: 5;
-  line-height: 1;
+  padding: 0;
 }
 .circulo:hover {
   transform: translate(-50%, -50%) scale(1.25);
-  z-index: 10;
+  z-index: 50;
+  box-shadow: 0 4px 14px rgba(0,0,0,.35);
 }
+.circulo .circulo-num {
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Variantes de color */
 .circulo.asignado {
   background: var(--primary);
   border: 2.5px solid var(--primary-dark);
@@ -170,6 +176,26 @@
   border: 2.5px solid #909090;
   color: #555;
   opacity: .75;
+}
+
+/* Variante PEQUEÑA — para puntos en clusters densos */
+.circulo.small {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.30);
+}
+.circulo.small .circulo-num {
+  display: none;       /* Ocultar el número cuando es chico */
+}
+.circulo.small:hover {
+  width: 30px;
+  height: 30px;
+  border-width: 2.5px;
+  z-index: 50;
+}
+.circulo.small:hover .circulo-num {
+  display: inline;     /* Mostrar el número al hacer hover */
 }
 
 /* POPUP INFO */
@@ -291,7 +317,15 @@
   .circulo {
     width: 24px;
     height: 24px;
-    font-size: .7rem;
+  }
+  .circulo .circulo-num { font-size: .7rem; }
+  .circulo.small {
+    width: 11px;
+    height: 11px;
+  }
+  .circulo.small:hover {
+    width: 24px;
+    height: 24px;
   }
   .popup-info {
     min-width: 220px;
