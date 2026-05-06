@@ -7,12 +7,11 @@
 </app-navbar>
 
 <!-- ════════════════════════════════════════════
-     PAGE HEADER: ahora aloja la barra de filtros
+     PAGE HEADER: filtros (izq) + stats (der)
 ════════════════════════════════════════════ -->
 <div class="page-header">
   <div class="page-header-inner">
 
-    <!-- Barra de filtros: busqueda + 3 selects en una fila -->
     <div class="filters-bar">
       <div class="search-wrap">
         <span class="material-symbols-rounded">search</span>
@@ -52,16 +51,7 @@
       </div>
     </div>
 
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     CONTENIDO
-════════════════════════════════════════════ -->
-<div class="main-content">
-
-  <!-- Stat-cards como filtros rapidos por estado -->
-  @if (!cargando && !error) {
+    @if (!cargando && !error) {
     <div class="header-stats">
       <button class="hstat" type="button"
               [class.active]="filtroEstado === 'TODOS'"
@@ -89,6 +79,14 @@
       </button>
     </div>
   }
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     CONTENIDO
+════════════════════════════════════════════ -->
+<div class="main-content">
 
   <!-- ESTADO: cargando -->
   @if (cargando) {
@@ -274,7 +272,7 @@
 
           <div class="modal-grid">
             <div class="modal-field">
-              <label>Profesor</label>
+              <label>Responsable</label>
               <p>{{ detalle.nombreProfesor }}</p>
               <p class="sub">{{ detalle.correoProfesor }}</p>
             </div>
