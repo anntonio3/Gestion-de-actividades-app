@@ -23,6 +23,13 @@ export const routes: Routes = [
       import('./features/admin/mapa-espacios/mapa-espacios.component')
         .then(m => m.MapaEspaciosComponent)
   },
+  // US-07/US-08/US-09/US-10
+  {
+    path: 'admin/revisar-solicitudes',
+    loadComponent: () =>
+      import('./features/vicerrectoria/revisar-solicitudes/revisar-solicitudes.component')
+        .then(m => m.RevisarSolicitudesComponent)
+  },
   { path: '**',        redirectTo: 'calendario' }
 ];
  
