@@ -181,6 +181,7 @@
         *ngFor="let ev of pagedEvents; let i = index"
         [style.animation-delay]="(i * 0.07) + 's'"
         [class.past-card]="isPast(ev)"
+        (click)="abrirDetalleEvento(ev)"
       >
         <!-- Imagen / color de portada -->
         <div
@@ -210,13 +211,17 @@
             <span class="event-date">📅 {{ formatFecha(ev.fechaActividad) }}</span>
             <span class="event-tipo">{{ ev.tipo }}</span>
           </div>
-          <div class="event-status" [class.status-past]="isPast(ev)">
+          <!-- IMPORTANTE: stopPropagation para que el click aquí NO abra el modal -->
+          <div class="event-status"
+              [class.status-past]="isPast(ev)"
+              (click)="$event.stopPropagation()">
             <span class="status-dot"></span>
             {{ isPast(ev) ? 'Evento finalizado' : 'Próximamente' }}
           </div>
         </div>
       </div>
     </div>
+
   </div>
 
   <!-- ══════════════════════════════════════
@@ -238,3 +243,10 @@
   </div>
 
 </div>
+
+<!-- MODAL DE DETALLE DE EVENTO -->
+<app-modal-detalle-evento
+  *ngIf="modalDetalleAbierto && idActividadDetalle !== null"
+  [idActividad]="idActividadDetalle"
+  (cerrado)="cerrarDetalleEvento()">
+</app-modal-detalle-evento>

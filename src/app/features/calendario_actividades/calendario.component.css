@@ -699,3 +699,10 @@
   object-fit: cover;
   display: block;
 }
+
+.event-card {
+  cursor: pointer;
+}
+.event-card:hover .event-card-body h3 {
+  color: var(--primary-dark);
+}

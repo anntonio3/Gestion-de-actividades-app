@@ -106,3 +106,35 @@ export interface ActualizarActividadRequest {
 }
 
 export type EstadoFiltro = '' | 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+
+// ─── Detalle público de actividad (US-04 modal de detalle) ───
+
+export interface ActividadDetallePublica {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  fechaActividad: string;
+  horaInicio: string;
+  horaFin: string;
+  tipo: string;
+  categoria: string;
+  imagenPortada?: string;
+  lugar: LugarPublico | null;
+  organizadores: OrganizadorPublico[];
+}
+
+export interface LugarPublico {
+  idEspacio: number;
+  nombre: string;
+  ubicacion: string;
+  capacidad: number;
+  idPunto?: number | null;
+  etiquetaPunto?: string | null;
+  coordX?: number | null;
+  coordY?: number | null;
+}
+
+export interface OrganizadorPublico {
+  nombre: string;
+  tipo: 'CARRERA' | 'DEPARTAMENTO';
+}

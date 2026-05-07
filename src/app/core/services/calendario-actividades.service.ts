@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ActividadPublica } from '../models/actividad.model';
+import { ActividadDetallePublica, ActividadPublica } from '../models/actividad.model';
 import { Categoria } from '../models/catalogo.model';
 
 @Injectable({ providedIn: 'root' })
@@ -20,5 +20,10 @@ export class ActividadService {
 
   getCategorias(): Observable<Categoria[]> {
     return this.http.get(`${this.base}/categorias`) as unknown as Observable<Categoria[]>;
+  }
+
+  // NUEVO: detalle completo para el modal
+  getDetalleActividad(id: number): Observable<ActividadDetallePublica> {
+    return this.http.get<ActividadDetallePublica>(`${this.base}/publico/${id}`);
   }
 }

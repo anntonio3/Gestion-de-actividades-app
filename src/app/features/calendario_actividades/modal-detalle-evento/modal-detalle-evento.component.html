@@ -1,0 +1,165 @@
+<div class="modal-overlay open" (click)="cerrarSiOverlay($event)">
+  <div class="modal-card">
+
+    <!-- Botón de cierre flotante -->
+    <button class="modal-close" (click)="cerrar()">
+      <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <!-- Cargando -->
+    @if (cargando) {
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Cargando detalle del evento...</p>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (error && !cargando) {
+      <div class="alert-error">
+        <span class="material-symbols-rounded">warning</span>
+        <p>{{ error }}</p>
+        <button class="btn btn-primary" (click)="cargar()">Reintentar</button>
+      </div>
+    }
+
+    <!-- Detalle -->
+    @if (detalle && !cargando) {
+
+      <!-- Hero: imagen + categoría -->
+      <div class="modal-hero"
+           [style.background]="detalle.imagenPortada ? 'none' : getColor(detalle.categoria)">
+        @if (detalle.imagenPortada) {
+          <img [src]="detalle.imagenPortada" [alt]="detalle.nombre" class="hero-img">
+        } @else {
+          <span class="hero-emoji">{{ getEmoji(detalle.categoria) }}</span>
+        }
+        <span class="hero-badge">{{ detalle.categoria }}</span>
+      </div>
+
+      <!-- Cuerpo del modal -->
+      <div class="modal-body">
+
+        <!-- Título -->
+        <h2 class="evento-titulo">{{ detalle.nombre }}</h2>
+        <span class="evento-tipo">{{ detalle.tipo }}</span>
+
+        <!-- Fecha y horario -->
+        <div class="info-pills">
+          <div class="pill">
+            <span class="material-symbols-rounded">calendar_month</span>
+            {{ detalle.fechaActividad | date:'EEEE d MMMM, y' }}
+          </div>
+          <div class="pill">
+            <span class="material-symbols-rounded">schedule</span>
+            {{ formatHora(detalle.horaInicio) }} – {{ formatHora(detalle.horaFin) }}
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        @if (detalle.descripcion) {
+          <div class="seccion">
+            <h3 class="seccion-titulo">
+              <span class="material-symbols-rounded">description</span>
+              Descripción
+            </h3>
+            <p class="seccion-texto">{{ detalle.descripcion }}</p>
+          </div>
+        }
+
+        <!-- Lugar + Mapa -->
+        <div class="seccion">
+          <h3 class="seccion-titulo">
+            <span class="material-symbols-rounded">location_on</span>
+            Ubicación
+          </h3>
+
+          @if (detalle.lugar) {
+            <div class="lugar-info">
+              <div class="lugar-nombre">{{ detalle.lugar.nombre }}</div>
+              <div class="lugar-meta">
+                <span class="lugar-meta-item">
+                  <span class="material-symbols-rounded">place</span>
+                  {{ detalle.lugar.ubicacion }}
+                </span>
+                <span class="lugar-meta-item">
+                  <span class="material-symbols-rounded">groups</span>
+                  Capacidad: {{ detalle.lugar.capacidad }}
+                </span>
+              </div>
+            </div>
+
+            @if (lugarTieneCoords) {
+              <div class="mapa-mini">
+                <img src="assets/images/Mapa_UNPA.jpeg" alt="Mapa UNPA" class="mapa-mini-img">
+                <div
+                  class="punto-resaltado"
+                  [style.left.%]="detalle.lugar.coordX"
+                  [style.top.%]="detalle.lugar.coordY"
+                  [title]="detalle.lugar.nombre">
+                  <div class="punto-pulse"></div>
+                  <div class="punto-centro"></div>
+                </div>
+              </div>
+              <p class="mapa-hint">
+                <span class="material-symbols-rounded">info</span>
+                Ubicación marcada en el mapa de la universidad
+              </p>
+            } @else {
+              <p class="mapa-hint">
+                <span class="material-symbols-rounded">info</span>
+                Este lugar aún no tiene ubicación en el mapa
+              </p>
+            }
+          } @else {
+            <p class="empty-hint">
+              <span class="material-symbols-rounded">info</span>
+              Esta actividad no tiene un espacio físico asignado
+            </p>
+          }
+        </div>
+
+        <!-- Organizadores -->
+        <div class="seccion">
+          <h3 class="seccion-titulo">
+            <span class="material-symbols-rounded">groups</span>
+            Organizadores
+            <span class="contador">{{ detalle.organizadores.length }}</span>
+          </h3>
+
+          @if (detalle.organizadores.length === 0) {
+            <p class="empty-hint">
+              <span class="material-symbols-rounded">info</span>
+              Sin organizadores registrados
+            </p>
+          } @else {
+            <ul class="org-list">
+              @for (org of detalle.organizadores; track $index) {
+                <li class="org-item">
+                  <span class="org-icon">
+                    <span class="material-symbols-rounded">
+                      {{ org.tipo === 'CARRERA' ? 'school' : 'corporate_fare' }}
+                    </span>
+                  </span>
+                  <div class="org-text">
+                    <span class="org-nombre">{{ org.nombre }}</span>
+                    <span class="org-tipo">{{ tipoOrganizadorLabel(org.tipo) }}</span>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
+        <!-- Acciones -->
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" (click)="cerrar()">
+            Cerrar
+          </button>
+        </div>
+
+      </div>
+    }
+
+  </div>
+</div>
