@@ -48,23 +48,114 @@ nav {
   text-transform: uppercase;
 }
 
+/* Titulo centrado */
+.nav-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: var(--accent);
+  margin: 0;
+  white-space: nowrap;
+}
+
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.7rem;
 }
 
-.nav-link {
-  font-size: 0.88rem;
-  color: var(--gray);
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.4rem 0.7rem;
+/* ════════════════════════════════════════════
+   ROLE DROPDOWN (Profesor / Admin)
+════════════════════════════════════════════ */
+.role-dropdown {
+  position: relative;
+}
+
+.role-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  background: var(--primary-bg);
+  border: 1.5px solid var(--primary-light);
   border-radius: 8px;
-  transition: all 0.2s;
+  color: var(--accent);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
 }
-.nav-link:hover { color: var(--accent); background: var(--primary-bg); }
+.role-btn:hover { background: var(--primary-light); }
+.role-btn.activo {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.role-btn .material-symbols-rounded { font-size: 18px; }
+.role-btn .chevron {
+  transition: transform 0.2s;
+  opacity: 0.8;
+}
+.role-btn.activo .chevron { transform: rotate(180deg); }
 
+/* Menu desplegable */
+.role-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 220px;
+  background: var(--white);
+  border: 1.5px solid var(--primary-light);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  z-index: 200;
+  animation: roleMenuIn 0.15s ease;
+}
+@keyframes roleMenuIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.role-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 7px;
+  color: var(--dark);
+  font-size: 0.86rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.role-menu-item:hover {
+  background: var(--primary-bg);
+  color: var(--accent);
+}
+.role-menu-item.activa {
+  background: var(--primary-bg);
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+.role-menu-item .material-symbols-rounded {
+  font-size: 18px;
+  color: var(--gray);
+}
+.role-menu-item:hover .material-symbols-rounded,
+.role-menu-item.activa .material-symbols-rounded {
+  color: var(--primary);
+}
+
+/* ════════════════════════════════════════════
+   AVATAR
+════════════════════════════════════════════ */
 .user-btn {
   display: flex;
   align-items: center;
@@ -87,36 +178,25 @@ nav {
   justify-content: center;
   font-size: 0.8rem;
   color: white;
+  font-weight: 700;
 }
 
-.nav-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'Playfair Display', serif;
-  font-size: 1.3rem;
-  color: var(--accent);
-  margin: 0;
-  white-space: nowrap;
+/* ════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .nav-title { display: none; }
+  .role-btn { padding: 0.45rem 0.7rem; font-size: 0.8rem; }
+  .role-btn span:not(.material-symbols-rounded) {
+    /* Ocultar texto, dejar solo iconos en pantallas chicas */
+    display: none;
+  }
+  .role-btn .chevron { display: inline-flex; }
 }
-
-.nav-1{
-  position: absolute;
-  left: 30%;
-  color: var(--accent);
-  margin: 0;
-  white-space: nowrap;
-  transform: translateX(-50%);
-  text-decoration: none;
-}
-
-.nav-2{
-  position: absolute;
-  left: 70%;
-  color: var(--accent);
-  margin: 0;
-  white-space: nowrap;
-  transform: translateX(-50%);
-  text-decoration: none;
+@media (max-width: 600px) {
+  nav { padding: 0 1rem; }
+  .user-btn { padding: 0.35rem 0.6rem; }
+  .user-btn { gap: 0.3rem; }
+  .user-btn:not(:has(.user-avatar)) { display: none; }
 }
 

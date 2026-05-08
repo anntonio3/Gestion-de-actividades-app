@@ -8,24 +8,63 @@
     </div>
   </a>
 
-   <!-- Título centrado en el navbar -->
   @if (titulo) {
     <h1 class="nav-title">{{ titulo }}</h1>
   }
 
-  <div>
-    <a routerLink="/mis-publicaciones" class="nav-1">Mis solicitudes</a>
-  </div>
-
-  <div>
-    <a routerLink="/actividades/registrar" class="nav-2">Registrar</a>
-  </div>
-
   <div class="nav-right">
-    <!--
-    @if (mostrarRegresar) {
-      <a [routerLink]="rutaRegresar" class="nav-link">Regresar</a>
-    } -->
+
+    <!-- Dropdown PROFESOR -->
+    <div class="role-dropdown">
+      <button class="role-btn"
+              [class.activo]="dropdownAbierto === 'profesor'"
+              (click)="toggleDropdown('profesor', $event)">
+        <span class="material-symbols-rounded">school</span>
+        Profesor
+        <span class="material-symbols-rounded chevron">expand_more</span>
+      </button>
+
+      @if (dropdownAbierto === 'profesor') {
+        <div class="role-menu">
+          @for (item of menuProfesor; track item.ruta) {
+            <a [routerLink]="item.ruta"
+               routerLinkActive="activa"
+               class="role-menu-item"
+               (click)="cerrarDropdowns()">
+              <span class="material-symbols-rounded">{{ item.icono }}</span>
+              {{ item.label }}
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Dropdown ADMIN -->
+    <div class="role-dropdown">
+      <button class="role-btn"
+              [class.activo]="dropdownAbierto === 'admin'"
+              (click)="toggleDropdown('admin', $event)">
+        <span class="material-symbols-rounded">shield_person</span>
+        Admin
+        <span class="material-symbols-rounded chevron">expand_more</span>
+      </button>
+
+      @if (dropdownAbierto === 'admin') {
+        <div class="role-menu">
+          @for (item of menuAdmin; track item.ruta) {
+            <a [routerLink]="item.ruta"
+               routerLinkActive="activa"
+               class="role-menu-item"
+               (click)="cerrarDropdowns()">
+              <span class="material-symbols-rounded">{{ item.icono }}</span>
+              {{ item.label }}
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Avatar -->
     <div class="user-btn">
       <div class="user-avatar">{{ inicialesUsuario }}</div>
       {{ nombreUsuario }}

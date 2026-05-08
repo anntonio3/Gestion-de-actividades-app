@@ -30,6 +30,12 @@ export const routes: Routes = [
       import('./features/vicerrectoria/revisar-solicitudes/revisar-solicitudes.component')
         .then(m => m.RevisarSolicitudesComponent)
   },
+  {
+    path: 'admin/inmobiliario',
+    loadComponent: () =>
+      import('./features/admin/inmobiliario/inmobiliario.component')
+        .then(m => m.InmobiliarioComponent)
+  },
   { path: '**',        redirectTo: 'calendario' }
 ];
  
