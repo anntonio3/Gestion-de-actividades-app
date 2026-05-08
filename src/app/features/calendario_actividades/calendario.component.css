@@ -706,3 +706,83 @@
 .event-card:hover .event-card-body h3 {
   color: var(--primary-dark);
 }
+
+/* ════════════════════════════════════════════
+   US-12: Bloque de asistencia en card
+════════════════════════════════════════════ */
+.asistencia-block {
+  margin-top: 0.8rem;
+  padding: 0.6rem 0.7rem;
+  background: var(--primary-bg);
+  border: 1px solid var(--primary-light);
+  border-radius: 10px;
+}
+.asistencia-titulo {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.asistencia-opciones {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+.asis-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.45rem 0.3rem;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  background: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+}
+.asis-btn:hover:not(:disabled):not(.activa) {
+  border-color: var(--primary-light);
+  transform: translateY(-1px);
+}
+.asis-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.asis-btn .material-symbols-rounded {
+  font-size: 18px;
+}
+.asis-label {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.asis-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--primary-bg);
+  padding: 0.05rem 0.4rem;
+  border-radius: 8px;
+  min-width: 22px;
+}
+
+/* Estado activo: el color define semantica */
+.asis-btn.activa { color: white; border-color: transparent; }
+.asis-btn.activa .asis-count { color: white; background: rgba(255,255,255,0.25); }
+
+.asis-voy.activa    { background: #4CAF50; }
+.asis-talvez.activa { background: var(--warn); }
+.asis-novoy.activa  { background: var(--danger); }
+
+/* Color de hover sutil por opcion */
+.asis-voy:hover:not(:disabled):not(.activa)    { color: #2d7a30; }
+.asis-talvez:hover:not(:disabled):not(.activa) { color: #b07526; }
+.asis-novoy:hover:not(:disabled):not(.activa)  { color: var(--danger); }

@@ -6,6 +6,8 @@ import { ActividadService } from '../../core/services/calendario-actividades.ser
 import { Categoria } from '../../core/models/catalogo.model';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { ModalDetalleEventoComponent } from './modal-detalle-evento/modal-detalle-evento.component';
+import { AsistenciaService } from '../../core/services/asistencia.service';
+import { AsistenciaEstado, RespuestaAsistencia } from '../../core/models/asistencia.model';
 
 interface DayPill {
   date: Date;
@@ -80,8 +82,15 @@ export class CalendarioComponent implements OnInit {
   modalDetalleAbierto = false;
   idActividadDetalle: number | null = null;
 
+  // Mapa idActividad -> estado de asistencia
+  asistencias: Record<number, AsistenciaEstado> = {};
+
+  // Para deshabilitar botones mientras se procesa una respuesta
+  respondiendoIds = new Set<number>();
+
   constructor(
     private actividadService: ActividadService,
+    private asistenciaService: AsistenciaService,   // <- AÑADIR
     private elRef: ElementRef
   ) {}
 
@@ -169,6 +178,8 @@ export class CalendarioComponent implements OnInit {
     this.eventsPage = futuros.length > 0
       ? this.paginaFuturosInicio
       : Math.max(0, this.totalPages - 1);
+
+    this.cargarAsistenciasPagina();
   }
 
   get pagedEvents(): ActividadPublica[] {
@@ -179,6 +190,7 @@ export class CalendarioComponent implements OnInit {
     const next = this.eventsPage + dir;
     if (next >= 0 && next < this.totalPages) {
       this.eventsPage = next;
+      this.cargarAsistenciasPagina();
     }
   }
 
@@ -375,4 +387,60 @@ export class CalendarioComponent implements OnInit {
     this.modalDetalleAbierto = false;
     this.idActividadDetalle = null;
   }
+
+  /**
+   * Carga los conteos + miRespuesta para los eventos visibles en la pagina actual.
+   * Se llama cada vez que cambia la pagina de eventos o el filtro.
+   */
+  private cargarAsistenciasPagina(): void {
+    const ids = this.pagedEvents.map(ev => ev.id);
+    if (ids.length === 0) return;
+
+    this.asistenciaService.obtenerLote(ids).subscribe({
+      next: data => {
+        // Merge con lo que ya tenia para conservar respuestas previas
+        this.asistencias = { ...this.asistencias, ...data };
+      },
+      error: () => {
+        // Falla silenciosa: el calendario sigue funcionando sin contadores.
+        // Los botones de US-12 mostraran 0 hasta que se reintente al cambiar de pagina.
+      }
+    });
+  }
+
+  /**
+   * Maneja el click en una opcion (Voy / Tal vez / No voy).
+   * Si el usuario clickea su respuesta actual, no hace nada (toggle off no soportado por ahora).
+   */
+  responder(ev: ActividadPublica, respuesta: RespuestaAsistencia, event: MouseEvent): void {
+    event.stopPropagation();
+
+    const estado = this.asistencias[ev.id];
+    if (estado?.miRespuesta === respuesta) return;
+    if (this.isPast(ev)) return;
+    if (this.respondiendoIds.has(ev.id)) return;
+
+    this.respondiendoIds.add(ev.id);
+    this.asistenciaService.responder(ev.id, respuesta).subscribe({
+      next: nuevoEstado => {
+        this.asistencias[ev.id] = nuevoEstado;
+        this.respondiendoIds.delete(ev.id);
+      },
+      error: () => {
+        this.respondiendoIds.delete(ev.id);
+      }
+    });
+  }
+
+  estadoAsistencia(idActividad: number): AsistenciaEstado {
+    return this.asistencias[idActividad] ?? {
+      idActividad, miRespuesta: null,
+      totalVoy: 0, totalTalVez: 0, totalNoVoy: 0
+    };
+  }
+
+  estaRespondiendo(idActividad: number): boolean {
+    return this.respondiendoIds.has(idActividad);
+  }
+
 }
