@@ -1,0 +1,302 @@
+<!-- NAV -->
+<app-navbar
+  nombreUsuario="Admin"
+  inicialesUsuario="AD"
+  [mostrarRegresar]="false"
+  titulo="Inmobiliario">
+</app-navbar>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1>Gestión de Inmobiliario</h1>
+      <p>Administra proyectores, pantallas, micrófonos y más</p>
+    </div>
+    <div class="header-stats" *ngIf="!cargando && !error">
+      <div class="hstat">
+        <span class="num">{{ lista.length }}</span>
+        <span class="lbl">Registros</span>
+      </div>
+      <div class="hstat">
+        <span class="num">{{ totalDisponibles }}</span>
+        <span class="lbl">Disponibles</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENIDO -->
+<div class="content-wrap">
+
+  <!-- BARRA DE ACCIONES -->
+  <div class="actions-bar">
+    <div class="search-box">
+      <input type="text" [(ngModel)]="busqueda"
+             placeholder="Buscar por nombre..."
+             (keyup.enter)="buscar()">
+      <button class="btn-buscar" (click)="buscar()">Buscar</button>
+      <button class="btn-limpiar" *ngIf="busqueda" (click)="limpiarBusqueda()">✕</button>
+    </div>
+    <button class="btn btn-primary" (click)="abrirCrear()">
+      + Registrar inmobiliario
+    </button>
+  </div>
+
+  <!-- ESTADO: cargando -->
+  <div class="empty-state" *ngIf="cargando">
+    <span class="icon">⏳</span>
+    <p>Cargando inmobiliario...</p>
+  </div>
+
+  <!-- ESTADO: error -->
+  <div class="empty-state" *ngIf="!cargando && error">
+    <span class="icon">⚠️</span>
+    <p style="color:var(--danger)">{{ error }}</p>
+    <button class="btn btn-outline" (click)="cargarLista()">Reintentar</button>
+  </div>
+
+  <!-- ESTADO: sin resultados -->
+  <div class="empty-state" *ngIf="!cargando && !error && lista.length === 0">
+    <span class="icon">📦</span>
+    <p>No hay inmobiliario registrado aún.</p>
+    <button class="btn btn-primary" (click)="abrirCrear()">Registrar el primero</button>
+  </div>
+
+  <!-- FIX 2: TABLA SIN columnas Descripción ni Nota -->
+  <div class="table-card" *ngIf="!cargando && !error && lista.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Foto</th>
+          <th>Nombre / Código</th>
+          <th>Existencias</th>
+          <th>Disponibles</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of lista" (click)="abrirDetalle(item)" class="table-row">
+
+          <td class="td-foto">
+            <div class="foto-thumb"
+                 [style.backgroundImage]="item.fotoUrl ? 'url(' + item.fotoUrl + ')' : 'none'">
+              <span *ngIf="!item.fotoUrl">📦</span>
+            </div>
+          </td>
+
+          <td class="td-nombre">
+            <strong>{{ item.nombre }}</strong>
+            <span class="codigo-badge" *ngIf="item.codigo">{{ item.codigo }}</span>
+            <span class="inv-badge"    *ngIf="item.numInventario">Inv: {{ item.numInventario }}</span>
+          </td>
+
+          <td class="td-num">{{ item.existencias }}</td>
+
+          <td class="td-num">
+            <span class="stock-badge" [ngClass]="stockClass(item)">
+              {{ item.disponibles }}
+            </span>
+          </td>
+
+          <td class="td-accion">
+            <button class="btn-ver" (click)="abrirDetalle(item); $event.stopPropagation()">
+              Ver
+            </button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+
+<!-- ============================================================
+     MODAL
+     ============================================================ -->
+<div class="modal-overlay" [class.open]="modalAbierto" (click)="cerrarModal($event)">
+  <div class="inmob-modal" (click)="$event.stopPropagation()">
+
+    <!-- ── Cabecera ── -->
+    <div class="modal-top">
+      <h2>
+        {{ modoModal === 'crear'  ? 'Registrar inmobiliario'
+         : modoModal === 'editar' ? 'Editar inmobiliario'
+         : seleccionado?.nombre }}
+      </h2>
+      <!-- FIX 4: X llama a intentarCerrar en lugar de cerrar directo -->
+      <button class="modal-close" (click)="intentarCerrar()">✕</button>
+    </div>
+
+    <!-- FIX 4: Confirmación de cierre al presionar X en editar/crear -->
+    <div class="confirm-cierre-box" *ngIf="confirmandoCierre">
+      <p>¿Seguro que quieres salir? Los cambios no guardados se perderán.</p>
+      <div class="confirm-cierre-actions">
+        <button class="btn-cancelar" (click)="cancelarCierre()">Seguir editando</button>
+        <button class="btn-danger-sm" (click)="confirmarCierre()">Sí, salir</button>
+      </div>
+    </div>
+
+    <!-- ── MODO DETALLE ── -->
+    <ng-container *ngIf="modoModal === 'detalle' && seleccionado && !confirmandoCierre">
+
+      <div class="alert-success" *ngIf="exitoForm">✅ Actualizado correctamente.</div>
+      <div class="alert-error"   *ngIf="errorForm">{{ errorForm }}</div>
+
+      <!-- Foto -->
+      <div class="detalle-foto-wrap" *ngIf="seleccionado.fotoUrl">
+        <img [src]="seleccionado.fotoUrl" alt="Foto del inmobiliario" class="detalle-foto">
+      </div>
+      <div class="detalle-foto-placeholder" *ngIf="!seleccionado.fotoUrl">
+        <span>📦</span>
+        <small>Sin foto registrada</small>
+      </div>
+
+      <!-- Datos en grid -->
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label>Código</label>
+          <p>{{ seleccionado.codigo || '—' }}</p>
+        </div>
+        <div class="modal-field">
+          <label>N° Inventario</label>
+          <p>{{ seleccionado.numInventario || '—' }}</p>
+        </div>
+        <div class="modal-field">
+          <label>Existencias</label>
+          <p>{{ seleccionado.existencias }}</p>
+        </div>
+        <div class="modal-field">
+          <label>Disponibles</label>
+          <p>
+            <span class="stock-badge" [ngClass]="stockClass(seleccionado)">
+              {{ seleccionado.disponibles }}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- FIX 2: Descripción y Nota sí se muestran aquí en el detalle -->
+      <div class="modal-field" *ngIf="seleccionado.descripcion">
+        <label>Descripción</label>
+        <!-- FIX 3: clase text-wrap evita que se desborde -->
+        <p class="text-wrap">{{ seleccionado.descripcion }}</p>
+      </div>
+
+      <div class="modal-field nota-field" *ngIf="tieneNota(seleccionado)">
+        <label>Nota</label>
+        <div class="nota-box text-wrap">{{ seleccionado.nota }}</div>
+      </div>
+
+      <!-- Acciones del detalle -->
+      <div class="detalle-actions">
+        <button class="btn btn-outline" (click)="pasarAEditar()">✏️ Editar</button>
+        <ng-container *ngIf="!confirmandoBaja">
+          <button class="btn btn-danger" (click)="confirmarBaja()">Dar de baja</button>
+        </ng-container>
+        <ng-container *ngIf="confirmandoBaja">
+          <span class="confirm-text">¿Confirmar baja?</span>
+          <button class="btn btn-danger" (click)="ejecutarBaja()" [disabled]="guardando">
+            {{ guardando ? 'Procesando...' : 'Sí, dar de baja' }}
+          </button>
+          <button class="btn btn-ghost" (click)="cancelarBaja()">Cancelar</button>
+        </ng-container>
+      </div>
+
+    </ng-container>
+
+    <!-- ── MODO CREAR / EDITAR ── -->
+    <ng-container *ngIf="(modoModal === 'crear' || modoModal === 'editar') && !confirmandoCierre">
+
+      <div class="alert-error" *ngIf="errorForm">{{ errorForm }}</div>
+
+      <div class="edit-form">
+
+        <!-- Nombre -->
+        <div class="form-field">
+          <label>Nombre del producto <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="form.nombre"
+                 placeholder="Ej: Proyector Epson X41" maxlength="150">
+        </div>
+
+        <!-- FIX 3: Descripción con maxlength y contador -->
+        <div class="form-field">
+          <label>Descripción detallada</label>
+          <textarea [(ngModel)]="form.descripcion"
+                    placeholder="Características, modelo, uso..."
+                    rows="3" maxlength="200"></textarea>
+          <span class="char-counter">{{ (form.descripcion || '').length }} / 200</span>
+        </div>
+
+        <!-- Código e inventario -->
+        <div class="form-row">
+          <div class="form-field">
+            <label>Código <span class="opt">(opcional)</span></label>
+            <input type="text" [(ngModel)]="form.codigo" placeholder="Ej: PRY-001" maxlength="50">
+          </div>
+          <div class="form-field">
+            <label>N° Inventario <span class="opt">(opcional)</span></label>
+            <input type="text" [(ngModel)]="form.numInventario" placeholder="Ej: INV-2024-008" maxlength="100">
+          </div>
+        </div>
+
+        <!-- Existencias y disponibles -->
+        <div class="form-row">
+          <div class="form-field">
+            <label>Existencias <span class="req">*</span></label>
+            <input type="number" [(ngModel)]="form.existencias" min="0" placeholder="0">
+          </div>
+          <div class="form-field">
+            <label>Disponibles <span class="req">*</span></label>
+            <input type="number" [(ngModel)]="form.disponibles" min="0" placeholder="0">
+          </div>
+        </div>
+        <p class="field-hint" *ngIf="form.disponibles > form.existencias">
+          ⚠️ Los disponibles no pueden superar las existencias.
+        </p>
+
+        <!-- FIX 3: Nota con maxlength y contador -->
+        <div class="form-field">
+          <label>Nota <span class="opt">(estado, mantenimiento, etc.)</span></label>
+          <textarea [(ngModel)]="form.nota"
+                    placeholder="Ej: 2 unidades en mantenimiento hasta el 20/06"
+                    rows="2" maxlength="100"></textarea>
+          <span class="char-counter">{{ (form.nota || '').length }} / 100</span>
+        </div>
+
+        <!-- Foto -->
+        <div class="form-field">
+          <label>Foto del artículo</label>
+          <div class="foto-preview-wrap" *ngIf="fotoPreview">
+            <img [src]="fotoPreview" alt="Vista previa" class="foto-preview">
+            <button class="btn-quitar-foto" type="button" (click)="quitarFoto()">✕ Quitar foto</button>
+          </div>
+          <label class="foto-upload-btn" *ngIf="!fotoPreview">
+            📷 Seleccionar imagen (JPG, PNG o WEBP · máx. 5 MB)
+            <input type="file" accept="image/jpeg,image/png,image/webp"
+                   (change)="onFotoSeleccionada($event)" style="display:none">
+          </label>
+          
+        </div>
+
+        <!-- FIX 4: Cancelar en editar vuelve al detalle, en crear cierra -->
+        <div class="form-actions">
+          <button class="btn-cancelar"
+                  (click)="modoModal === 'editar' ? (modoModal = 'detalle') : (modalAbierto = false)"
+                  [disabled]="guardando">
+            Cancelar
+          </button>
+          <!-- FIX 1: disabled mientras guarda para evitar doble registro -->
+          <button class="btn-guardar" (click)="guardar()" [disabled]="guardando">
+            {{ guardando ? 'Guardando...' : (modoModal === 'crear' ? 'Registrar' : 'Guardar cambios') }}
+          </button>
+        </div>
+
+      </div>
+
+    </ng-container>
+
+  </div>
+</div>
