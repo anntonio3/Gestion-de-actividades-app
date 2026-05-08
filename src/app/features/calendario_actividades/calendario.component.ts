@@ -6,8 +6,8 @@ import { ActividadService } from '../../core/services/calendario-actividades.ser
 import { Categoria } from '../../core/models/catalogo.model';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { ModalDetalleEventoComponent } from './modal-detalle-evento/modal-detalle-evento.component';
-import { AsistenciaService } from '../../core/services/asistencia.service';
 import { AsistenciaEstado, RespuestaAsistencia } from '../../core/models/asistencia.model';
+import { AsistenciaService } from '../../core/services/asistencia.service';
 
 interface DayPill {
   date: Date;
@@ -87,6 +87,9 @@ export class CalendarioComponent implements OnInit {
 
   // Para deshabilitar botones mientras se procesa una respuesta
   respondiendoIds = new Set<number>();
+
+  // US-12: id de la actividad cuyo dropdown de asistencia esta abierto
+  asistenciaAbiertaId: number | null = null;
 
   constructor(
     private actividadService: ActividadService,
@@ -367,6 +370,12 @@ export class CalendarioComponent implements OnInit {
     if (!this.elRef.nativeElement.querySelector('.view-toggle')?.contains(e.target)) {
       this.miniCalOpen = false;
     }
+
+    // US-12: cerrar dropdown de asistencia si el click fue fuera de uno
+    const target = e.target as HTMLElement;
+    if (!target.closest('.asistencia-block')) {
+      this.asistenciaAbiertaId = null;
+    }
   }
 
   get tituloSeccion(): string {
@@ -416,7 +425,10 @@ export class CalendarioComponent implements OnInit {
     event.stopPropagation();
 
     const estado = this.asistencias[ev.id];
-    if (estado?.miRespuesta === respuesta) return;
+    if (estado?.miRespuesta === respuesta){
+      this.asistenciaAbiertaId = null;   // cerrar incluso si no cambia
+      return;
+    } 
     if (this.isPast(ev)) return;
     if (this.respondiendoIds.has(ev.id)) return;
 
@@ -425,6 +437,7 @@ export class CalendarioComponent implements OnInit {
       next: nuevoEstado => {
         this.asistencias[ev.id] = nuevoEstado;
         this.respondiendoIds.delete(ev.id);
+        this.asistenciaAbiertaId = null;   // cerrar al guardar
       },
       error: () => {
         this.respondiendoIds.delete(ev.id);
@@ -441,6 +454,64 @@ export class CalendarioComponent implements OnInit {
 
   estaRespondiendo(idActividad: number): boolean {
     return this.respondiendoIds.has(idActividad);
+  }
+
+  // US-12: abre/cierra el dropdown de una actividad
+  toggleAsistenciaDropdown(idActividad: number, event: MouseEvent): void {
+    event.stopPropagation();
+    this.asistenciaAbiertaId = this.asistenciaAbiertaId === idActividad ? null : idActividad;
+  }
+
+  // Texto del boton segun la respuesta del usuario
+  asistenciaLabel(idActividad: number): string {
+    const r = this.estadoAsistencia(idActividad).miRespuesta;
+    if (!r) return '¿Piensas asistir?';
+    const labels: Record<RespuestaAsistencia, string> = {
+      VOY: 'Voy',
+      TAL_VEZ: 'Tal vez',
+      NO_VOY: 'No voy'
+    };
+    return labels[r];
+  }
+
+  // Icono del boton segun la respuesta
+  asistenciaIcono(idActividad: number): string {
+    const r = this.estadoAsistencia(idActividad).miRespuesta;
+    if (!r) return 'how_to_reg';
+    const iconos: Record<RespuestaAsistencia, string> = {
+      VOY: 'check_circle',
+      TAL_VEZ: 'help',
+      NO_VOY: 'cancel'
+    };
+    return iconos[r];
+  }
+
+  // Clase CSS por respuesta (color del boton)
+  asistenciaClase(idActividad: number): string {
+    const r = this.estadoAsistencia(idActividad).miRespuesta;
+    if (!r) return '';
+    const clases: Record<RespuestaAsistencia, string> = {
+      VOY: 'asis-voy',
+      TAL_VEZ: 'asis-talvez',
+      NO_VOY: 'asis-novoy'
+    };
+    return clases[r];
+  }
+
+  // Texto del conteo: solo el dato mas relevante
+  asistenciaConteoTexto(idActividad: number): string {
+    const e = this.estadoAsistencia(idActividad);
+    // Prioridad: VOY -> TAL_VEZ -> NO_VOY -> nada
+    if (e.totalVoy > 0) {
+      return e.totalVoy === 1 ? '1 persona va' : `${e.totalVoy} personas van`;
+    }
+    if (e.totalTalVez > 0) {
+      return e.totalTalVez === 1 ? '1 tal vez asista' : `${e.totalTalVez} tal vez asistan`;
+    }
+    if (e.totalNoVoy > 0) {
+      return e.totalNoVoy === 1 ? '1 no asistira' : `${e.totalNoVoy} no asistiran`;
+    }
+    return 'Aun nadie ha respondido';
   }
 
 }

@@ -211,44 +211,55 @@
             <span class="event-date">📅 {{ formatFecha(ev.fechaActividad) }}</span>
             <span class="event-tipo">{{ ev.tipo }}</span>
           </div>
-          <!-- US-12: Encuesta de asistencia (reemplaza al status anterior) -->
+          <!-- US-12: bloque de tamaño fijo: estado o asistencia -->
           @if (isPast(ev)) {
             <div class="event-status status-past" (click)="$event.stopPropagation()">
               <span class="status-dot"></span>
               Evento finalizado
-            </div>
+                    </div>
           } @else {
             <div class="asistencia-block" (click)="$event.stopPropagation()">
-              <div class="asistencia-titulo">¿Piensas asistir?</div>
-              <div class="asistencia-opciones">
-                <button class="asis-btn asis-voy"
-                        [class.activa]="estadoAsistencia(ev.id).miRespuesta === 'VOY'"
-                        [disabled]="estaRespondiendo(ev.id)"
-                        (click)="responder(ev, 'VOY', $event)"
-                        title="Voy">
-                  <span class="material-symbols-rounded">check_circle</span>
-                  <span class="asis-label">Voy</span>
-                  <span class="asis-count">{{ estadoAsistencia(ev.id).totalVoy }}</span>
-                </button>
-                <button class="asis-btn asis-talvez"
-                        [class.activa]="estadoAsistencia(ev.id).miRespuesta === 'TAL_VEZ'"
-                        [disabled]="estaRespondiendo(ev.id)"
-                        (click)="responder(ev, 'TAL_VEZ', $event)"
-                        title="Tal vez">
-                  <span class="material-symbols-rounded">help</span>
-                  <span class="asis-label">Tal vez</span>
-                  <span class="asis-count">{{ estadoAsistencia(ev.id).totalTalVez }}</span>
-                </button>
-                <button class="asis-btn asis-novoy"
-                        [class.activa]="estadoAsistencia(ev.id).miRespuesta === 'NO_VOY'"
-                        [disabled]="estaRespondiendo(ev.id)"
-                        (click)="responder(ev, 'NO_VOY', $event)"
-                        title="No voy">
-                  <span class="material-symbols-rounded">cancel</span>
-                  <span class="asis-label">No voy</span>
-                  <span class="asis-count">{{ estadoAsistencia(ev.id).totalNoVoy }}</span>
-                </button>
-              </div>
+
+              <!-- Conteo arriba: solo el dato mas relevante, en pequeño -->
+              <div class="asistencia-conteo">{{ asistenciaConteoTexto(ev.id) }}</div>
+
+              <!-- Boton-trigger del mismo tamaño que el bloque "Evento finalizado" -->
+              <button class="asistencia-trigger"
+                      [class]="asistenciaClase(ev.id)"
+                      [class.abierto]="asistenciaAbiertaId === ev.id"
+                      [disabled]="estaRespondiendo(ev.id)"
+                      (click)="toggleAsistenciaDropdown(ev.id, $event)">
+                <span class="material-symbols-rounded">{{ asistenciaIcono(ev.id) }}</span>
+                <span class="trigger-label">{{ asistenciaLabel(ev.id) }}</span>
+                <span class="material-symbols-rounded chevron">expand_more</span>
+              </button>
+
+              <!-- Dropdown con las 3 opciones -->
+              @if (asistenciaAbiertaId === ev.id) {
+                <div class="asistencia-dropdown">
+                  <button class="asis-opcion asis-voy"
+                          [class.activa]="estadoAsistencia(ev.id).miRespuesta === 'VOY'"
+                          [disabled]="estaRespondiendo(ev.id)"
+                          (click)="responder(ev, 'VOY', $event)">
+                    <span class="material-symbols-rounded">check_circle</span>
+                    <span>Voy</span>
+                  </button>
+                  <button class="asis-opcion asis-talvez"
+                          [class.activa]="estadoAsistencia(ev.id).miRespuesta === 'TAL_VEZ'"
+                          [disabled]="estaRespondiendo(ev.id)"
+                          (click)="responder(ev, 'TAL_VEZ', $event)">
+                    <span class="material-symbols-rounded">help</span>
+                    <span>Tal vez</span>
+                  </button>
+                  <button class="asis-opcion asis-novoy"
+                          [class.activa]="estadoAsistencia(ev.id).miRespuesta === 'NO_VOY'"
+                          [disabled]="estaRespondiendo(ev.id)"
+                          (click)="responder(ev, 'NO_VOY', $event)">
+                    <span class="material-symbols-rounded">cancel</span>
+                    <span>No voy</span>
+                  </button>
+                </div>
+              }
             </div>
           }
         </div>
