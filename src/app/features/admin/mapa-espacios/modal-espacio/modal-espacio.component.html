@@ -128,9 +128,12 @@
               @for (item of equipamientoArray.controls; track $index) {
                 <div class="equip-row" [formGroupName]="$index">
                   <div class="equip-fields">
+
+                    <!-- SELECT con (change) para actualizar validador -->
                     <div class="form-field">
                       <label>Mobiliario <span class="req">*</span></label>
-                      <select formControlName="idRecurso">
+                      <select formControlName="idRecurso"
+                              (change)="onRecursoChange($index)">
                         <option [ngValue]="null">— Selecciona —</option>
                         @for (m of recursosDisponibles($index); track m.idRecurso) {
                           <option [ngValue]="m.idRecurso">{{ m.nombre }}</option>
@@ -138,17 +141,40 @@
                       </select>
                     </div>
 
-                    <div class="form-field qty-field">
-                      <label>Cantidad <span class="req">*</span></label>
-                      <input type="number" formControlName="cantidad" min="1">
+                    <!-- INPUT cantidad con max dinámico y error -->
+                    <div class="form-field qty-field"
+                        [class.has-error]="item.get('cantidad')?.invalid && item.get('cantidad')?.touched">
+                      <label>
+                        Cantidad <span class="req">*</span>
+                        @if (existenciasRecurso($index); as max) {
+                          <span style="font-weight:400; color: var(--gray)">
+                            (máx. {{ max }})
+                          </span>
+                        }
+                      </label>
+                      <input type="number"
+                            formControlName="cantidad"
+                            min="1"
+                            [max]="existenciasRecurso($index) ?? ''">
+                      @if (item.get('cantidad')?.errors?.['min'] && item.get('cantidad')?.touched) {
+                        <span class="error-msg" style="display:block">
+                          La cantidad debe ser al menos 1.
+                        </span>
+                      }
+                      @if (item.get('cantidad')?.errors?.['max'] && item.get('cantidad')?.touched) {
+                        <span class="error-msg" style="display:block">
+                          Máximo disponible: {{ existenciasRecurso($index) }}.
+                        </span>
+                      }
                     </div>
+
                   </div>
 
                   <div class="form-field">
                     <label>Características</label>
                     <input type="text" formControlName="caracteristicas"
-                           placeholder="Ej. Sillas plegables fijas en gradas"
-                           maxlength="300">
+                          placeholder="Ej. Sillas plegables fijas en gradas"
+                          maxlength="300">
                   </div>
 
                   <button type="button" class="btn-remove" (click)="quitarEquipamiento($index)">

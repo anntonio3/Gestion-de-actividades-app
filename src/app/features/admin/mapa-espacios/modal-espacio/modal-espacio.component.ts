@@ -13,6 +13,7 @@ import { MobiliarioRecurso } from '../../../../core/models/catalogo.model';
 import {
   EspacioRequest, EspacioDetalle
 } from '../../../../core/models/espacio-admin.model';
+import { AbstractControl } from '@angular/forms';
 
 @Component({
   selector: 'app-modal-espacio',
@@ -230,4 +231,37 @@ export class ModalEspacioComponent implements OnInit, OnChanges {
     const c = this.form.get(nombre);
     return !!c && c.invalid && c.touched;
   }
+
+  // Método nuevo: se llama cuando cambia el select de recurso en una fila
+  onRecursoChange(indice: number): void {
+    const grupo = this.equipamientoArray.at(indice) as FormGroup;
+    const idRecurso = grupo.get('idRecurso')?.value;
+    const cantidadCtrl = grupo.get('cantidad');
+
+    if (!cantidadCtrl) return;
+
+    const recurso = this.mobiliario.find(m => m.idRecurso === idRecurso);
+    const max = recurso?.cantidad ?? recurso?.cantidadTotal ?? null;
+
+    if (max !== null) {
+      cantidadCtrl.setValidators([
+        Validators.required,
+        Validators.min(1),
+        Validators.max(max)
+      ]);
+    } else {
+      cantidadCtrl.setValidators([Validators.required, Validators.min(1)]);
+    }
+
+    cantidadCtrl.updateValueAndValidity();
+  }
+
+  // Helper para obtener las existencias del recurso seleccionado en una fila
+  existenciasRecurso(indice: number): number | null {
+    const idRecurso = this.equipamientoArray.at(indice).get('idRecurso')?.value;
+    if (!idRecurso) return null;
+    const recurso = this.mobiliario.find(m => m.idRecurso === idRecurso);
+    return recurso?.cantidad ?? recurso?.cantidadTotal ?? null;
+  }
+
 }
