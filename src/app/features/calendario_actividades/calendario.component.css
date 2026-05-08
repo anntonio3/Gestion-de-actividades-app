@@ -189,14 +189,23 @@
   background: linear-gradient(135deg, var(--primary-light), var(--primary));
   display: flex; align-items: center; justify-content: center;
 }
-.highlighted-emoji { font-size: 3.5rem; }
+.highlighted-img .material-symbols-rounded {
+  font-size: 3.5rem;
+  color: white;
+}
 .highlighted-body { flex: 1; }
 .highlighted-badge {
   background: var(--primary); color: white;
   font-size: 0.7rem; font-weight: 600;
   letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0.25rem 0.7rem; border-radius: 30px;
-  display: inline-block; margin-bottom: 0.5rem;
+  padding: 0.3rem 0.8rem; border-radius: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+.highlighted-badge .material-symbols-rounded {
+  font-size: 14px;
 }
 .highlighted-card h2 {
   font-family: 'Playfair Display', serif;
@@ -216,6 +225,19 @@
 .register-btn:hover:not(:disabled) { background: var(--primary); transform: translateY(-2px); }
 .register-btn:disabled, .disabled-btn {
   opacity: 0.5; cursor: not-allowed; transform: none !important;
+}
+
+.meta-tag {
+  font-size: 0.82rem;
+  color: var(--gray);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.meta-tag .material-symbols-rounded {
+  font-size: 16px;
+  color: var(--primary);
 }
 
 /* ══════════════════════════════════════════════════
@@ -252,7 +274,6 @@
   border: 1.5px solid var(--primary-light);
   background: var(--white);
   color: var(--accent);
-  font-size: 1.2rem;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
@@ -262,6 +283,7 @@
   background: var(--primary); color: white; border-color: var(--primary);
 }
 .strip-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.strip-nav-btn .material-symbols-rounded { font-size: 20px; }
 
 /* ══════════════════════════════════════════════════
    VIEW TOGGLE
@@ -274,11 +296,13 @@
   background: var(--white);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; color: var(--gray); transition: all 0.2s;
+  color: var(--gray); transition: all 0.2s;
 }
 .toggle-btn.active, .toggle-btn:hover {
   background: var(--primary); color: white; border-color: var(--primary);
 }
+.toggle-btn .material-symbols-rounded { font-size: 20px; }
+
 
 /* ══════════════════════════════════════════════════
    MINI CALENDARIO
@@ -309,14 +333,14 @@
 }
 .mini-nav-btn {
   background: none; border: none;
-  font-size: 1.2rem; color: var(--gray);
+  color: var(--gray);
   cursor: pointer; width: 28px; height: 28px;
   border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.15s;
 }
 .mini-nav-btn:hover { background: var(--primary-bg); color: var(--accent); }
-
+.mini-nav-btn .material-symbols-rounded { font-size: 18px; }
 .mini-cal-days-header {
   display: grid; grid-template-columns: repeat(7,1fr);
   margin-bottom: 0.4rem;
@@ -472,6 +496,15 @@
   background: var(--primary); color: white; border-color: var(--primary);
 }
 
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.chip-icon {
+  font-size: 16px !important;
+}
+
 /* ══════════════════════════════════════════════════
    EVENTS SECTION
 ══════════════════════════════════════════════════ */
@@ -533,8 +566,10 @@
 .event-cover-img {
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
-.event-emoji { font-size: 2.8rem; }
-
+.event-icon {
+  font-size: 56px !important;
+  color: white;
+}
 .category-badge {
   position: absolute; top: 10px; left: 10px;
   font-size: 0.68rem; font-weight: 600;
@@ -593,14 +628,34 @@
 }
 
 .event-meta {
-  font-size: 0.78rem; color: var(--gray); margin-bottom: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--gray);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.event-meta .material-symbols-rounded {
+  font-size: 16px;
+  color: var(--primary);
+}
+
+.event-date {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.event-date .material-symbols-rounded {
+  font-size: 16px;
 }
 .event-card-footer {
   display: flex; justify-content: space-between; align-items: center;
   border-top: 1px solid var(--primary-bg);
   padding-top: 0.8rem; margin-top: auto;
 }
-.event-date { font-size: 0.78rem; font-weight: 600; color: var(--primary-dark); }
 .event-tipo { font-size: 0.72rem; color: var(--gray); }
 
 /* ── Estados (loading, error, vacío) ── */
@@ -611,6 +666,12 @@
   color: var(--gray); font-size: 0.9rem;
   grid-column: 1 / -1;
 }
+
+.state-icon {
+  font-size: 2.5rem !important;
+  color: var(--gray);
+}
+.error-box .state-icon { color: var(--danger); }
 .error-box { color: var(--danger); }
 .spinner {
   width: 36px; height: 36px;

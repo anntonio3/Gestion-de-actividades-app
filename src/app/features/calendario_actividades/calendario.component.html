@@ -8,7 +8,7 @@
     inicialesUsuario="SG"
     rutaRegresar="/"
     [mostrarRegresar]="true"
-    titulo="Calendario de Actividades">    <!-- ← NUEVO -->
+    titulo="Calendario de Actividades">
   </app-navbar>
 
   <!-- ══════════════════════════════════════
@@ -28,15 +28,30 @@
         <img src="assets/images/computacion.jpg" alt="Imagen del evento destacado" class="highlighted-event-img">
       </div>
       <div class="highlighted-body">
-        <span class="highlighted-badge">⭐ Destacado</span>
+        <span class="highlighted-badge">
+          <span class="material-symbols-rounded">star</span>
+          Destacado
+        </span>
         <h2>Foro de Computación 2026</h2>
         <p>El encuentro anual de estudiantes y profesionales de tecnología de la UNPA.
            Ponencias, talleres prácticos y networking con líderes del sector.</p>
         <div class="highlighted-meta">
-          <span class="meta-tag">📅 11 de Noviembre, 2026</span>
-          <span class="meta-tag">📍 Auditorio Principal</span>
-          <span class="meta-tag">👥 150 lugares</span>
-          <span class="meta-tag">🕐 09:00 – 17:00 hrs</span>
+          <span class="meta-tag">
+            <span class="material-symbols-rounded">calendar_month</span>
+            11 de Noviembre, 2026
+          </span>
+          <span class="meta-tag">
+            <span class="material-symbols-rounded">location_on</span>
+            Auditorio Principal
+          </span>
+          <span class="meta-tag">
+            <span class="material-symbols-rounded">groups</span>
+            150 lugares
+          </span>
+          <span class="meta-tag">
+            <span class="material-symbols-rounded">schedule</span>
+            09:00 – 17:00 hrs
+          </span>
         </div>
       </div>
     </div>
@@ -48,19 +63,31 @@
   <div class="agenda-header-wrap">
     <h2 class="agenda-title">{{ agendaTitle }}</h2>
     <div class="agenda-controls">
-      <button class="strip-nav-btn" (click)="shiftStrip(-1)" title="Semana anterior">&#8249;</button>
-      <button class="strip-nav-btn" (click)="shiftStrip(1)"  title="Semana siguiente">&#8250;</button>
+      <button class="strip-nav-btn" (click)="shiftStrip(-1)" title="Semana anterior">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+      <button class="strip-nav-btn" (click)="shiftStrip(1)"  title="Semana siguiente">
+        <span class="material-symbols-rounded">chevron_right</span>
+      </button>
 
       <div class="view-toggle" style="position:relative">
-        <button class="toggle-btn active" title="Vista cuadrícula">⊞</button>
-        <button class="toggle-btn" title="Abrir calendario" (click)="toggleMiniCal()">📅</button>
+        <button class="toggle-btn active" title="Vista cuadrícula">
+          <span class="material-symbols-rounded">grid_view</span>
+        </button>
+        <button class="toggle-btn" title="Abrir calendario" (click)="toggleMiniCal()">
+          <span class="material-symbols-rounded">calendar_month</span>
+        </button>
 
         <!-- MINI CALENDARIO -->
         <div class="mini-cal" *ngIf="miniCalOpen">
           <div class="mini-cal-header">
-            <button class="mini-nav-btn" (click)="shiftMonth(-1)">&#8249;</button>
+            <button class="mini-nav-btn" (click)="shiftMonth(-1)">
+              <span class="material-symbols-rounded">chevron_left</span>
+            </button>
             <span class="mini-cal-title">{{ miniCalTitle }}</span>
-            <button class="mini-nav-btn" (click)="shiftMonth(1)">&#8250;</button>
+            <button class="mini-nav-btn" (click)="shiftMonth(1)">
+              <span class="material-symbols-rounded">chevron_right</span>
+            </button>
           </div>
           <div class="mini-cal-days-header">
             <span *ngFor="let d of DAYS_HEADER">{{ d }}</span>
@@ -138,7 +165,8 @@
       [class.active]="categoriaSeleccionada === cat.idCategoria"
       (click)="selectCategoria(cat)"
     >
-      {{ getEmoji(cat.nombre) }} {{ cat.nombre }}
+      <span class="material-symbols-rounded chip-icon">{{ getIconoCategoria(cat.nombre) }}</span>
+      {{ cat.nombre }}
     </button>
   </div>
 
@@ -149,9 +177,13 @@
     <div class="section-header">
       <h2>{{ tituloSeccion }}</h2>
       <div class="events-pagination">
-        <button class="strip-nav-btn" (click)="shiftEvents(-1)" [disabled]="eventsPage === 0">&#8249;</button>
+        <button class="strip-nav-btn" (click)="shiftEvents(-1)" [disabled]="eventsPage === 0">
+          <span class="material-symbols-rounded">chevron_left</span>
+        </button>
         <span class="page-label" *ngIf="totalPages > 0">{{ eventsPage + 1 }} / {{ totalPages }}</span>
-        <button class="strip-nav-btn" (click)="shiftEvents(1)" [disabled]="eventsPage >= totalPages - 1">&#8250;</button>
+        <button class="strip-nav-btn" (click)="shiftEvents(1)" [disabled]="eventsPage >= totalPages - 1">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </button>
       </div>
     </div>
 
@@ -163,14 +195,14 @@
 
     <!-- Estado: error -->
     <div class="state-box error-box" *ngIf="error && !loading">
-      <span style="font-size:2rem">⚠️</span>
+      <span class="material-symbols-rounded state-icon">error</span>
       <p>No se pudo conectar con el servidor.</p>
       <button class="btn btn-primary" (click)="loadActividades()">Reintentar</button>
     </div>
 
     <!-- Estado: sin resultados -->
     <div class="state-box" *ngIf="!loading && !error && filteredEvents.length === 0">
-      <span style="font-size:2rem">🔍</span>
+      <span class="material-symbols-rounded state-icon">search_off</span>
       <p>No se encontraron eventos.</p>
     </div>
 
@@ -194,7 +226,9 @@
             [alt]="ev.nombre"
             class="event-cover-img"
           >
-          <span *ngIf="!ev.imagenPortada" class="event-emoji">{{ getEmoji(ev.categoria) }}</span>
+          <span *ngIf="!ev.imagenPortada" class="material-symbols-rounded event-icon">
+            {{ getIconoCategoria(ev.categoria) }}
+          </span>
           <span class="category-badge" [class.past-badge]="isPast(ev)">
             {{ isPast(ev) ? 'Pasado' : ev.categoria }}
           </span>
@@ -205,10 +239,14 @@
           <h3>{{ ev.nombre }}</h3>
           <p>{{ ev.descripcion }}</p>
           <div class="event-meta">
-            🕐 {{ formatHora(ev.horaInicio) }} – {{ formatHora(ev.horaFin) }}
+            <span class="material-symbols-rounded">schedule</span>
+            {{ formatHora(ev.horaInicio) }} – {{ formatHora(ev.horaFin) }}
           </div>
           <div class="event-card-footer">
-            <span class="event-date">📅 {{ formatFecha(ev.fechaActividad) }}</span>
+            <span class="event-date">
+              <span class="material-symbols-rounded">calendar_month</span>
+              {{ formatFecha(ev.fechaActividad) }}
+            </span>
             <span class="event-tipo">{{ ev.tipo }}</span>
           </div>
           <!-- US-12: bloque de tamaño fijo: estado o asistencia -->
@@ -216,7 +254,7 @@
             <div class="event-status status-past" (click)="$event.stopPropagation()">
               <span class="status-dot"></span>
               Evento finalizado
-                    </div>
+            </div>
           } @else {
             <div class="asistencia-block" (click)="$event.stopPropagation()">
 

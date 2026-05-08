@@ -214,6 +214,21 @@ export class CalendarioComponent implements OnInit {
     return this.catColor[categoria] ?? 'linear-gradient(135deg,#a8d5cc,#71B6A7)';
   }
 
+  // Mapeo categoria -> icono Material Symbols
+  getIconoCategoria(categoria: string): string {
+    const map: Record<string, string> = {
+      'Tecnologia': 'computer',
+      'Tecnología': 'computer',
+      'Academica': 'school',
+      'Académica': 'school',
+      'Cultural': 'palette',
+      'Deportiva': 'sports_soccer',
+      'Ciencia': 'science',
+      'Salud': 'local_hospital'
+    };
+    return map[categoria] ?? 'event';
+  }
+
   formatHora(h: string): string {
     return h ? h.substring(0, 5) : '';
   }
