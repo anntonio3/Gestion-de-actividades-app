@@ -774,3 +774,9 @@
   margin: 0 0.3rem;
   color: var(--primary-light);
 }
+
+/*PAGINACION SUPERIOR: separacion con la lista*/
+.pagination-top {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}

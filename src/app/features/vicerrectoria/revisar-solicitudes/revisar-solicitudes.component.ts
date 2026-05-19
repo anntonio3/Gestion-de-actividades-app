@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
@@ -33,8 +33,12 @@ export class RevisarSolicitudesComponent implements OnInit {
   carreras: Carrera[] = [];
   departamentos: Departamento[] = [];
 
-  // Datos
-  solicitudes: SolicitudListItem[] = [];
+  // Datos:
+  //  - solicitudesTodas: lo que devuelve el backend con los filtros de categoria/carrera/dpto/busqueda.
+  //    El estado NO se manda al backend; se filtra en el cliente para que las stats
+  //    siempre reflejen todos los estados.
+  //  - solicitudes: vista filtrada por el estado seleccionado, usada para la lista paginada.
+  solicitudesTodas: SolicitudListItem[] = [];
   cargando = true;
   error = '';
 
@@ -93,8 +97,8 @@ export class RevisarSolicitudesComponent implements OnInit {
     this.cargando = true;
     this.error = '';
 
+    // El estado NO se manda al backend: traemos todas para que las stats sean reales
     const filtros: FiltrosSolicitudes = {
-      estado: this.filtroEstado,
       idCategoria: this.filtroCategoria ?? undefined,
       idCarrera: this.filtroCarrera ?? undefined,
       idDepartamento: this.filtroDepartamento ?? undefined,
@@ -103,9 +107,8 @@ export class RevisarSolicitudesComponent implements OnInit {
 
     this.vicerrectoriaService.listar(filtros).subscribe({
       next: data => {
-        this.solicitudes = data;
+        this.solicitudesTodas = data;
         this.cargando = false;
-        // Si la pagina actual quedo fuera de rango, ajustar
         if (this.paginaActual > this.totalPaginas) {
           this.paginaActual = Math.max(1, this.totalPaginas);
         }
@@ -117,10 +120,16 @@ export class RevisarSolicitudesComponent implements OnInit {
     });
   }
 
+  // Vista derivada: aplica el filtro de estado en memoria
+  get solicitudes(): SolicitudListItem[] {
+    if (this.filtroEstado === 'TODOS') return this.solicitudesTodas;
+    return this.solicitudesTodas.filter(s => s.estado === this.filtroEstado);
+  }
+
   setEstado(estado: FiltroEstado): void {
     this.filtroEstado = estado;
     this.paginaActual = 1;
-    this.cargarSolicitudes();
+    // No recarga: solo cambia el filtro en memoria
   }
 
   setCategoria(id: number | null): void {
@@ -151,16 +160,16 @@ export class RevisarSolicitudesComponent implements OnInit {
     this.setCarrera(value ? +value : null);
   }
 
-  // Estadisticas en el header
-  get statTotal(): number { return this.solicitudes.length; }
+  // Estadisticas: SIEMPRE sobre el set completo (solicitudesTodas), no sobre la vista filtrada
+  get statTotal(): number { return this.solicitudesTodas.length; }
   get statPendientes(): number {
-    return this.solicitudes.filter(s => s.estado === 'PENDIENTE').length;
+    return this.solicitudesTodas.filter(s => s.estado === 'PENDIENTE').length;
   }
   get statAprobadas(): number {
-    return this.solicitudes.filter(s => s.estado === 'APROBADA').length;
+    return this.solicitudesTodas.filter(s => s.estado === 'APROBADA').length;
   }
   get statRechazadas(): number {
-    return this.solicitudes.filter(s => s.estado === 'RECHAZADA').length;
+    return this.solicitudesTodas.filter(s => s.estado === 'RECHAZADA').length;
   }
 
   // ====================================================================
@@ -287,9 +296,10 @@ export class RevisarSolicitudesComponent implements OnInit {
     obs.subscribe({
       next: res => {
         this.procesando = false;
-        const idx = this.solicitudes.findIndex(s => s.idActividad === idActividad);
+        // Actualiza el item en el set completo para que stats y vista filtrada queden al dia
+        const idx = this.solicitudesTodas.findIndex(s => s.idActividad === idActividad);
         if (idx !== -1) {
-          this.solicitudes[idx] = { ...this.solicitudes[idx], estado: res.estado };
+          this.solicitudesTodas[idx] = { ...this.solicitudesTodas[idx], estado: res.estado };
         }
         const verbo = res.estado === 'APROBADA' ? 'aprobada' : 'rechazada';
         this.mostrarToast(`Solicitud ${verbo} correctamente.`, 'exito');

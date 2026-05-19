@@ -115,6 +115,44 @@
 
   <!-- LISTA -->
   @if (!cargando && !error && solicitudes.length > 0) {
+
+    <!-- Paginacion ARRIBA -->
+    @if (totalPaginas > 1) {
+      <div class="pagination pagination-top">
+        <span class="pagination-info">
+          Mostrando {{ rangoInicio }}–{{ rangoFin }} de {{ solicitudes.length }}
+        </span>
+        <div class="pagination-controls">
+          <button class="page-btn" type="button"
+                  [disabled]="paginaActual === 1"
+                  (click)="paginaAnterior()"
+                  aria-label="Pagina anterior">
+            <span class="material-symbols-rounded">chevron_left</span>
+          </button>
+
+          @for (p of paginasVisibles; track $index) {
+            @if (p === '...') {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button class="page-btn"
+                      type="button"
+                      [class.active]="p === paginaActual"
+                      (click)="irPagina(p)">
+                {{ p }}
+              </button>
+            }
+          }
+
+          <button class="page-btn" type="button"
+                  [disabled]="paginaActual === totalPaginas"
+                  (click)="paginaSiguiente()"
+                  aria-label="Pagina siguiente">
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+
     <div class="sol-list">
       @for (s of solicitudesPagina; track s.idActividad) {
         <div class="sol-card" (click)="abrirDetalle(s)">
@@ -166,7 +204,7 @@
       }
     </div>
 
-    <!-- Paginacion -->
+    <!-- Paginacion ABAJO -->
     @if (totalPaginas > 1) {
       <div class="pagination">
         <span class="pagination-info">
