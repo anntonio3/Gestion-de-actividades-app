@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, HostListener, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActividadPublica, CATEGORIA_COLOR, CATEGORIA_EMOJI } from '../../core/models/actividad.model';
@@ -8,6 +8,9 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { ModalDetalleEventoComponent } from './modal-detalle-evento/modal-detalle-evento.component';
 import { AsistenciaEstado, RespuestaAsistencia } from '../../core/models/asistencia.model';
 import { AsistenciaService } from '../../core/services/asistencia.service';
+import { RouterLink } from '@angular/router';
+import { Aviso } from '../../core/models/aviso.model';
+import { CorchoService } from '../../core/services/corcho.service';
 
 interface DayPill {
   date: Date;
@@ -33,12 +36,12 @@ interface MiniCalDay {
 @Component({
   selector: 'app-calendario',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, ModalDetalleEventoComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, ModalDetalleEventoComponent, RouterLink],
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css'],
   providers: [DatePipe]
 })
-export class CalendarioComponent implements OnInit {
+export class CalendarioComponent implements OnInit, OnDestroy {
 
   // ... [TODAS las propiedades que ya tenías permanecen igual] ...
 
@@ -91,9 +94,20 @@ export class CalendarioComponent implements OnInit {
   // US-12: id de la actividad cuyo dropdown de asistencia esta abierto
   asistenciaAbiertaId: number | null = null;
 
+  // US-18: Carrusel de avisos en el header
+  avisosPreview: Aviso[] = [];
+  avisosPreviewPage = 0;
+  readonly AVISOS_VISIBLES = 1;
+  readonly MAX_AVISOS = 5;
+  private avisosTimer?: ReturnType<typeof setInterval>;
+  private readonly AVISOS_INTERVALO = 4000;  // 4 segundos
+  
+  
+
   constructor(
     private actividadService: ActividadService,
-    private asistenciaService: AsistenciaService,   // <- AÑADIR
+    private asistenciaService: AsistenciaService,
+    private corchoService: CorchoService,
     private elRef: ElementRef
   ) {}
 
@@ -109,6 +123,12 @@ export class CalendarioComponent implements OnInit {
     });
 
     this.loadActividades();
+    // US-18: cargar avisos para el carrusel del header
+    this.cargarAvisosPreview();
+  }
+
+  ngOnDestroy(): void {
+    this.detenerAutoSlide();
   }
 
   loadActividades(): void {
@@ -527,6 +547,82 @@ export class CalendarioComponent implements OnInit {
       return e.totalNoVoy === 1 ? '1 no asistira' : `${e.totalNoVoy} no asistiran`;
     }
     return 'Aun nadie ha respondido';
+  }
+
+  // ═══════════════════════════════════════════════════════
+  //  US-18: Carrusel de avisos en el header del calendario
+  // ═══════════════════════════════════════════════════════
+  private cargarAvisosPreview(): void {
+    // Trae los activos ordenados por fecha asc; tomamos como máximo MAX_AVISOS
+    this.corchoService.listar().subscribe({
+      next: data => {
+        this.avisosPreview = data.slice(0, this.MAX_AVISOS);
+        this.avisosPreviewPage = 0;
+        // Solo auto-desliza si hay más de una página
+        if (this.totalPaginasAvisos > 1) {
+          this.iniciarAutoSlide();
+        }
+      },
+      error: () => this.avisosPreview = []  // falla silenciosa
+    });
+  }
+
+  get totalPaginasAvisos(): number {
+    return Math.ceil(this.avisosPreview.length / this.AVISOS_VISIBLES);
+  }
+
+  get avisosVisibles(): Aviso[] {
+    const inicio = this.avisosPreviewPage * this.AVISOS_VISIBLES;
+    return this.avisosPreview.slice(inicio, inicio + this.AVISOS_VISIBLES);
+  }
+
+  // Avanza ciclicamente (vuelve al inicio tras la última página)
+  private avanzarAvisos(): void {
+    this.avisosPreviewPage =
+      (this.avisosPreviewPage + 1) % this.totalPaginasAvisos;
+  }
+
+  // Navegacion manual (flechas/dots): reinicia el timer
+  irPaginaAviso(pagina: number): void {
+    if (pagina < 0 || pagina >= this.totalPaginasAvisos) return;
+    this.avisosPreviewPage = pagina;
+    this.reiniciarAutoSlide();
+  }
+
+  shiftAvisos(dir: number): void {
+    const total = this.totalPaginasAvisos;
+    this.avisosPreviewPage = (this.avisosPreviewPage + dir + total) % total;
+    this.reiniciarAutoSlide();
+  }
+
+  // ── Control del auto-slide ──
+  private iniciarAutoSlide(): void {
+    this.detenerAutoSlide();
+    this.avisosTimer = setInterval(() => this.avanzarAvisos(), this.AVISOS_INTERVALO);
+  }
+  private detenerAutoSlide(): void {
+    if (this.avisosTimer) {
+      clearInterval(this.avisosTimer);
+      this.avisosTimer = undefined;
+    }
+  }
+  private reiniciarAutoSlide(): void {
+    if (this.totalPaginasAvisos > 1) this.iniciarAutoSlide();
+  }
+
+  // Pausa al pasar el mouse, reanuda al salir (llamados desde el template)
+  pausarAvisos(): void { this.detenerAutoSlide(); }
+  reanudarAvisos(): void { this.reiniciarAutoSlide(); }
+
+  // Helpers de formato
+  formatFechaAvisoPreview(f: string): string {
+    if (!f) return '';
+    const d = new Date(f + 'T00:00:00');
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    return `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+  }
+  formatHoraAviso(h?: string | null): string {
+    return h ? h.substring(0, 5) : '';
   }
 
 }

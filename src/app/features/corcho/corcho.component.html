@@ -1,0 +1,231 @@
+<app-navbar
+  nombreUsuario="Visitante"
+  inicialesUsuario="V"
+  rutaRegresar="/calendario"
+  [mostrarRegresar]="true"
+  titulo="Corcho Digital">
+</app-navbar>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1>Corcho Digital</h1>
+      <p>Avisos y noticias publicadas por profesores de la UNPA</p>
+    </div>
+    @if (!cargando && !error) {
+      <div class="header-stats">
+        <div class="hstat">
+          <span class="num">{{ avisos.length }}</span>
+          <span class="lbl">Avisos</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- FILTROS -->
+<div class="filtros-wrap">
+  <div class="filtros-bar">
+    <span class="filtros-label">Filtrar por:</span>
+
+    <button class="filtro-chip"
+            [class.active]="filtroActivo === 'TODOS'"
+            (click)="setFiltro('TODOS')">
+      <span class="material-symbols-rounded">apps</span>
+      Todos
+    </button>
+
+    <button class="filtro-chip"
+            [class.active]="filtroActivo === 'HOY'"
+            (click)="setFiltro('HOY')">
+      <span class="material-symbols-rounded">today</span>
+      Hoy
+    </button>
+
+    <button class="filtro-chip"
+            [class.active]="filtroActivo === 'SEMANA'"
+            (click)="setFiltro('SEMANA')">
+      <span class="material-symbols-rounded">date_range</span>
+      Esta semana
+    </button>
+
+    <button class="filtro-chip"
+            [class.active]="filtroActivo === 'MES'"
+            (click)="setFiltro('MES')">
+      <span class="material-symbols-rounded">calendar_month</span>
+      Este mes
+    </button>
+
+    <!-- Fecha custom -->
+    <div class="custom-date-wrap"
+         [class.active]="filtroActivo === 'CUSTOM'"
+         (click)="setFiltro('CUSTOM')">
+      <span class="material-symbols-rounded">event</span>
+      <input type="date"
+             [(ngModel)]="fechaCustom"
+             (change)="aplicarFechaCustom()"
+             aria-label="Fecha específica">
+    </div>
+
+    @if (filtroActivo !== 'TODOS') {
+      <button class="btn-limpiar" (click)="limpiarFiltros()">
+        <span class="material-symbols-rounded">close</span>
+        Limpiar
+      </button>
+    }
+  </div>
+</div>
+
+<!-- TABLERO DE CORCHO -->
+<div class="tablero-wrap">
+  <div class="tablero">
+
+    <!-- Estado: cargando -->
+    @if (cargando) {
+      <div class="state-box">
+        <div class="spinner"></div>
+        <p>Cargando avisos...</p>
+      </div>
+    }
+
+    <!-- Estado: error -->
+    @if (!cargando && error) {
+      <div class="state-box error-box">
+        <span class="material-symbols-rounded big">warning</span>
+        <p>{{ error }}</p>
+        <button class="btn btn-primary" (click)="cargar()">Reintentar</button>
+      </div>
+    }
+
+    <!-- Estado: sin avisos -->
+    @if (!cargando && !error && avisos.length === 0) {
+      <div class="state-box">
+        <span class="material-symbols-rounded big">push_pin</span>
+        <p>No hay avisos publicados en este momento.</p>
+      </div>
+    }
+
+    <!-- Mosaico de avisos (masonry) -->
+    @if (!cargando && !error && avisos.length > 0) {
+      <div class="masonry">
+        @for (aviso of avisos; track aviso.idAviso) {
+
+          <div class="aviso-papel"
+               [style.background]="papelDe(aviso)"
+               [style.--rotacion]="rotacionDe(aviso)"
+               [style.--sombra-papel]="sombraDe(aviso)"
+               (click)="abrirDetalle(aviso)">
+
+            <!-- Fijación: chincheta -->
+            @if (tipoFijacion(aviso) === 'chincheta') {
+              <div class="chincheta" [style.background]="colorChincheta(aviso)">
+                <div class="chincheta-brillo"></div>
+              </div>
+            }
+
+            <!-- Fijación: cinta washi -->
+            @if (tipoFijacion(aviso) === 'cinta') {
+              <div class="cinta" [style.background]="estiloCinta(aviso)"></div>
+            }
+
+            <!-- Foto opcional -->
+            @if (aviso.fotoUrl) {
+              <div class="aviso-foto">
+                <img [src]="aviso.fotoUrl" [alt]="aviso.titulo">
+              </div>
+            }
+
+            <!-- Contenido -->
+            <div class="aviso-contenido">
+              <h3 class="aviso-titulo">{{ aviso.titulo }}</h3>
+
+              <p class="aviso-desc">{{ aviso.descripcion }}</p>
+
+              <div class="aviso-meta">
+                <span class="meta-item">
+                  <span class="material-symbols-rounded">calendar_month</span>
+                  {{ aviso.fechaEvento | date:'d MMM y' }}
+                </span>
+                @if (aviso.horaEvento) {
+                  <span class="meta-item">
+                    <span class="material-symbols-rounded">schedule</span>
+                    {{ formatHora(aviso.horaEvento) }}
+                  </span>
+                }
+              </div>
+
+              <div class="aviso-firma">
+                <span class="material-symbols-rounded">edit_note</span>
+                {{ aviso.nombreProfesor }}
+              </div>
+            </div>
+          </div>
+
+        }
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- MODAL DE DETALLE -->
+@if (avisoSeleccionado) {
+  <div class="modal-overlay open" (click)="cerrarDetalle($event)">
+    <div class="detalle-modal"
+         [style.background]="papelDe(avisoSeleccionado)">
+
+      <!-- Decoración -->
+      @if (tipoFijacion(avisoSeleccionado) === 'chincheta') {
+        <div class="chincheta modal-fijacion"
+             [style.background]="colorChincheta(avisoSeleccionado)">
+          <div class="chincheta-brillo"></div>
+        </div>
+      } @else {
+        <div class="cinta modal-fijacion"
+             [style.background]="estiloCinta(avisoSeleccionado)"></div>
+      }
+
+      <button class="modal-close" (click)="cerrarDetalle()">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+
+      @if (avisoSeleccionado.fotoUrl) {
+        <div class="modal-foto">
+          <img [src]="avisoSeleccionado.fotoUrl" [alt]="avisoSeleccionado.titulo">
+        </div>
+      }
+
+      <div class="modal-body">
+        <h2 class="modal-titulo">{{ avisoSeleccionado.titulo }}</h2>
+
+        <div class="modal-info-pills">
+          <span class="pill">
+            <span class="material-symbols-rounded">calendar_month</span>
+            {{ avisoSeleccionado.fechaEvento | date:'EEEE d MMMM, y' }}
+          </span>
+          @if (avisoSeleccionado.horaEvento) {
+            <span class="pill">
+              <span class="material-symbols-rounded">schedule</span>
+              {{ formatHora(avisoSeleccionado.horaEvento) }}
+            </span>
+          }
+        </div>
+
+        <p class="modal-desc">{{ avisoSeleccionado.descripcion }}</p>
+
+        <div class="modal-firma">
+          <div class="firma-avatar">
+            <span class="material-symbols-rounded">person</span>
+          </div>
+          <div class="firma-info">
+            <span class="firma-nombre">{{ avisoSeleccionado.nombreProfesor }}</span>
+            <span class="firma-fecha">
+              Publicado el {{ avisoSeleccionado.fechaPublicacion | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

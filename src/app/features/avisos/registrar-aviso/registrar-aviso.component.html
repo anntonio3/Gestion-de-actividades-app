@@ -1,0 +1,222 @@
+<app-navbar
+  nombreUsuario="Sandro G."
+  inicialesUsuario="SG"
+  rutaRegresar="/avisos/mis-avisos"
+  [mostrarRegresar]="true"
+  [titulo]="modoEdicion ? 'Editar Aviso' : 'Nuevo Aviso'">
+</app-navbar>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <span class="badge">
+      <span class="material-symbols-rounded">campaign</span>
+      Corcho Digital
+    </span>
+    <p>
+      {{ modoEdicion
+         ? 'Actualiza la informacion de tu aviso. Los cambios se publican al instante.'
+         : 'Publica un aviso o noticia en el corcho. Se publica automaticamente, sin revision.' }}
+    </p>
+  </div>
+</div>
+
+<!-- CARGANDO (modo edicion) -->
+@if (cargando) {
+  <div class="form-wrapper">
+    <div class="state-box">
+      <div class="spinner"></div>
+      <p>Cargando aviso...</p>
+    </div>
+  </div>
+}
+
+<!-- FORM + PREVIEW -->
+@if (!cargando) {
+  <div class="form-wrapper">
+    <div class="layout">
+
+      <!-- ─── COLUMNA IZQUIERDA: FORMULARIO ─── -->
+      <form class="form-col" [formGroup]="form" (ngSubmit)="enviar()">
+
+        @if (errorGlobal) {
+          <div class="alert-error">
+            <span class="material-symbols-rounded">warning</span>
+            {{ errorGlobal }}
+          </div>
+        }
+
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-rounded">edit_note</span>
+            </div>
+            <div>
+              <h3>Contenido del aviso</h3>
+              <p>Que quieres comunicar</p>
+            </div>
+          </div>
+
+          <div class="section-body">
+            <!-- Titulo -->
+            <div class="form-group" [class.has-error]="invalido('titulo')">
+              <label>Titulo <span class="required-dot"></span></label>
+              <input type="text" formControlName="titulo"
+                     placeholder="Ej: Suspension de clases por mantenimiento"
+                     maxlength="150">
+              <span class="hint">{{ campo('titulo')?.value?.length ?? 0 }} / 150</span>
+              <span class="error-msg">El titulo es obligatorio.</span>
+            </div>
+
+            <!-- Descripcion -->
+            <div class="form-group" [class.has-error]="invalido('descripcion')">
+              <label>Descripcion <span class="required-dot"></span></label>
+              <textarea formControlName="descripcion" rows="5"
+                        placeholder="Detalla el aviso: que, cuando, donde, a quien aplica..."></textarea>
+              <span class="error-msg">La descripcion es obligatoria.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-rounded">calendar_month</span>
+            </div>
+            <div>
+              <h3>Fecha y hora</h3>
+              <p>Cuando ocurre lo que avisas (la hora es opcional)</p>
+            </div>
+          </div>
+
+          <div class="section-body two-col">
+            <div class="form-group" [class.has-error]="invalido('fechaEvento')">
+              <label>Fecha <span class="required-dot"></span></label>
+              <input type="date" formControlName="fechaEvento">
+              <span class="error-msg">La fecha es obligatoria.</span>
+            </div>
+            <div class="form-group">
+              <label>Hora <span class="opt">(opcional)</span></label>
+              <input type="time" formControlName="horaEvento">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-rounded">image</span>
+            </div>
+            <div>
+              <h3>Imagen</h3>
+              <p>Opcional, se mostrara en la nota del corcho</p>
+            </div>
+          </div>
+
+          <div class="section-body">
+            @if (!previewImagen) {
+              <div class="file-upload-area"
+                   (dragover)="$event.preventDefault()"
+                   (drop)="onDrop($event)">
+                <input type="file" accept="image/jpeg,image/png,image/webp"
+                       (change)="onFotoSeleccionada($event)">
+                <span class="material-symbols-rounded upload-icon">add_photo_alternate</span>
+                <div class="upload-text">Arrastra una imagen o haz clic</div>
+                <div class="upload-sub">PNG, JPG o WEBP · Max. 5 MB</div>
+              </div>
+            } @else {
+              <div class="file-preview">
+                <img class="preview-img" [src]="previewImagen" alt="preview">
+                <div class="file-info">
+                  @if (archivoFoto) {
+                    <div class="file-name">{{ archivoFoto.name }}</div>
+                    <div class="file-size">{{ formatBytes(archivoFoto.size) }}</div>
+                  } @else {
+                    <div class="file-name">Imagen actual</div>
+                    <div class="file-size">Sube una nueva para reemplazarla</div>
+                  }
+                </div>
+                <button type="button" class="remove-file" (click)="quitarFoto()">
+                  <span class="material-symbols-rounded">close</span>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" (click)="cancelar()" [disabled]="guardando">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="guardando">
+            @if (guardando) {
+              <span class="material-symbols-rounded spin">progress_activity</span>
+              Guardando...
+            } @else {
+              <span class="material-symbols-rounded">{{ modoEdicion ? 'save' : 'send' }}</span>
+              {{ modoEdicion ? 'Guardar cambios' : 'Publicar aviso' }}
+            }
+          </button>
+        </div>
+      </form>
+
+      <!-- ─── COLUMNA DERECHA: PREVIEW EN VIVO ─── -->
+      <div class="preview-col">
+        <div class="preview-sticky">
+            <!--
+          <div class="preview-label">
+            <span class="material-symbols-rounded">visibility</span>
+            Vista previa en el corcho
+          </div>
+            -->
+
+          <!-- Nota: mismo look que la nota del calendario/corcho -->
+          <div class="nota-preview">
+            @if (previewImagen) {
+              <div class="nota-preview-foto">
+                <img [src]="previewImagen" alt="preview">
+              </div>
+            }
+            <div class="nota-preview-body">
+              <div class="nota-preview-fecha">
+                <span class="material-symbols-rounded">event</span>
+                {{ previewFecha }} {{ previewHora }}
+              </div>
+              <h4>{{ campo('titulo')?.value || 'Titulo del aviso' }}</h4>
+              <p>{{ campo('descripcion')?.value || 'Aqui aparecera la descripcion de tu aviso tal como la veran los visitantes del corcho.' }}</p>
+              <div class="nota-preview-firma">
+                <span class="material-symbols-rounded">person</span>
+                Tu nombre
+              </div>
+            </div>
+          </div>
+
+          <p class="preview-hint">
+            <span class="material-symbols-rounded">info</span>
+            Asi se vera tu aviso en el corcho digital, visible para todos sin necesidad de iniciar sesion.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- MODAL EXITO -->
+@if (enviado) {
+  <div class="modal-overlay open">
+    <div class="success-modal">
+      <div class="success-ring">
+        <span class="material-symbols-rounded">{{ modoEdicion ? 'task_alt' : 'campaign' }}</span>
+      </div>
+      <h2>{{ modoEdicion ? 'Aviso actualizado' : 'Aviso publicado' }}</h2>
+      <p>
+        {{ modoEdicion
+           ? 'Los cambios ya estan visibles en el corcho.'
+           : 'Tu aviso ya aparece en el corcho digital.' }}
+      </p>
+    <!--<p class="redirect-hint">Redirigiendo a tus avisos...</p>-->
+    </div>
+  </div>
+}

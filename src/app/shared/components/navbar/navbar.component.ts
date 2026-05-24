@@ -27,7 +27,9 @@ export class NavbarComponent {
 
   readonly menuProfesor: MenuItem[] = [
     { label: 'Registrar actividad', ruta: '/actividades/registrar', icono: 'add_circle' },
-    { label: 'Mis publicaciones',   ruta: '/mis-publicaciones',     icono: 'folder_managed' }
+    { label: 'Mis publicaciones',   ruta: '/mis-publicaciones',     icono: 'folder_managed' },
+    { label: 'Corcho digital',      ruta: '/corcho',                icono: 'push_pin' },  // ← NUEVO
+    { label: 'Mis avisos',          ruta: '/avisos/mis-avisos',     icono: 'campaign' }
   ];
 
   readonly menuAdmin: MenuItem[] = [

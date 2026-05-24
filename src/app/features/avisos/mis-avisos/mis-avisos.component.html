@@ -1,0 +1,142 @@
+<app-navbar
+  nombreUsuario="Sandro G."
+  inicialesUsuario="SG"
+  rutaRegresar="/calendario"
+  [mostrarRegresar]="true"
+  titulo="Mis Avisos">
+</app-navbar>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1>Mis Avisos</h1>
+      <p>Gestiona los avisos que publicaste en el corcho digital</p>
+    </div>
+    @if (!cargando && !error) {
+      <div class="header-stats">
+        <div class="hstat">
+          <span class="num">{{ avisos.length }}</span>
+          <span class="lbl">Publicados</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- CONTENIDO -->
+<div class="content-wrap">
+
+  <!-- Barra de acciones -->
+  <div class="actions-bar">
+    <div class="search-box">
+      <span class="material-symbols-rounded">search</span>
+      <input type="text" [(ngModel)]="busqueda" placeholder="Buscar por titulo...">
+    </div>
+    <button class="btn btn-primary" (click)="nuevoAviso()">
+      <span class="material-symbols-rounded">add</span>
+      Nuevo aviso
+    </button>
+  </div>
+
+  <!-- Estado: cargando -->
+  @if (cargando) {
+    <div class="state-box">
+      <div class="spinner"></div>
+      <p>Cargando tus avisos...</p>
+    </div>
+  }
+
+  <!-- Estado: error -->
+  @if (!cargando && error) {
+    <div class="state-box error-box">
+      <span class="material-symbols-rounded big">warning</span>
+      <p>{{ error }}</p>
+      <button class="btn btn-primary" (click)="cargar()">Reintentar</button>
+    </div>
+  }
+
+  <!-- Estado: vacio -->
+  @if (!cargando && !error && avisos.length === 0) {
+    <div class="state-box">
+      <span class="material-symbols-rounded big">campaign</span>
+      <p>Aun no has publicado avisos.</p>
+      <button class="btn btn-primary" (click)="nuevoAviso()">Publicar el primero</button>
+    </div>
+  }
+
+  <!-- Lista de avisos -->
+  @if (!cargando && !error && avisos.length > 0) {
+    <div class="avisos-list">
+      @for (aviso of avisosFiltrados; track aviso.idAviso) {
+        <div class="aviso-card">
+
+          <!-- Miniatura / icono -->
+          <div class="aviso-thumb"
+               [style.backgroundImage]="aviso.fotoUrl ? 'url(' + aviso.fotoUrl + ')' : 'none'">
+            @if (!aviso.fotoUrl) {
+              <span class="material-symbols-rounded">campaign</span>
+            }
+          </div>
+
+          <!-- Info -->
+          <div class="aviso-info">
+            <h3>{{ aviso.titulo }}</h3>
+            <p>{{ aviso.descripcion }}</p>
+            <div class="aviso-meta">
+              <span class="ameta">
+                <span class="material-symbols-rounded">event</span>
+                {{ formatFecha(aviso.fechaEvento) }}
+                @if (aviso.horaEvento) {
+                  · {{ formatHora(aviso.horaEvento) }}
+                }
+              </span>
+              <span class="ameta">
+                <span class="material-symbols-rounded">schedule</span>
+                Publicado {{ aviso.fechaPublicacion | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="aviso-actions">
+            @if (confirmandoId !== aviso.idAviso) {
+              <button class="btn-accion editar" (click)="editar(aviso)">
+                <span class="material-symbols-rounded">edit</span>
+                Editar
+              </button>
+              <button class="btn-accion retirar" (click)="confirmarRetiro(aviso)">
+                <span class="material-symbols-rounded">delete</span>
+                Retirar
+              </button>
+            } @else {
+              <span class="confirm-text">¿Retirar este aviso?</span>
+              <div class="confirm-actions">
+                <button class="btn-accion retirar"
+                        (click)="ejecutarRetiro(aviso)"
+                        [disabled]="procesandoId === aviso.idAviso">
+                  {{ procesandoId === aviso.idAviso ? 'Retirando...' : 'Si, retirar' }}
+                </button>
+                <button class="btn-accion cancelar"
+                        (click)="cancelarRetiro()"
+                        [disabled]="procesandoId === aviso.idAviso">
+                  Cancelar
+                </button>
+              </div>
+            }
+          </div>
+
+        </div>
+      }
+
+      <!-- Sin resultados de busqueda -->
+      @if (avisosFiltrados.length === 0) {
+        <div class="empty-search">
+          <span class="material-symbols-rounded">search_off</span>
+          <p>No hay avisos que coincidan con "{{ busqueda }}".</p>
+        </div>
+      }
+    </div>
+  }
+
+</div>

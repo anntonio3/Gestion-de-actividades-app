@@ -20,40 +20,114 @@
   </div>
 
   <!-- ══════════════════════════════════════
-       HIGHLIGHTED — evento fijo destacado
-  ══════════════════════════════════════ -->
+     HEADER: Destacado (50%) + Avisos (50%)
+══════════════════════════════════════ -->
   <div class="highlighted-section">
-    <div class="highlighted-card">
-      <div class="highlighted-img">
-        <img src="assets/images/computacion.jpg" alt="Imagen del evento destacado" class="highlighted-event-img">
-      </div>
-      <div class="highlighted-body">
-        <span class="highlighted-badge">
-          <span class="material-symbols-rounded">star</span>
-          Destacado
-        </span>
-        <h2>Foro de Computación 2026</h2>
-        <p>El encuentro anual de estudiantes y profesionales de tecnología de la UNPA.
-           Ponencias, talleres prácticos y networking con líderes del sector.</p>
-        <div class="highlighted-meta">
-          <span class="meta-tag">
-            <span class="material-symbols-rounded">calendar_month</span>
-            11 de Noviembre, 2026
+    <div class="header-grid">
+
+      <!-- ─── DESTACADO (50%) — define la altura ─── -->
+      <div class="highlighted-card">
+        <div class="highlighted-img">
+          <img src="assets/images/computacion.jpg" alt="Imagen del evento destacado" class="highlighted-event-img">
+        </div>
+        <div class="highlighted-body">
+          <span class="highlighted-badge">
+            <span class="material-symbols-rounded">star</span>
+            Destacado
           </span>
-          <span class="meta-tag">
-            <span class="material-symbols-rounded">location_on</span>
-            Auditorio Principal
-          </span>
-          <span class="meta-tag">
-            <span class="material-symbols-rounded">groups</span>
-            150 lugares
-          </span>
-          <span class="meta-tag">
-            <span class="material-symbols-rounded">schedule</span>
-            09:00 – 17:00 hrs
-          </span>
+          <h2>Foro de Computación 2026</h2>
+          <p>El encuentro anual de estudiantes y profesionales de tecnología de la UNPA.
+            Ponencias, talleres prácticos y networking con líderes del sector.</p>
+          <div class="highlighted-meta">
+            <span class="meta-tag">
+              <span class="material-symbols-rounded">calendar_month</span>
+              11 de Noviembre, 2026
+            </span>
+            <span class="meta-tag">
+              <span class="material-symbols-rounded">location_on</span>
+              Auditorio Principal
+            </span>
+            <span class="meta-tag">
+              <span class="material-symbols-rounded">groups</span>
+              150 lugares
+            </span>
+            <span class="meta-tag">
+              <span class="material-symbols-rounded">schedule</span>
+              09:00 – 17:00 hrs
+            </span>
+          </div>
         </div>
       </div>
+
+      <!-- ─── AVISOS (50%) — copia la altura, nunca la supera ─── -->
+      <div class="avisos-card"
+          (mouseenter)="pausarAvisos()"
+          (mouseleave)="reanudarAvisos()">
+
+          <!---->
+        <div class="avisos-header">
+          <h3>
+            <span class="material-symbols-rounded">campaign</span>
+            Avisos
+          </h3>
+          <a routerLink="/corcho" class="ver-todos-link">
+            Ver todos
+            <span class="material-symbols-rounded">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- Sin avisos -->
+        @if (avisosPreview.length === 0) {
+          <div class="avisos-empty">
+            <span class="material-symbols-rounded">inbox</span>
+            <p>Aún no hay avisos publicados</p>
+          </div>
+        }
+
+        <!-- Carrusel: 1 nota por pagina -->
+        @if (avisosPreview.length > 0) {
+          <div class="avisos-viewport">
+            @for (aviso of avisosVisibles; track aviso.idAviso) {
+              <a [routerLink]="['/corcho']" class="nota-grande">
+                <div class="nota-grande-fecha">
+                  <span class="material-symbols-rounded">event</span>
+                  {{ formatFechaAvisoPreview(aviso.fechaEvento) }}
+                  @if (aviso.horaEvento) {
+                    <span class="nota-hora">· {{ formatHoraAviso(aviso.horaEvento) }}</span>
+                  }
+                </div>
+                <h4>{{ aviso.titulo }}</h4>
+                <p>{{ aviso.descripcion }}</p>
+                <div class="nota-grande-firma">
+                  <span class="material-symbols-rounded">person</span>
+                  {{ aviso.nombreProfesor }}
+                </div>
+              </a>
+            }
+          </div>
+
+          <!-- Controles 
+          @if (totalPaginasAvisos > 1) {
+            <div class="avisos-controles">
+              <button class="avisos-nav-btn" (click)="shiftAvisos(-1)" aria-label="Anterior">
+                <span class="material-symbols-rounded">chevron_left</span>
+              </button>
+              <div class="avisos-dots">
+                @for (p of [].constructor(totalPaginasAvisos); track $index) {
+                  <button class="avisos-dot"
+                          [class.active]="$index === avisosPreviewPage"
+                          (click)="irPaginaAviso($index)"
+                          [attr.aria-label]="'Pagina ' + ($index + 1)"></button>
+                }
+              </div>
+              <button class="avisos-nav-btn" (click)="shiftAvisos(1)" aria-label="Siguiente">
+                <span class="material-symbols-rounded">chevron_right</span>
+              </button>
+            </div>
+          } -->
+        }
+      </div>
+
     </div>
   </div>
 

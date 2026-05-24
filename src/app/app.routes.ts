@@ -36,6 +36,30 @@ export const routes: Routes = [
       import('./features/admin/inmobiliario/inmobiliario.component')
         .then(m => m.InmobiliarioComponent)
   },
+  {
+    path: 'corcho',
+    loadComponent: () =>
+      import('./features/corcho/corcho.component')
+        .then(m => m.CorchoComponent)
+  },
+  {
+    path: 'avisos/mis-avisos',
+    loadComponent: () =>
+      import('./features/avisos/mis-avisos/mis-avisos.component')
+        .then(m => m.MisAvisosComponent)
+  },
+  {
+    path: 'avisos/registrar',
+    loadComponent: () =>
+      import('./features/avisos/registrar-aviso/registrar-aviso.component')
+        .then(m => m.RegistrarAvisoComponent)
+  },
+  {
+    path: 'avisos/editar/:id',
+    loadComponent: () =>
+      import('./features/avisos/registrar-aviso/registrar-aviso.component')
+        .then(m => m.RegistrarAvisoComponent)
+  },
   { path: '**',        redirectTo: 'calendario' }
 ];
  
