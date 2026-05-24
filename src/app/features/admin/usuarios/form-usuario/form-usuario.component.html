@@ -1,0 +1,230 @@
+<app-navbar
+  nombreUsuario="Admin"
+  inicialesUsuario="AD"
+  [mostrarRegresar]="true"
+  rutaRegresar="/admin/usuarios"
+  [titulo]="modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario'">
+</app-navbar>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <span class="material-symbols-rounded">chevron_left</span>
+      <a routerLink="/admin/usuarios">Regresar</a>
+    </nav>
+    <h1>{{ modoEdicion ? 'Editar Usuario' : 'Registrar Nuevo Usuario' }}</h1>
+    <p>{{ modoEdicion
+      ? 'Modifica los datos del usuario. La contraseña no se puede cambiar desde aquí.'
+      : 'Completa los datos. La contraseña inicial se generará automáticamente.' }}
+    </p>
+  </div>
+</div>
+
+<!-- FORMULARIO -->
+<div class="form-wrap" [formGroup]="form">
+
+  <!-- Error global -->
+  @if (errorGlobal) {
+    <div class="alert-error">
+      <span class="material-symbols-rounded">error</span>
+      {{ errorGlobal }}
+    </div>
+  }
+
+  <!-- Cargando (solo en modo edición al buscar el usuario) -->
+  @if (cargandoUsuario) {
+    <div class="form-card">
+      <div style="padding:3rem; display:flex; flex-direction:column; align-items:center; gap:1rem; color:var(--gray)">
+        <div class="spinner" style="width:36px;height:36px;border:3px solid var(--primary-light);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></div>
+        <p>Cargando datos del usuario...</p>
+      </div>
+    </div>
+  }
+
+  @if (!cargandoUsuario) {
+    <div class="form-card">
+
+      <!-- SECCIÓN 1: DATOS PERSONALES -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <span class="material-symbols-rounded">person</span>
+          </div>
+          <div>
+            <h3>Datos personales</h3>
+            <p>Nombre completo del usuario</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <!-- Nombre -->
+          <div class="form-field">
+            <label for="nombre">
+              Nombre <span class="req">*</span>
+            </label>
+            <input
+              id="nombre"
+              type="text"
+              formControlName="nombre"
+              placeholder="Ej. Carlos"
+              maxlength="100"
+              [class.error]="invalido('nombre')">
+            @if (invalido('nombre')) {
+              <span class="field-error">
+                <span class="material-symbols-rounded">error</span>
+                El nombre es obligatorio.
+              </span>
+            }
+          </div>
+
+          <!-- Apellidos -->
+          <div class="form-field">
+            <label for="apellidos">
+              Apellidos <span class="req">*</span>
+            </label>
+            <input
+              id="apellidos"
+              type="text"
+              formControlName="apellidos"
+              placeholder="Ej. Hernández López"
+              maxlength="100"
+              [class.error]="invalido('apellidos')">
+            @if (invalido('apellidos')) {
+              <span class="field-error">
+                <span class="material-symbols-rounded">error</span>
+                Los apellidos son obligatorios.
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: CUENTA -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <span class="material-symbols-rounded">manage_accounts</span>
+          </div>
+          <div>
+            <h3>Cuenta de acceso</h3>
+            <p>Correo institucional y rol en el sistema</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <!-- Correo -->
+          <div class="form-field full">
+            <label for="correo">
+              Correo institucional <span class="req">*</span>
+            </label>
+            <input
+              id="correo"
+              type="email"
+              formControlName="correo"
+              placeholder="usuario@unpa.edu.mx"
+              maxlength="150"
+              [class.error]="invalido('correo')">
+            @if (invalido('correo')) {
+              <span class="field-error">
+                <span class="material-symbols-rounded">error</span>
+                {{ getErrorCorreo() }}
+              </span>
+            } @else {
+              <span class="field-hint">Solo se permiten correos del dominio &#64;unpa.edu.mx</span>
+            }
+          </div>
+
+          <!-- Rol -->
+          <div class="form-field">
+            <label for="rol">
+              Rol <span class="req">*</span>
+            </label>
+            <select id="rol" formControlName="rol" [class.error]="invalido('rol')">
+              <option value="">— Selecciona un rol —</option>
+              <option value="ADMIN">Administrador</option>
+              <option value="PROFESOR">Profesor</option>
+            </select>
+            @if (invalido('rol')) {
+              <span class="field-error">
+                <span class="material-symbols-rounded">error</span>
+                Selecciona un rol.
+              </span>
+            }
+          </div>
+        </div>
+
+        <!-- Info contraseña (solo crear) 
+        @if (!modoEdicion) {
+          <div class="password-info">
+            <span class="material-symbols-rounded">key</span>
+            <p>
+              La contraseña inicial se generará automáticamente como
+              <strong>la parte antes del &#64; del correo</strong>.
+              Por ejemplo, si el correo es <strong>c.hernandez&#64;unpa.edu.mx</strong>,
+              la contraseña inicial será <strong>c.hernandez</strong>.
+              El usuario deberá cambiarla en su primer acceso.
+            </p>
+          </div>
+        } -->
+      </div>
+
+      <!-- SECCIÓN 3: ESTADO (solo editar) -->
+      @if (modoEdicion) {
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <span class="material-symbols-rounded">toggle_on</span>
+            </div>
+            <div>
+              <h3>Estado de la cuenta</h3>
+              <p>Los usuarios inactivos no pueden acceder al sistema</p>
+            </div>
+          </div>
+
+          <div class="toggle-field">
+            <div class="toggle-field-info">
+              <strong>{{ form.get('activo')?.value ? 'Cuenta activa' : 'Cuenta inactiva' }}</strong>
+              <span>{{ form.get('activo')?.value
+                ? 'El usuario puede iniciar sesión normalmente.'
+                : 'El usuario no puede acceder. Sus datos se conservan.' }}</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" formControlName="activo">
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+          </div>
+        </div>
+      }
+
+      <!-- FOOTER DE ACCIONES -->
+      <div class="form-footer">
+        <span class="form-footer-info">
+          <span class="material-symbols-rounded">info</span>
+          Los campos marcados con <span style="color:var(--danger); font-weight:700">*</span> son obligatorios.
+        </span>
+        <div class="form-footer-actions">
+          <a routerLink="/admin/usuarios" class="btn btn-ghost">
+            Cancelar
+          </a>
+          <button
+            class="btn btn-primary"
+            (click)="guardar()"
+            [disabled]="guardando">
+            @if (guardando) {
+              <span class="material-symbols-rounded" style="animation:spin .8s linear infinite">progress_activity</span>
+              Guardando...
+            } @else {
+              <span class="material-symbols-rounded">save</span>
+              {{ modoEdicion ? 'Guardar cambios' : 'Registrar usuario' }}
+            }
+          </button>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

@@ -180,6 +180,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  width: 90px;
   padding: 0.45rem 0.9rem;
   border-radius: 8px;
   font-family: 'DM Sans', sans-serif;

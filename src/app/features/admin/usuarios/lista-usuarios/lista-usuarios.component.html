@@ -1,0 +1,201 @@
+<app-navbar
+  nombreUsuario="Admin"
+  inicialesUsuario="AD"
+  [mostrarRegresar]="false"
+  titulo="Gestión de Usuarios">
+</app-navbar>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1>Gestión de Usuarios</h1>
+      <p>Administra cuentas de profesores y administradores del sistema</p>
+    </div>
+    @if (!cargando && !error) {
+      <div class="header-stats">
+        <div class="hstat">
+          <span class="num">{{ totalUsuarios }}</span>
+          <span class="lbl">Total</span>
+        </div>
+        <div class="hstat">
+          <span class="num">{{ totalActivos }}</span>
+          <span class="lbl">Activos</span>
+        </div>
+        <div class="hstat">
+          <span class="num">{{ totalAdmins }}</span>
+          <span class="lbl">Admins</span>
+        </div>
+        <div class="hstat">
+          <span class="num">{{ totalProfesores }}</span>
+          <span class="lbl">Profesores</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- AVISO PROFESORES TEMPORALES
+<div class="aviso-profesores">
+  <div class="aviso-inner">
+    <span class="material-symbols-rounded">info</span>
+    Los profesores se sincronizarán automáticamente con el sistema institucional de la UNPA en una versión futura.
+    Por ahora puedes registrarlos manualmente de forma temporal.
+  </div>
+</div>  -->
+
+<!-- CONTENIDO -->
+<div class="content-wrap">
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+
+    <!-- Buscador -->
+    <div class="search-wrap">
+      <span class="material-symbols-rounded">search</span>
+      <input
+        type="text"
+        placeholder="Buscar por nombre, apellidos o correo..."
+        [(ngModel)]="busqueda"
+        (ngModelChange)="onBusqueda()">
+    </div>
+
+    <!-- Filtro rol -->
+    <select class="select-filtro" [(ngModel)]="filtroRol" (ngModelChange)="cargar()">
+      <option value="">Todos los roles</option>
+      <option value="ADMIN">Administrador</option>
+      <option value="PROFESOR">Profesor</option>
+    </select>
+
+    <!-- Filtro estado -->
+    <select class="select-filtro" [(ngModel)]="filtroActivo" (ngModelChange)="cargar()">
+      <option value="">Todos los estados</option>
+      <option value="true">Activos</option>
+      <option value="false">Inactivos</option>
+    </select>
+
+    <div class="divider-v"></div>
+
+    <!-- Botón nuevo usuario -->
+    <a routerLink="/admin/usuarios/nuevo" class="btn btn-primary">
+      <span class="material-symbols-rounded">person_add</span>
+      Nuevo usuario
+    </a>
+
+  </div>
+
+  <!-- TABLA -->
+  <div class="table-card">
+
+    <!-- Cargando -->
+    @if (cargando) {
+      <div class="state-box">
+        <div class="spinner"></div>
+        <p>Cargando usuarios...</p>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (!cargando && error) {
+      <div class="state-box error-box">
+        <span class="material-symbols-rounded">error</span>
+        <p>{{ error }}</p>
+        <button class="btn btn-primary" (click)="cargar()">Reintentar</button>
+      </div>
+    }
+
+    <!-- Vacío -->
+    @if (!cargando && !error && usuarios.length === 0) {
+      <div class="state-box">
+        <span class="material-symbols-rounded">manage_accounts</span>
+        <p>No se encontraron usuarios con esos filtros.</p>
+      </div>
+    }
+
+    <!-- Tabla con datos -->
+    @if (!cargando && !error && usuarios.length > 0) {
+      <table>
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Registrado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of usuarios; track u.idUsuario) {
+            <tr class="table-row">
+
+              <!-- Avatar + nombre + correo -->
+              <td>
+                <div class="td-usuario">
+                  <div class="avatar" [class]="u.rol === 'ADMIN' ? 'admin' : 'profesor'">
+                    {{ u.iniciales }}
+                  </div>
+                  <div class="td-usuario-info">
+                    <strong>{{ u.nombre }} {{ u.apellidos }}</strong>
+                    <span>{{ u.correo }}</span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Rol badge -->
+              <td>
+                <span class="rol-badge" [class]="u.rol === 'ADMIN' ? 'admin' : 'profesor'">
+                  <span class="material-symbols-rounded">{{ getRolIcono(u.rol) }}</span>
+                  {{ getRolLabel(u.rol) }}
+                </span>
+              </td>
+
+              <!-- Toggle activo -->
+              <td>
+                <div class="toggle-wrap">
+                  <label class="toggle" (click)="$event.stopPropagation()">
+                    <input
+                      type="checkbox"
+                      [checked]="u.activo"
+                      [disabled]="cambiandoEstadoId === u.idUsuario"
+                      (change)="toggleEstado(u)">
+                    <div class="toggle-track"></div>
+                    <div class="toggle-thumb"></div>
+                  </label>
+                  {{ u.activo ? 'Activo' : 'Inactivo' }}
+                </div>
+              </td>
+
+              <!-- Fecha registro -->
+              <td class="td-fecha">
+                {{ formatFecha(u.fechaRegistro) }}
+              </td>
+
+              <!-- Acción editar -->
+              <td>
+                <a
+                  [routerLink]="['/admin/usuarios', u.idUsuario, 'editar']"
+                  class="btn-editar"
+                  (click)="$event.stopPropagation()">
+                  <span class="material-symbols-rounded">edit</span>
+                  Editar
+                </a>
+              </td>
+
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  </div>
+</div>
+
+<!-- TOAST -->
+@if (toastVisible) {
+  <div class="toast" [class.toast-error]="toastTipo === 'error'">
+    <span class="material-symbols-rounded">
+      {{ toastTipo === 'exito' ? 'check_circle' : 'error' }}
+    </span>
+    {{ toastMensaje }}
+  </div>
+}

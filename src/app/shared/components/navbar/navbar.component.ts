@@ -35,7 +35,8 @@ export class NavbarComponent {
   readonly menuAdmin: MenuItem[] = [
     { label: 'Revisar solicitudes', ruta: '/admin/revisar-solicitudes', icono: 'fact_check' },
     { label: 'Espacios',            ruta: '/admin/espacios',            icono: 'map' },
-    { label: 'Inmobiliario',        ruta: '/admin/inmobiliario',        icono: 'chair' }
+    { label: 'Inmobiliario',        ruta: '/admin/inmobiliario',        icono: 'chair' },
+    { label: 'Usuarios',            ruta: '/admin/usuarios',            icono: 'manage_accounts' }
   ];
 
   constructor(private elRef: ElementRef) {}

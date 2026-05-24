@@ -60,6 +60,25 @@ export const routes: Routes = [
       import('./features/avisos/registrar-aviso/registrar-aviso.component')
         .then(m => m.RegistrarAvisoComponent)
   },
+  // US-01: Gestión de usuarios
+  {
+    path: 'admin/usuarios',
+    loadComponent: () =>
+      import('./features/admin/usuarios/lista-usuarios/lista-usuarios.component')
+        .then(m => m.ListaUsuariosComponent)
+  },
+  {
+    path: 'admin/usuarios/nuevo',
+    loadComponent: () =>
+      import('./features/admin/usuarios/form-usuario/form-usuario.component')
+        .then(m => m.FormUsuarioComponent)
+  },
+  {
+    path: 'admin/usuarios/:id/editar',
+    loadComponent: () =>
+      import('./features/admin/usuarios/form-usuario/form-usuario.component')
+        .then(m => m.FormUsuarioComponent)
+  },
   { path: '**',        redirectTo: 'calendario' }
 ];
  
