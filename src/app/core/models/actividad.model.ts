@@ -18,6 +18,7 @@ export interface ActividadResponse {
 export interface ActividadRequest {
   idProfesor: number;
   idTipo: number;
+  idCampus: number;
   nombre: string;
   descripcion?: string;
   fechaActividad: string;   // 'YYYY-MM-DD'

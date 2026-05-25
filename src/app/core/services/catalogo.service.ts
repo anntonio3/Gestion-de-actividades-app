@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   Categoria, TipoActividad, Departamento,
-  Carrera, EspacioRecurso, MobiliarioRecurso
+  Carrera, EspacioRecurso, MobiliarioRecurso,
+  Campus
 } from '../models/catalogo.model';
 
 @Injectable({ providedIn: 'root' })
@@ -45,4 +46,9 @@ export class CatalogoService {
     }
     return this.http.get<MobiliarioRecurso[]>(`${this.base}/recursos/mobiliario${params}`);
   }
+
+  getCampus(): Observable<Campus[]> {
+    return this.http.get<Campus[]>(`${this.base}/campus`);
+  }
+
 }

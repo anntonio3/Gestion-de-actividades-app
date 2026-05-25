@@ -123,6 +123,17 @@
           <span class="error-msg">Selecciona el tipo de evento.</span>
         </div>
 
+        <div class="form-group" [class.has-error]="invalido('idCampus')">
+          <label>Campus <span class="required-dot"></span></label>
+          <select formControlName="idCampus">
+            <option value="">— Selecciona un campus —</option>
+            @for (c of campus; track c.idCampus) {
+              <option [value]="c.idCampus">{{ c.nombre }}</option>
+            }
+          </select>
+          <span class="error-msg">Selecciona el campus.</span>
+        </div>
+
         <div class="form-group full-width" [class.has-error]="invalido('descripcion')">
           <label>Descripción del Evento</label>
           <textarea formControlName="descripcion" rows="4"
@@ -406,6 +417,10 @@
             <span class="resumen-value">
               {{ getNombreTipo(campo('idTipo')?.value) }}
             </span>
+          </div>
+          <div class="resumen-item">
+            <span class="resumen-label">Campus</span>
+            <span class="resumen-value">{{ nombreCampusSeleccionado }}</span>
           </div>
           <div class="resumen-item">
             <span class="resumen-label">Fecha</span>

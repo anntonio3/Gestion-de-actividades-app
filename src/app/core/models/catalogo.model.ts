@@ -38,3 +38,9 @@ export interface MobiliarioRecurso {
   cantidadTotal: number;        // ← renombrado
   cantidadDisponible: number;   // ← nuevo
 }
+
+export interface Campus {
+  idCampus: number;
+  nombre: string;
+  ciudad: string;
+}

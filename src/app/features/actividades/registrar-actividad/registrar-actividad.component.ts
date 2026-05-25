@@ -7,7 +7,8 @@ import { CatalogoService } from '../../../core/services/catalogo.service';
 import { ActividadService } from '../../../core/services/registro_actividad.service';
 import {
   Categoria, TipoActividad, Departamento,
-  Carrera, EspacioRecurso, MobiliarioRecurso
+  Carrera, EspacioRecurso, MobiliarioRecurso,
+  Campus
 } from '../../../core/models/catalogo.model';
 import { ActividadRequest } from '../../../core/models/actividad.model';
 
@@ -31,6 +32,7 @@ export class RegistrarActividadComponent implements OnInit {
   carreras:     Carrera[]           = [];
   espacios:     EspacioRecurso[]    = [];
   mobiliario:   MobiliarioRecurso[] = [];
+  campus:       Campus[]            = [];
 
   // Estado UI
   pasoActual     = 1;
@@ -58,6 +60,7 @@ export class RegistrarActividadComponent implements OnInit {
       nombre:       ['', [Validators.required, Validators.maxLength(200)]],
       idCategoria:  [null, Validators.required],
       idTipo:       [{ value: null, disabled: true }, Validators.required],
+      idCampus:     [null, Validators.required],
       descripcion:  ['', Validators.maxLength(5000)],
 
       // Paso 2 — Fecha y hora
@@ -87,6 +90,7 @@ export class RegistrarActividadComponent implements OnInit {
     this.catalogo.getCategorias().subscribe(d => this.categorias = d);
     this.catalogo.getDepartamentos().subscribe(d => this.departamentos = d);
     this.catalogo.getCarreras().subscribe(d => this.carreras = d);
+    this.catalogo.getCampus().subscribe(d => this.campus = d);
   }
 
   onCategoriaChange(event: Event): void {
@@ -200,7 +204,7 @@ export class RegistrarActividadComponent implements OnInit {
 
   validarPasoActual(): boolean {
     const campos: Record<number, string[]> = {
-      1: ['nombre', 'idCategoria', 'idTipo'],
+      1: ['nombre', 'idCategoria', 'idTipo', 'idCampus'],
       2: ['fechaActividad', 'horaInicio', 'horaFin'],
     };
     const camposPaso = campos[this.pasoActual];
@@ -237,6 +241,7 @@ export class RegistrarActividadComponent implements OnInit {
     const request: ActividadRequest = {
       idProfesor:     3, // TODO: obtener del servicio de autenticación
       idTipo:         v.idTipo,
+      idCampus:       v.idCampus,
       nombre:         v.nombre,
       descripcion:    v.descripcion,
       fechaActividad: v.fechaActividad,
@@ -360,6 +365,11 @@ export class RegistrarActividadComponent implements OnInit {
 
   toggleInfo(): void {
     this.mostrarInfo = !this.mostrarInfo;
+  }
+
+  get nombreCampusSeleccionado(): string {
+    const id = +this.campo('idCampus')?.value;
+    return this.campus.find(c => c.idCampus === id)?.nombre ?? '—';
   }
 
 
