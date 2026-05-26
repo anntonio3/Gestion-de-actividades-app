@@ -1,0 +1,189 @@
+<app-navbar titulo="Estadísticas"></app-navbar>
+
+<div class="grafica-page">
+
+  <!-- Encabezado -->
+  <div class="page-header">
+    <div class="header-left">
+      <span class="material-symbols-rounded page-icon">bar_chart</span>
+      <div>
+        <h1>Gráficas de Actividades</h1>
+        <p class="subtitle">Análisis de eventos por mes y año</p>
+      </div>
+    </div>
+
+    <!-- Botón de año con picker -->
+    @if (!cargando && !error) {
+      <div class="year-picker-wrap">
+        <button class="year-btn" (click)="togglePickerAnio($event)">
+          <span class="material-symbols-rounded">calendar_today</span>
+          Año&nbsp;<strong>{{ anioActual }}</strong>
+          <span class="material-symbols-rounded chevron" [class.open]="mostrarPickerAnio">expand_more</span>
+        </button>
+
+        @if (mostrarPickerAnio) {
+          <div class="year-dropdown">
+            <p class="year-dropdown-title">Seleccionar año</p>
+            <div class="year-grid">
+              @for (item of aniosMostrar; track item.anio) {
+                <button
+                  class="year-option"
+                  [class.activo]="item.anio === anioActual"
+                  (click)="seleccionarAnio(item.anio, $event)">
+                  {{ item.anio }}
+                  @if (item.tieneActividad) {
+                    <span class="year-dot"></span>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Cargando -->
+  @if (cargando) {
+    <div class="estado-center">
+      <div class="spinner"></div>
+      <p>Cargando estadísticas…</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error) {
+    <div class="estado-center">
+      <span class="material-symbols-rounded error-icon">error</span>
+      <p class="error-msg">{{ error }}</p>
+    </div>
+  }
+
+  <!-- Contenido principal -->
+  @if (!cargando && !error) {
+
+    <!-- KPI cards -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <span class="material-symbols-rounded kpi-icon general">event</span>
+        <div class="kpi-info">
+          <span class="kpi-valor">{{ totalAnio(dataGeneral) }}</span>
+          <span class="kpi-label">Actividades en {{ anioActual }}</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <span class="material-symbols-rounded kpi-icon campus">apartment</span>
+        <div class="kpi-info">
+          <span class="kpi-valor">{{ uniqueCount(dataCampus, 'idDepartamento') }}</span>
+          <span class="kpi-label">Campus activos</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <span class="material-symbols-rounded kpi-icon carrera">school</span>
+        <div class="kpi-info">
+          <span class="kpi-valor">{{ uniqueCount(dataCarrera, 'idCarrera') }}</span>
+          <span class="kpi-label">Carreras participantes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- US-21: Gráfica general -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="material-symbols-rounded">insights</span>
+        <div>
+          <h2>Actividades Generales</h2>
+          <p>Total de eventos aprobados en {{ anioActual }}</p>
+        </div>
+      </div>
+      @if (totalAnio(dataGeneral) === 0) {
+        <div class="empty-chart">
+          <span class="material-symbols-rounded">bar_chart_off</span>
+          <p>Sin actividades aprobadas en {{ anioActual }}</p>
+        </div>
+      } @else {
+        <div class="chart-wrapper">
+          <canvas #canvasGeneral></canvas>
+        </div>
+      }
+    </div>
+
+    <!-- US-22: Gráfica por campus -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="material-symbols-rounded">apartment</span>
+        <div>
+          <h2>Actividades Por Campus</h2>
+          <p>Desglose por campus en {{ anioActual }}</p>
+        </div>
+      </div>
+
+      @if (uniqueCount(dataCampus, 'idDepartamento') === 0) {
+        <div class="empty-chart">
+          <span class="material-symbols-rounded">bar_chart_off</span>
+          <p>Sin datos de campus para {{ anioActual }}</p>
+        </div>
+      } @else {
+        <div class="chart-wrapper">
+          <canvas #canvasCampus></canvas>
+        </div>
+      }
+    </div>
+
+    <!-- US-23: Gráfica por carrera -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="material-symbols-rounded">school</span>
+        <div>
+          <h2>Actividades Por Carrera</h2>
+          <p>Selecciona una carrera para ver su estadística en {{ anioActual }}</p>
+        </div>
+
+
+        <!-- Dropdown selector de carrera -->
+      @if (listadoCarreras.length > 0) {
+        <div class="carrera-picker-wrap ">
+          <button class="carrera-btn" (click)="toggleListaCarreras($event)">
+            <span class="material-symbols-rounded">school</span>
+            <span class="carrera-btn-text">{{ carreraSeleccionada || 'Seleccionar carrera' }}</span>
+            <span class="material-symbols-rounded chevron" [class.open]="mostrarListaCarreras">expand_more</span>
+          </button>
+
+          @if (mostrarListaCarreras) {
+            <div class="carrera-dropdown">
+              @for (carrera of listadoCarreras; track carrera) {
+                <button
+                  class="carrera-option"
+                  [class.activo]="carrera === carreraSeleccionada"
+                  (click)="seleccionarCarrera(carrera, $event)">
+                  <span class="material-symbols-rounded check-icon">
+                    {{ carrera === carreraSeleccionada ? 'check' : '' }}
+                  </span>
+                  {{ carrera }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+
+
+      </div>
+
+      
+
+      @if (uniqueCount(dataCarrera, 'idCarrera') === 0) {
+        <div class="empty-chart">
+          <span class="material-symbols-rounded">bar_chart_off</span>
+          <p>Sin datos de carreras para {{ anioActual }}</p>
+        </div>
+      } @else {
+        <div class="chart-wrapper">
+          <canvas #canvasCarrera></canvas>
+        </div>
+      }
+    </div>
+
+  }
+</div>

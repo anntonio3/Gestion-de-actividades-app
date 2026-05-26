@@ -36,6 +36,12 @@ export const routes: Routes = [
       import('./features/admin/inmobiliario/inmobiliario.component')
         .then(m => m.InmobiliarioComponent)
   },
-  { path: '**',        redirectTo: 'calendario' }
+  {path: 'admin/grafica', 
+    loadComponent: () => 
+      import('./features/admin/grafica/grafica.component')
+        .then(m => m.GraficaComponent) 
+  },
+  { path: '**', redirectTo: 'calendario' },
+
 ];
  

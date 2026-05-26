@@ -123,7 +123,7 @@ thead th { padding: .85rem 1.1rem; text-align: left; font-size: .73rem; font-wei
   .td-desc { display: none; }
 }
 
-/* FIX 3: Evita desbordamiento de texto largo en descripción y nota */
+/* Evita desbordamiento de texto largo en descripción y nota */
 .text-wrap {
   white-space: pre-wrap;
   word-break: break-word;
@@ -131,7 +131,7 @@ thead th { padding: .85rem 1.1rem; text-align: left; font-size: .73rem; font-wei
   line-height: 1.6;
 }
 
-/* FIX 3: Contador de caracteres */
+/* Contador de caracteres */
 .char-counter {
   align-self: flex-end;
   font-size: .72rem;
@@ -139,7 +139,7 @@ thead th { padding: .85rem 1.1rem; text-align: left; font-size: .73rem; font-wei
   margin-top: .15rem;
 }
 
-/* FIX 4: Caja de confirmación de cierre */
+/*Caja de confirmación de cierre */
 .confirm-cierre-box {
   background: #fef6ec;
   border: 1.5px solid #f5d9a8;
