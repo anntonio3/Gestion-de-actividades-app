@@ -1,0 +1,282 @@
+/* ── Layout ───────────────────────────────────────────────── */
+.grafica-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── Encabezado ───────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header-left { display: flex; align-items: center; gap: 14px; }
+
+.page-icon { font-size: 40px; color: var(--primary); }
+
+.page-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--dark);
+  margin: 0 0 2px;
+}
+
+.subtitle { color: var(--gray); font-size: 0.9rem; }
+
+/* ── Botón + picker de año ────────────────────────────────── */
+.year-picker-wrap { position: relative; }
+
+.year-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  border: 2px solid var(--primary-light);
+  background: var(--white);
+  color: var(--dark);
+  font-size: 0.92rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.year-btn:hover { border-color: var(--primary); background: var(--primary-bg); }
+
+.year-btn .material-symbols-rounded:first-child { font-size: 18px; color: var(--primary); }
+.year-btn strong { color: var(--primary); font-weight: 700; }
+
+.chevron { font-size: 20px; color: var(--gray); transition: transform .2s; }
+.chevron.open { transform: rotate(180deg); }
+
+.year-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.13);
+  padding: 16px;
+  min-width: 260px;
+  z-index: 100;
+  animation: fadeDown .15s ease;
+}
+
+.year-dropdown-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin: 0 0 12px;
+}
+
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+/* Un año: posición relativa para poder colocar el puntito */
+.year-option {
+  position: relative;
+  padding: 9px 4px 14px;     /* extra abajo para el punto */
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: var(--primary-bg);
+  color: var(--dark);
+  font-size: 0.88rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  text-align: center;
+}
+
+.year-option:hover { border-color: var(--primary); color: var(--primary-dark); }
+
+.year-option.activo {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  border-color: var(--primary);
+}
+
+/* Puntito que indica "tiene actividad" */
+.year-dot {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.year-option.activo .year-dot { background: rgba(255,255,255,.85); }
+
+/* ── Selector de carrera ─────────────────────────────────── */
+.carrera-picker-wrap { position: relative; margin-left: auto; }
+
+.carrera-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 2px solid var(--primary-light);
+  background: var(--primary-bg);
+  color: var(--dark);
+  font-size: 0.92rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all .2s;
+  max-width: 100%;
+}
+
+.carrera-btn:hover { border-color: var(--primary); }
+
+.carrera-btn .material-symbols-rounded:first-child { font-size: 20px; color: var(--primary); flex-shrink: 0; }
+
+.carrera-btn-text {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--primary-dark);
+}
+
+.carrera-dropdown {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  background: var(--white);
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.13);
+  padding: 8px;
+  min-width: 280px;
+  max-width: 440px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 100;
+  animation: fadeDown .15s ease;
+}
+
+.carrera-dropdown::-webkit-scrollbar { width: 6px; }
+.carrera-dropdown::-webkit-scrollbar-track { background: transparent; }
+.carrera-dropdown::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 3px; }
+
+.carrera-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--dark);
+  font-size: 0.88rem;
+  font-family: 'DM Sans', sans-serif;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.carrera-option:hover { background: var(--primary-bg); }
+
+.carrera-option.activo { background: var(--primary-bg); color: var(--primary-dark); font-weight: 600; }
+
+.check-icon { font-size: 18px; color: var(--primary); width: 18px; flex-shrink: 0; }
+
+/* ── KPI cards ───────────────────────────────────────────── */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+
+.kpi-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow .2s;
+}
+
+.kpi-card:hover { box-shadow: var(--card-shadow-hover); }
+
+.kpi-icon { font-size: 36px; padding: 10px; border-radius: 12px; }
+.kpi-icon.general { color: var(--primary); background: var(--primary-bg); }
+.kpi-icon.campus  { color: #7b6be0;        background: #f0edfb; }
+.kpi-icon.carrera { color: var(--accent);  background: #e8f4f2; }
+
+.kpi-info { display: flex; flex-direction: column; }
+.kpi-valor { font-size: 2rem; font-weight: 700; color: var(--dark); line-height: 1; }
+.kpi-label { font-size: 0.8rem; color: var(--gray); margin-top: 4px; }
+
+/* ── Chart cards ─────────────────────────────────────────── */
+.chart-card { background: var(--white); border-radius: 20px; padding: 28px 28px 24px; box-shadow: var(--card-shadow); }
+
+.chart-header { display: flex; align-items: flex-start; gap: 12px; justify-content: space-between; margin-bottom: 24px; }
+.chart-header > div {
+  flex: 1;
+}
+.chart-header .material-symbols-rounded { font-size: 28px; color: var(--primary); margin-top: 2px; }
+.chart-header h2 { font-size: 1.05rem; font-weight: 600; color: var(--dark); margin: 0 0 2px; }
+.chart-header p  { font-size: 0.82rem; color: var(--gray); }
+
+.chart-wrapper { position: relative; height: 300px; }
+
+/* ── Empty state ─────────────────────────────────────────── */
+.empty-chart {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px; height: 140px; color: var(--gray);
+}
+.empty-chart .material-symbols-rounded { font-size: 40px; opacity: .4; }
+.empty-chart p { font-size: 0.9rem; }
+
+/* ── Estados carga / error ───────────────────────────────── */
+.estado-center {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; min-height: 220px; color: var(--gray);
+}
+
+.spinner {
+  width: 44px; height: 44px;
+  border: 4px solid var(--primary-light);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.error-icon { font-size: 48px; color: var(--danger); }
+.error-msg  { font-size: 0.95rem; color: var(--danger); text-align: center; max-width: 400px; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .grafica-page { padding: 20px 14px 48px; }
+  .page-header  { flex-direction: column; align-items: flex-start; }
+  .chart-wrapper { height: 240px; }
+  .year-grid { grid-template-columns: repeat(4, 1fr); }
+  .carrera-dropdown { max-width: 90vw; }
+}

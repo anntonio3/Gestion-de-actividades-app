@@ -115,7 +115,12 @@ export const routes: Routes = [
       import('./features/admin/usuarios/form-usuario/form-usuario.component')
         .then(m => m.FormUsuarioComponent)
   },
+  {path: 'admin/grafica', 
+    loadComponent: () => 
+      import('./features/admin/grafica/grafica.component')
+        .then(m => m.GraficaComponent) 
+  },
+  { path: '**', redirectTo: 'calendario' },
 
-  { path: '**', redirectTo: 'calendario' }
 ];
  

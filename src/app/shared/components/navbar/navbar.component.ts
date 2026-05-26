@@ -57,7 +57,8 @@ export class NavbarComponent {
     { label: 'Revisar solicitudes', ruta: '/admin/revisar-solicitudes', icono: 'fact_check' },
     { label: 'Espacios',            ruta: '/admin/espacios',            icono: 'map' },
     { label: 'Inmobiliario',        ruta: '/admin/inmobiliario',        icono: 'chair' },
-    { label: 'Usuarios',            ruta: '/admin/usuarios',            icono: 'manage_accounts' }
+    { label: 'Usuarios',            ruta: '/admin/usuarios',            icono: 'manage_accounts' },
+    { label: 'Estadísticas',         ruta: '/admin/grafica',             icono: 'bar_chart' }
   ];
 
   toggleDropdown(menu: 'profesor' | 'admin' | 'usuario', event: MouseEvent): void {
