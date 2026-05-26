@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AvisoService } from '../../../core/services/aviso.service';
 import { Aviso } from '../../../core/models/aviso.model';
+import { SesionService } from '../../../core/services/sesion.service';
 
 @Component({
   selector: 'app-mis-avisos',
@@ -18,8 +19,7 @@ export class MisAvisosComponent implements OnInit {
   private avisoSrv = inject(AvisoService);
   private router   = inject(Router);
 
-  // TODO: reemplazar con id del profesor autenticado
-  readonly idProfesor = 3;
+  private readonly sesion = inject(SesionService);
 
   avisos: Aviso[] = [];
   cargando = true;
@@ -37,7 +37,7 @@ export class MisAvisosComponent implements OnInit {
   cargar(): void {
     this.cargando = true;
     this.error = '';
-    this.avisoSrv.misAvisos(this.idProfesor).subscribe({
+    this.avisoSrv.misAvisos(this.sesion.getIdProfesor()).subscribe({
       next: data => { this.avisos = data; this.cargando = false; },
       error: err => {
         this.error = err.mensajeAmigable ?? 'No se pudieron cargar tus avisos.';
@@ -67,7 +67,7 @@ export class MisAvisosComponent implements OnInit {
 
   ejecutarRetiro(aviso: Aviso): void {
     this.procesandoId = aviso.idAviso;
-    this.avisoSrv.desactivar(aviso.idAviso, this.idProfesor).subscribe({
+    this.avisoSrv.desactivar(aviso.idAviso, this.sesion.getIdProfesor()).subscribe({
       next: () => {
         this.avisos = this.avisos.filter(a => a.idAviso !== aviso.idAviso);
         this.procesandoId = null;

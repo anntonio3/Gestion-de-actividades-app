@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActualizarActividadRequest, SolicitudActividad } from '../../../core/models/actividad.model';
 import { ActividadService } from '../../../core/services/actividad.service';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { SesionService } from '../../../core/services/sesion.service';
 
 type TabId = 'aprobadas' | 'rechazadas' | 'pendientes';
 
@@ -16,8 +17,6 @@ type TabId = 'aprobadas' | 'rechazadas' | 'pendientes';
 })
 export class MisSolicitudesComponent implements OnInit {
 
-  // TODO: reemplazar con id del profesor autenticado
-  readonly idProfesor = 3;
 
   todas: SolicitudActividad[] = [];
   cargando = true;
@@ -41,6 +40,9 @@ export class MisSolicitudesComponent implements OnInit {
     horaFin: ''
   };
 
+  private readonly sesion = inject(SesionService);
+
+
   constructor(private actividadService: ActividadService) {}
 
   ngOnInit(): void {
@@ -49,7 +51,7 @@ export class MisSolicitudesComponent implements OnInit {
 
   cargarSolicitudes(): void {
     this.cargando = true;
-    this.actividadService.getMisSolicitudes(this.idProfesor).subscribe({
+    this.actividadService.getMisSolicitudes(this.sesion.getIdProfesor()).subscribe({
       next: data => { this.todas = data; this.cargando = false; },
       error: () => { this.error = 'Error al cargar las solicitudes. Intenta de nuevo.'; this.cargando = false; }
     });
@@ -127,7 +129,7 @@ export class MisSolicitudesComponent implements OnInit {
     this.guardando = true;
     this.errorEdicion = '';
 
-    this.actividadService.editarActividad(this.detalle.idActividad, this.idProfesor, this.formEdicion).subscribe({
+    this.actividadService.editarActividad(this.detalle.idActividad, this.sesion.getIdProfesor(), this.formEdicion).subscribe({
       next: (actualizada) => {
         // Actualizar en la lista local sin recargar todo
         const idx = this.todas.findIndex(a => a.idActividad === actualizada.idActividad);

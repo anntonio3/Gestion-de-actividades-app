@@ -11,6 +11,7 @@ import {
   Campus
 } from '../../../core/models/catalogo.model';
 import { ActividadRequest } from '../../../core/models/actividad.model';
+import { SesionService } from '../../../core/services/sesion.service';
 
 @Component({
   selector: 'app-registrar-actividad',
@@ -24,6 +25,7 @@ export class RegistrarActividadComponent implements OnInit {
   private fb        = inject(FormBuilder);
   private catalogo  = inject(CatalogoService);
   private actividad = inject(ActividadService);
+  private sesion    = inject(SesionService);
 
   // Catálogos
   categorias:   Categoria[]         = [];
@@ -239,7 +241,7 @@ export class RegistrarActividadComponent implements OnInit {
     const v = this.form.getRawValue();
 
     const request: ActividadRequest = {
-      idProfesor:     3, // TODO: obtener del servicio de autenticación
+      idProfesor:     this.sesion.getIdProfesor(),
       idTipo:         v.idTipo,
       idCampus:       v.idCampus,
       nombre:         v.nombre,

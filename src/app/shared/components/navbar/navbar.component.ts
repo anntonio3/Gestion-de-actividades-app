@@ -1,6 +1,8 @@
-import { Component, ElementRef, HostListener, Input } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, ElementRef, HostListener, Input, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { SesionService } from '../../../core/services/sesion.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface MenuItem {
   label: string;
@@ -16,19 +18,38 @@ interface MenuItem {
   styleUrl: './navbar.component.css'
 })
 export class NavbarComponent {
-  @Input() nombreUsuario: string = 'Usuario';
-  @Input() inicialesUsuario: string = 'U';
+
+  // Inputs mantenidos por compatibilidad; si no se pasan, se usan los datos de sesion
+  @Input() nombreUsuario: string = '';
+  @Input() inicialesUsuario: string = '';
   @Input() rutaRegresar: string = '/';
   @Input() mostrarRegresar: boolean = true;
-  @Input() titulo: string = '';   // ← NUEVO
+  @Input() titulo: string = '';
 
-  // Cual dropdown esta abierto: 'profesor' | 'admin' | null
-  dropdownAbierto: 'profesor' | 'admin' | null = null;
+  readonly sesion = inject(SesionService);
+  private readonly auth   = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly elRef  = inject(ElementRef);
+
+  dropdownAbierto: 'profesor' | 'admin' | 'usuario' | null = null;
+
+  // Nombre a mostrar: preferir sesion real sobre el input
+  get nombreMostrado(): string {
+    const u = this.sesion.usuario();
+    if (u) return this.sesion.getNombreCorto();
+    return this.nombreUsuario || 'Visitante';
+  }
+
+  get inicialesMostradas(): string {
+    const u = this.sesion.usuario();
+    if (u) return u.iniciales;
+    return this.inicialesUsuario || 'V';
+  }
 
   readonly menuProfesor: MenuItem[] = [
     { label: 'Registrar actividad', ruta: '/actividades/registrar', icono: 'add_circle' },
     { label: 'Mis publicaciones',   ruta: '/mis-publicaciones',     icono: 'folder_managed' },
-    { label: 'Corcho digital',      ruta: '/corcho',                icono: 'push_pin' },  // ← NUEVO
+    { label: 'Corcho digital',      ruta: '/corcho',                icono: 'push_pin' },
     { label: 'Mis avisos',          ruta: '/avisos/mis-avisos',     icono: 'campaign' }
   ];
 
@@ -39,9 +60,7 @@ export class NavbarComponent {
     { label: 'Usuarios',            ruta: '/admin/usuarios',            icono: 'manage_accounts' }
   ];
 
-  constructor(private elRef: ElementRef) {}
-
-  toggleDropdown(menu: 'profesor' | 'admin', event: MouseEvent): void {
+  toggleDropdown(menu: 'profesor' | 'admin' | 'usuario', event: MouseEvent): void {
     event.stopPropagation();
     this.dropdownAbierto = this.dropdownAbierto === menu ? null : menu;
   }
@@ -50,13 +69,16 @@ export class NavbarComponent {
     this.dropdownAbierto = null;
   }
 
-  // Cierra los dropdowns al hacer click fuera del navbar
+  cerrarSesion(): void {
+    this.cerrarDropdowns();
+    this.auth.logout();
+  }
+
   @HostListener('document:click', ['$event'])
   onDocClick(e: MouseEvent): void {
     const target = e.target as HTMLElement;
-    if (!target.closest('.role-dropdown')) {
+    if (!target.closest('.role-dropdown') && !target.closest('.user-dropdown')) {
       this.dropdownAbierto = null;
     }
   }
-
 }

@@ -1,74 +1,119 @@
 <nav>
+  <!-- Logo -->
   <a class="nav-brand" routerLink="/calendario">
     <img class="logo-unpa" src="assets/logo/logo-unpa.svg" alt="UNPA"
-      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      onerror="this.style.display='none'">
     <div class="nav-brand-text">
       <span>UNPA</span>
       <small>Eventos Universitarios</small>
     </div>
   </a>
 
+  <!-- Titulo centrado -->
   @if (titulo) {
     <h1 class="nav-title">{{ titulo }}</h1>
   }
 
   <div class="nav-right">
 
-    <!-- Dropdown PROFESOR -->
-    <div class="role-dropdown">
-      <button class="role-btn"
-              [class.activo]="dropdownAbierto === 'profesor'"
-              (click)="toggleDropdown('profesor', $event)">
-        <span class="material-symbols-rounded">school</span>
-        Profesor
-        <span class="material-symbols-rounded chevron">expand_more</span>
-      </button>
+    <!-- Corcho digital: visible para todos (logueados o no) -->
+    <a routerLink="/corcho" routerLinkActive="nav-link-activo" class="nav-link">
+      Corcho digital
+    </a>
 
-      @if (dropdownAbierto === 'profesor') {
-        <div class="role-menu">
-          @for (item of menuProfesor; track item.ruta) {
-            <a [routerLink]="item.ruta"
-               routerLinkActive="activa"
-               class="role-menu-item"
-               (click)="cerrarDropdowns()">
-              <span class="material-symbols-rounded">{{ item.icono }}</span>
-              {{ item.label }}
-            </a>
-          }
-        </div>
-      }
-    </div>
+    <!-- Menu PROFESOR -->
+    @if (sesion.esProfesor()) {
+      <div class="role-dropdown">
+        <button class="role-btn"
+                [class.activo]="dropdownAbierto === 'profesor'"
+                (click)="toggleDropdown('profesor', $event)">
+          <span class="material-symbols-rounded">school</span>
+          Profesor
+          <span class="material-symbols-rounded chevron">expand_more</span>
+        </button>
+        @if (dropdownAbierto === 'profesor') {
+          <div class="role-menu">
+            @for (item of menuProfesor; track item.ruta) {
+              <a [routerLink]="item.ruta"
+                 routerLinkActive="activa"
+                 class="role-menu-item"
+                 (click)="cerrarDropdowns()">
+                <span class="material-symbols-rounded">{{ item.icono }}</span>
+                {{ item.label }}
+              </a>
+            }
+          </div>
+        }
+      </div>
+    }
 
-    <!-- Dropdown ADMIN -->
-    <div class="role-dropdown">
-      <button class="role-btn"
-              [class.activo]="dropdownAbierto === 'admin'"
-              (click)="toggleDropdown('admin', $event)">
-        <span class="material-symbols-rounded">shield_person</span>
-        Admin
-        <span class="material-symbols-rounded chevron">expand_more</span>
-      </button>
+    <!-- Menu ADMIN -->
+    @if (sesion.esAdmin()) {
+      <div class="role-dropdown">
+        <button class="role-btn"
+                [class.activo]="dropdownAbierto === 'admin'"
+                (click)="toggleDropdown('admin', $event)">
+          <span class="material-symbols-rounded">shield_person</span>
+          Admin
+          <span class="material-symbols-rounded chevron">expand_more</span>
+        </button>
+        @if (dropdownAbierto === 'admin') {
+          <div class="role-menu">
+            @for (item of menuAdmin; track item.ruta) {
+              <a [routerLink]="item.ruta"
+                 routerLinkActive="activa"
+                 class="role-menu-item"
+                 (click)="cerrarDropdowns()">
+                <span class="material-symbols-rounded">{{ item.icono }}</span>
+                {{ item.label }}
+              </a>
+            }
+          </div>
+        }
+      </div>
+    }
 
-      @if (dropdownAbierto === 'admin') {
-        <div class="role-menu">
-          @for (item of menuAdmin; track item.ruta) {
-            <a [routerLink]="item.ruta"
-               routerLinkActive="activa"
-               class="role-menu-item"
-               (click)="cerrarDropdowns()">
-              <span class="material-symbols-rounded">{{ item.icono }}</span>
-              {{ item.label }}
-            </a>
-          }
-        </div>
-      }
-    </div>
+    <!-- Usuario logueado: solo nombre + dropdown con logout -->
+    @if (sesion.logueado()) {
+      <div class="user-dropdown role-dropdown">
+        <button class="user-btn"
+                [class.activo]="dropdownAbierto === 'usuario'"
+                (click)="toggleDropdown('usuario', $event)">
+          <div class="user-avatar">{{ inicialesMostradas }}</div>
+         <!-- <span class="user-nombre">{{ nombreMostrado }}</span> -->
+          <span class="material-symbols-rounded chevron-sm">expand_more</span>
+        </button>
+        @if (dropdownAbierto === 'usuario') {
+          <div class="role-menu user-menu">
+            <div class="user-menu-info">
+              <div class="user-avatar user-avatar-lg">{{ inicialesMostradas }}</div>
+              <div>
+                <strong>{{ sesion.usuario()?.nombre }} {{ sesion.usuario()?.apellidos }}</strong>
+                <span class="user-tipo-badge">
+                  {{ sesion.usuario()?.tipo === 'ALUMNO' ? 'Alumno'
+                   : sesion.usuario()?.tipo === 'ADMIN'  ? 'Administrador'
+                   : 'Profesor' }}
+                </span>
+              </div>
+            </div>
+            <div class="menu-divider"></div>
+            <button class="role-menu-item logout-item" (click)="cerrarSesion()">
+              <span class="material-symbols-rounded">logout</span>
+              Cerrar sesión
+            </button>
+          </div>
+        }
+      </div>
+    }
 
-    <!-- Avatar -->
-    <div class="user-btn">
-      <div class="user-avatar">{{ inicialesUsuario }}</div>
-      {{ nombreUsuario }}
-    </div>
+    <!-- Sin sesion: solo icono + texto corto -->
+    @if (!sesion.logueado()) {
+      <a routerLink="/auth/login" class="btn-login">
+        <span class="material-symbols-rounded">login</span>
+        Entrar
+      </a>
+    }
+
   </div>
 </nav>
 

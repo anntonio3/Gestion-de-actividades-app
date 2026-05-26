@@ -1,0 +1,175 @@
+<div class="auth-page">
+
+  <!-- Panel izquierdo -->
+  <div class="auth-panel-left" aria-hidden="true">
+    <div class="panel-content">
+      <div class="panel-logo">
+        <img src="assets/logo/logo-unpa.svg" alt="UNPA" class="panel-logo-img"
+             onerror="this.style.display='none'">
+      </div>
+      <h1 class="panel-title">UNPA Eventos</h1>
+      <p class="panel-sub">Crea tu cuenta de alumno para acceder a inscripciones y más funciones.</p>
+
+      <div class="panel-features">
+        <div class="feature">
+          <span class="material-symbols-rounded">how_to_reg</span>
+          <span>Inscríbete a actividades</span>
+        </div>
+        <div class="feature">
+          <span class="material-symbols-rounded">notifications</span>
+          <span>Recibe notificaciones de eventos</span>
+        </div>
+        <div class="feature">
+          <span class="material-symbols-rounded">badge</span>
+          <span>Acceso con tu matrícula institucional</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel derecho: formulario -->
+  <div class="auth-panel-right">
+    <div class="auth-card">
+
+      <div class="auth-header">
+        <h2>Crear cuenta</h2>
+        <p>Solo disponible para alumnos de la UNPA</p>
+      </div>
+
+      @if (error) {
+        <div class="auth-alert error">
+          <span class="material-symbols-rounded">error</span>
+          {{ error }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="enviar()" class="auth-form">
+
+        <!-- Matricula -->
+        <div class="form-field" [class.has-error]="invalido('matricula')">
+          <label for="matricula">Matrícula <span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="material-symbols-rounded input-icon">badge</span>
+            <input id="matricula" type="text" formControlName="matricula"
+                   placeholder="Ej: 20231001" maxlength="20">
+          </div>
+          @if (invalido('matricula')) {
+            <span class="error-msg">La matrícula es obligatoria.</span>
+          }
+        </div>
+
+        <!-- Nombre y Apellidos en fila -->
+        <div class="form-row">
+          <div class="form-field" [class.has-error]="invalido('nombre')">
+            <label for="nombre">Nombre <span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="material-symbols-rounded input-icon">person</span>
+              <input id="nombre" type="text" formControlName="nombre"
+                     placeholder="Tu nombre" maxlength="100">
+            </div>
+            @if (invalido('nombre')) {
+              <span class="error-msg">Obligatorio.</span>
+            }
+          </div>
+          <div class="form-field" [class.has-error]="invalido('apellidos')">
+            <label for="apellidos">Apellidos <span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="material-symbols-rounded input-icon">person</span>
+              <input id="apellidos" type="text" formControlName="apellidos"
+                     placeholder="Tus apellidos" maxlength="100">
+            </div>
+            @if (invalido('apellidos')) {
+              <span class="error-msg">Obligatorio.</span>
+            }
+          </div>
+        </div>
+
+        <!-- Correo -->
+        <div class="form-field" [class.has-error]="invalido('correo')">
+          <label for="correo">Correo electrónico <span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="material-symbols-rounded input-icon">mail</span>
+            <input id="correo" type="email" formControlName="correo"
+                   placeholder="tu@correo.com" maxlength="150">
+          </div>
+          @if (invalido('correo')) {
+            <span class="error-msg">Ingresa un correo válido.</span>
+          }
+          <span class="field-hint">Se usará para recuperar tu contraseña</span>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="form-field" [class.has-error]="invalido('contrasena')">
+          <label for="contrasena">Contraseña <span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="material-symbols-rounded input-icon">lock</span>
+            <input id="contrasena"
+                   [type]="mostrarPass ? 'text' : 'password'"
+                   formControlName="contrasena"
+                   placeholder="Mínimo 6 caracteres">
+            <button type="button" class="btn-toggle-pass"
+                    (click)="mostrarPass = !mostrarPass">
+              <span class="material-symbols-rounded">
+                {{ mostrarPass ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+          @if (invalido('contrasena')) {
+            <span class="error-msg">Mínimo 6 caracteres.</span>
+          }
+        </div>
+
+        <!-- Confirmar contraseña -->
+        <div class="form-field"
+             [class.has-error]="invalido('confirmarContrasena') || noCoinciden">
+          <label for="confirmar">Confirmar contraseña <span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="material-symbols-rounded input-icon">lock_reset</span>
+            <input id="confirmar"
+                   [type]="mostrarConfirm ? 'text' : 'password'"
+                   formControlName="confirmarContrasena"
+                   placeholder="Repite tu contraseña">
+            <button type="button" class="btn-toggle-pass"
+                    (click)="mostrarConfirm = !mostrarConfirm">
+              <span class="material-symbols-rounded">
+                {{ mostrarConfirm ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+          @if (noCoinciden) {
+            <span class="error-msg">Las contraseñas no coinciden.</span>
+          }
+        </div>
+
+        <button type="submit" class="btn-auth" [disabled]="cargando">
+          @if (cargando) {
+            <span class="material-symbols-rounded spinning">progress_activity</span>
+            Creando cuenta...
+          } @else {
+            <span class="material-symbols-rounded">how_to_reg</span>
+            Crear cuenta
+          }
+        </button>
+
+      </form>
+
+      <div class="auth-divider">
+        <span>¿Ya tienes cuenta?</span>
+      </div>
+
+      <a routerLink="/auth/login" class="btn-auth-outline">
+        <span class="material-symbols-rounded">login</span>
+        Iniciar sesión
+      </a>
+
+      <div class="auth-footer">
+        <a routerLink="/calendario" class="link-back">
+          <span class="material-symbols-rounded">arrow_back</span>
+          Volver al calendario público
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>

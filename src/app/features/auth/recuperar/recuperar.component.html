@@ -1,0 +1,110 @@
+<div class="auth-page">
+
+  <!-- Panel izquierdo -->
+  <div class="auth-panel-left" aria-hidden="true">
+    <div class="panel-content">
+      <div class="panel-logo">
+        <img src="assets/logo/logo-unpa.svg" alt="UNPA" class="panel-logo-img"
+             onerror="this.style.display='none'">
+      </div>
+      <h1 class="panel-title">UNPA Eventos</h1>
+      <p class="panel-sub">
+        Te enviaremos un enlace a tu correo registrado para que puedas crear una nueva contraseña.
+      </p>
+      <div class="panel-features">
+        <div class="feature">
+          <span class="material-symbols-rounded">mail</span>
+          <span>Enlace enviado a tu correo</span>
+        </div>
+        <div class="feature">
+          <span class="material-symbols-rounded">schedule</span>
+          <span>El enlace expira en 1 hora</span>
+        </div>
+        <div class="feature">
+          <span class="material-symbols-rounded">lock_reset</span>
+          <span>Elige una nueva contraseña segura</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel derecho -->
+  <div class="auth-panel-right">
+    <div class="auth-card">
+
+      <!-- Estado: formulario -->
+      @if (!respuesta) {
+        <div class="auth-header">
+          <h2>Recuperar contraseña</h2>
+          <p>Ingresa el correo asociado a tu cuenta</p>
+        </div>
+
+        @if (error) {
+          <div class="auth-alert error">
+            <span class="material-symbols-rounded">error</span>
+            {{ error }}
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="enviar()" class="auth-form">
+          <div class="form-field" [class.has-error]="invalido('correo')">
+            <label for="correo">Correo electrónico</label>
+            <div class="input-wrap">
+              <span class="material-symbols-rounded input-icon">mail</span>
+              <input id="correo" type="email" formControlName="correo"
+                     placeholder="tu@correo.com" autocomplete="email">
+            </div>
+            @if (invalido('correo')) {
+              <span class="error-msg">Ingresa un correo válido.</span>
+            }
+          </div>
+
+          <button type="submit" class="btn-auth" [disabled]="cargando">
+            @if (cargando) {
+              <span class="material-symbols-rounded spinning">progress_activity</span>
+              Enviando...
+            } @else {
+              <span class="material-symbols-rounded">send</span>
+              Enviar enlace de recuperación
+            }
+          </button>
+        </form>
+      }
+
+      <!-- Estado: enviado con exito -->
+      @if (respuesta) {
+        <div class="success-state">
+          <div class="success-ring">
+            <span class="material-symbols-rounded">mark_email_read</span>
+          </div>
+          <h2>Solicitud enviada</h2>
+          <p>{{ respuesta.mensaje }}</p>
+
+          <!-- En modo desarrollo se muestra el token para pruebas -->
+          @if (respuesta.tokenSimulado) {
+            <div class="auth-alert info dev-token">
+              <span class="material-symbols-rounded">code</span>
+              <div>
+                <strong>Modo desarrollo</strong><br>
+                Token: <code>{{ respuesta.tokenSimulado }}</code><br>
+                <a [routerLink]="['/auth/restablecer', respuesta.tokenSimulado]"
+                   class="link-dev">
+                  Ir directamente al formulario de restablecimiento
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="auth-footer">
+        <a routerLink="/auth/login" class="link-back">
+          <span class="material-symbols-rounded">arrow_back</span>
+          Volver al inicio de sesión
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>

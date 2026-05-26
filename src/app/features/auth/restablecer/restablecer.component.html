@@ -1,0 +1,151 @@
+<div class="auth-page">
+
+  <!-- Panel izquierdo -->
+  <div class="auth-panel-left" aria-hidden="true">
+    <div class="panel-content">
+      <div class="panel-logo">
+        <img src="assets/logo/logo-unpa.svg" alt="UNPA" class="panel-logo-img"
+             onerror="this.style.display='none'">
+      </div>
+      <h1 class="panel-title">UNPA Eventos</h1>
+      <p class="panel-sub">Elige una contraseña nueva y segura para tu cuenta.</p>
+      <div class="panel-features">
+        <div class="feature">
+          <span class="material-symbols-rounded">lock</span>
+          <span>Mínimo 6 caracteres</span>
+        </div>
+        <div class="feature">
+          <span class="material-symbols-rounded">check_circle</span>
+          <span>El cambio aplica de inmediato</span>
+        </div>
+        <div class="feature">
+          <span class="material-symbols-rounded">security</span>
+          <span>Tu contraseña se almacena de forma segura</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel derecho -->
+  <div class="auth-panel-right">
+    <div class="auth-card">
+
+      <!-- Verificando token -->
+      @if (verificando) {
+        <div class="state-box">
+          <div class="spinner"></div>
+          <p>Verificando enlace...</p>
+        </div>
+      }
+
+      <!-- Token invalido -->
+      @if (!verificando && tokenInvalido) {
+        <div class="state-box state-error">
+          <span class="material-symbols-rounded state-icon">link_off</span>
+          <h2>Enlace inválido</h2>
+          <p>Este enlace de recuperación ya fue usado o ha expirado. Solicita uno nuevo.</p>
+          <a routerLink="/auth/recuperar" class="btn-auth" style="text-decoration:none; margin-top:1rem;">
+            <span class="material-symbols-rounded">refresh</span>
+            Solicitar nuevo enlace
+          </a>
+        </div>
+      }
+
+      <!-- Formulario -->
+      @if (!verificando && !tokenInvalido && !exito) {
+        <div class="auth-header">
+          <h2>Nueva contraseña</h2>
+          <p>Ingresa y confirma tu nueva contraseña</p>
+        </div>
+
+        @if (error) {
+          <div class="auth-alert error">
+            <span class="material-symbols-rounded">error</span>
+            {{ error }}
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="enviar()" class="auth-form">
+
+          <!-- Nueva contraseña -->
+          <div class="form-field" [class.has-error]="invalido('nuevaContrasena')">
+            <label for="nueva">Nueva contraseña <span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="material-symbols-rounded input-icon">lock</span>
+              <input id="nueva"
+                     [type]="mostrarPass ? 'text' : 'password'"
+                     formControlName="nuevaContrasena"
+                     placeholder="Mínimo 6 caracteres"
+                     autocomplete="new-password">
+              <button type="button" class="btn-toggle-pass"
+                      (click)="mostrarPass = !mostrarPass">
+                <span class="material-symbols-rounded">
+                  {{ mostrarPass ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+            @if (invalido('nuevaContrasena')) {
+              <span class="error-msg">Mínimo 6 caracteres.</span>
+            }
+          </div>
+
+          <!-- Confirmar contraseña -->
+          <div class="form-field"
+               [class.has-error]="invalido('confirmarContrasena') || noCoinciden">
+            <label for="confirmar">Confirmar contraseña <span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="material-symbols-rounded input-icon">lock_reset</span>
+              <input id="confirmar"
+                     [type]="mostrarConfirm ? 'text' : 'password'"
+                     formControlName="confirmarContrasena"
+                     placeholder="Repite tu contraseña"
+                     autocomplete="new-password">
+              <button type="button" class="btn-toggle-pass"
+                      (click)="mostrarConfirm = !mostrarConfirm">
+                <span class="material-symbols-rounded">
+                  {{ mostrarConfirm ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+            @if (noCoinciden) {
+              <span class="error-msg">Las contraseñas no coinciden.</span>
+            }
+          </div>
+
+          <button type="submit" class="btn-auth" [disabled]="cargando">
+            @if (cargando) {
+              <span class="material-symbols-rounded spinning">progress_activity</span>
+              Guardando...
+            } @else {
+              <span class="material-symbols-rounded">lock_reset</span>
+              Guardar nueva contraseña
+            }
+          </button>
+
+        </form>
+      }
+
+      <!-- Exito -->
+      @if (exito) {
+        <div class="state-box state-success">
+          <div class="success-ring">
+            <span class="material-symbols-rounded">check_circle</span>
+          </div>
+          <h2>¡Contraseña actualizada!</h2>
+          <p>Tu contraseña fue cambiada correctamente. Redirigiendo al inicio de sesión...</p>
+        </div>
+      }
+
+      @if (!verificando) {
+        <div class="auth-footer">
+          <a routerLink="/auth/login" class="link-back">
+            <span class="material-symbols-rounded">arrow_back</span>
+            Volver al inicio de sesión
+          </a>
+        </div>
+      }
+
+    </div>
+  </div>
+
+</div>

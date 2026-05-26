@@ -1,0 +1,146 @@
+<!-- Pagina de login -->
+<div class="auth-page">
+
+  <!-- Panel izquierdo: decorativo -->
+  <div class="auth-panel-left" aria-hidden="true">
+    <div class="panel-content">
+      <div class="panel-logo">
+        <img src="assets/logo/logo-unpa.svg" alt="UNPA" class="panel-logo-img"
+             onerror="this.style.display='none'">
+      </div>
+      <h1 class="panel-title">UNPA Eventos</h1>
+      <p class="panel-sub">Sistema de Gestión de Actividades Universitarias</p>
+
+      <div class="panel-features">
+        <div class="feature">
+          <span class="material-symbols-rounded">calendar_month</span>
+          <span>Calendario institucional</span>
+        </div>
+        <div class="feature">
+          <span class="material-symbols-rounded">campaign</span>
+          <span>Corcho digital de avisos</span>
+        </div>
+        <!--
+        <div class="feature">
+          <span class="material-symbols-rounded">fact_check</span>
+          <span>Flujo de aprobación de eventos</span>
+        </div>
+        -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel derecho: formulario -->
+  <div class="auth-panel-right">
+    <div class="auth-card">
+
+      <!-- Encabezado -->
+      <div class="auth-header">
+        <h2>Iniciar sesión</h2>
+        <p>Accede con tu correo institucional o matrícula</p>
+      </div>
+
+      <!-- Indicador de tipo detectado -->
+      @if (form.get('identificador')?.value) {
+        <div class="tipo-badge" [class.tipo-alumno]="identificadorEsMatricula">
+          <span class="material-symbols-rounded">
+            {{ identificadorEsMatricula ? 'badge' : 'manage_accounts' }}
+          </span>
+          {{ identificadorEsMatricula ? 'Ingresando como Alumno' : 'Ingresando como Profesor / Admin' }}
+        </div>
+      }
+
+      <!-- Error global -->
+      @if (error) {
+        <div class="auth-alert error">
+          <span class="material-symbols-rounded">error</span>
+          {{ error }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="enviar()" class="auth-form">
+
+        <!-- Identificador -->
+        <div class="form-field" [class.has-error]="invalido('identificador')">
+          <label for="identificador">
+            Matrícula o correo institucional
+          </label>
+          <div class="input-wrap">
+            <span class="material-symbols-rounded input-icon">person</span>
+            <input
+              id="identificador"
+              type="text"
+              formControlName="identificador"
+              placeholder="Ej: 20231001 o a.rodriguez@unpa.edu.mx"
+              autocomplete="username">
+          </div>
+          @if (invalido('identificador')) {
+            <span class="error-msg">Este campo es obligatorio.</span>
+          }
+        </div>
+
+        <!-- Contraseña -->
+        <div class="form-field" [class.has-error]="invalido('contrasena')">
+          <div class="label-row">
+            <label for="contrasena">Contraseña</label>
+            <a routerLink="/auth/recuperar" class="link-forgot">¿Olvidaste tu contraseña?</a>
+          </div>
+          <div class="input-wrap">
+            <span class="material-symbols-rounded input-icon">lock</span>
+            <input
+              id="contrasena"
+              [type]="mostrarContrasena ? 'text' : 'password'"
+              formControlName="contrasena"
+              placeholder="Tu contraseña"
+              autocomplete="current-password">
+            <button
+              type="button"
+              class="btn-toggle-pass"
+              (click)="mostrarContrasena = !mostrarContrasena"
+              [attr.aria-label]="mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <span class="material-symbols-rounded">
+                {{ mostrarContrasena ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+          </div>
+          @if (invalido('contrasena')) {
+            <span class="error-msg">La contraseña es obligatoria (mínimo 4 caracteres).</span>
+          }
+        </div>
+
+        <!-- Boton submit -->
+        <button type="submit" class="btn-auth" [disabled]="cargando">
+          @if (cargando) {
+            <span class="material-symbols-rounded spinning">progress_activity</span>
+            Verificando...
+          } @else {
+            <span class="material-symbols-rounded">login</span>
+            Iniciar sesión
+          }
+        </button>
+
+      </form>
+
+      <!-- Divider -->
+      <div class="auth-divider">
+        <span>¿Eres alumno y no tienes cuenta?</span>
+      </div>
+
+      <!-- Registro -->
+      <a routerLink="/auth/registro" class="btn-auth-outline">
+        <span class="material-symbols-rounded">person_add</span>
+        Crear cuenta de alumno
+      </a>
+
+      <!-- Volver al calendario -->
+      <div class="auth-footer">
+        <a routerLink="/calendario" class="link-back">
+          <span class="material-symbols-rounded">arrow_back</span>
+          Volver al calendario público
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>

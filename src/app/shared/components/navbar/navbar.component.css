@@ -12,33 +12,21 @@ nav {
   box-shadow: 0 2px 12px rgba(113,182,167,0.10);
 }
 
+/* ── Logo ── */
 .nav-brand {
   display: flex;
   align-items: center;
   gap: 0.7rem;
   text-decoration: none;
+  flex-shrink: 0;
 }
-
-.logo-placeholder {
-  width: 42px; height: 42px;
-  background: var(--primary);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-}
-
 .logo-unpa { height: 42px; width: auto; object-fit: contain; }
-
 .nav-brand-text span {
   font-family: 'Playfair Display', serif;
   font-size: 1.5rem;
   color: var(--accent);
-  letter-spacing: 0.02em;
   display: block;
 }
-
 .nav-brand-text small {
   font-size: 0.65rem;
   color: var(--gray);
@@ -48,7 +36,7 @@ nav {
   text-transform: uppercase;
 }
 
-/* Titulo centrado */
+/* ── Titulo centrado ── */
 .nav-title {
   position: absolute;
   left: 50%;
@@ -58,26 +46,42 @@ nav {
   color: var(--accent);
   margin: 0;
   white-space: nowrap;
+  pointer-events: none;
 }
 
+/* ── Zona derecha: compacta ── */
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.5rem;
 }
 
-/* ════════════════════════════════════════════
-   ROLE DROPDOWN (Profesor / Admin)
-════════════════════════════════════════════ */
-.role-dropdown {
-  position: relative;
+/* ── Link Corcho (siempre visible) ── */
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  transition: background 0.18s, color 0.18s;
 }
+.nav-link:hover { background: var(--primary-bg); color: var(--accent); }
+.nav-link-activo { color: var(--accent); background: var(--primary-bg); }
+.nav-link .material-symbols-rounded { font-size: 18px; }
+
+/* ── Dropdowns de rol ── */
+.role-dropdown { position: relative; }
 
 .role-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.9rem;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
   background: var(--primary-bg);
   border: 1.5px solid var(--primary-light);
   border-radius: 8px;
@@ -86,7 +90,8 @@ nav {
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s;
+  transition: background 0.18s, border-color 0.18s;
+  white-space: nowrap;
 }
 .role-btn:hover { background: var(--primary-light); }
 .role-btn.activo {
@@ -94,10 +99,11 @@ nav {
   color: white;
   border-color: var(--primary);
 }
-.role-btn .material-symbols-rounded { font-size: 18px; }
-.role-btn .chevron {
+.role-btn .material-symbols-rounded { font-size: 17px; }
+.chevron {
+  font-size: 16px !important;
   transition: transform 0.2s;
-  opacity: 0.8;
+  opacity: 0.75;
 }
 .role-btn.activo .chevron { transform: rotate(180deg); }
 
@@ -106,19 +112,19 @@ nav {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  min-width: 220px;
+  min-width: 210px;
   background: var(--white);
   border: 1.5px solid var(--primary-light);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  padding: 0.35rem;
+  padding: 0.3rem;
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.1rem;
   z-index: 200;
-  animation: roleMenuIn 0.15s ease;
+  animation: menuIn 0.15s ease;
 }
-@keyframes roleMenuIn {
+@keyframes menuIn {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
@@ -127,76 +133,154 @@ nav {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.6rem 0.8rem;
+  padding: 0.55rem 0.8rem;
   border-radius: 7px;
   color: var(--dark);
+  font-family: 'DM Sans', sans-serif;
   font-size: 0.86rem;
   font-weight: 500;
   text-decoration: none;
-  transition: all 0.15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
 }
-.role-menu-item:hover {
-  background: var(--primary-bg);
-  color: var(--accent);
-}
-.role-menu-item.activa {
-  background: var(--primary-bg);
-  color: var(--primary-dark);
-  font-weight: 700;
-}
-.role-menu-item .material-symbols-rounded {
-  font-size: 18px;
-  color: var(--gray);
-}
+.role-menu-item:hover { background: var(--primary-bg); color: var(--accent); }
+.role-menu-item.activa { background: var(--primary-bg); color: var(--primary-dark); font-weight: 700; }
+.role-menu-item .material-symbols-rounded { font-size: 18px; color: var(--gray); }
 .role-menu-item:hover .material-symbols-rounded,
-.role-menu-item.activa .material-symbols-rounded {
-  color: var(--primary);
-}
+.role-menu-item.activa .material-symbols-rounded { color: var(--primary); }
 
-/* ════════════════════════════════════════════
-   AVATAR
-════════════════════════════════════════════ */
+/* Logout */
+.logout-item { color: var(--danger); }
+.logout-item .material-symbols-rounded { color: var(--danger) !important; }
+.logout-item:hover { background: var(--danger-bg) !important; }
+
+/* ── Avatar / usuario logueado: compacto ── */
 .user-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.9rem;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem 0.3rem 0.3rem;
   border-radius: 30px;
   border: 1.5px solid var(--primary-light);
   background: var(--primary-bg);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--accent);
+  transition: background 0.18s, border-color 0.18s;
+  white-space: nowrap;
+}
+.user-btn:hover, .user-btn.activo {
+  background: var(--primary-light);
+  border-color: var(--primary);
 }
 
 .user-avatar {
-  width: 28px; height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: white;
   font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0;
 }
 
-/* ════════════════════════════════════════════
-   RESPONSIVE
-════════════════════════════════════════════ */
+/* Nombre: solo el nombre corto, sin overflow */
+.user-nombre {
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.83rem;
+}
+
+.chevron-sm {
+  font-size: 15px !important;
+  opacity: 0.6;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.user-btn.activo .chevron-sm { transform: rotate(180deg); }
+
+/* Menu del usuario */
+.user-menu { min-width: 230px; }
+
+.user-menu-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.8rem;
+}
+.user-avatar-lg {
+  width: 38px;
+  height: 38px;
+  font-size: 0.88rem;
+  flex-shrink: 0;
+}
+.user-menu-info strong {
+  display: block;
+  font-size: 0.86rem;
+  color: var(--dark);
+  line-height: 1.3;
+}
+.user-tipo-badge {
+  display: inline-block;
+  margin-top: 0.2rem;
+  font-size: 0.68rem;
+  color: var(--primary-dark);
+  background: var(--primary-bg);
+  border: 1px solid var(--primary-light);
+  border-radius: 20px;
+  padding: 0.1rem 0.5rem;
+  font-weight: 600;
+}
+
+.menu-divider {
+  height: 1px;
+  background: var(--primary-bg);
+  margin: 0.25rem 0;
+}
+
+/* ── Boton login compacto ── */
+.btn-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  background: var(--primary);
+  color: white;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.btn-login:hover { background: var(--primary-dark); }
+.btn-login .material-symbols-rounded { font-size: 17px; }
+
+/* ── Responsive ── */
 @media (max-width: 900px) {
   .nav-title { display: none; }
-  .role-btn { padding: 0.45rem 0.7rem; font-size: 0.8rem; }
-  .role-btn span:not(.material-symbols-rounded) {
-    /* Ocultar texto, dejar solo iconos en pantallas chicas */
-    display: none;
-  }
-  .role-btn .chevron { display: inline-flex; }
+  /* Ocultar texto de los botones de rol, dejar solo icono */
+  .role-btn .role-label { display: none; }
 }
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   nav { padding: 0 1rem; }
-  .user-btn { padding: 0.35rem 0.6rem; }
-  .user-btn { gap: 0.3rem; }
-  .user-btn:not(:has(.user-avatar)) { display: none; }
+  .nav-brand-text { display: none; }
+  .user-nombre { display: none; }
+  .nav-link span:last-child { display: none; } /* ocultar texto "Corcho", dejar solo icono */
 }
+
 

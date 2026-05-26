@@ -20,11 +20,8 @@ export class RegistrarAvisoComponent implements OnInit {
   private route    = inject(ActivatedRoute);
   private router   = inject(Router);
   private avisoSrv = inject(AvisoService);
-  private sesion   = inject(SesionService);
 
-  // TODO: reemplazar con id del profesor autenticado cuando exista login.
-  // Por ahora se usa un id quemado (mismo patron que /actividades/registrar).
-  readonly idProfesor = 3;
+  private sesion = inject(SesionService);
 
   form!: FormGroup;
 
@@ -135,7 +132,7 @@ export class RegistrarAvisoComponent implements OnInit {
 
     const v = this.form.getRawValue();
     const request: AvisoRequest = {
-      idProfesor:  this.idProfesor,
+      idProfesor:  this.sesion.getIdProfesor(),
       titulo:      v.titulo.trim(),
       descripcion: v.descripcion.trim(),
       fechaEvento: v.fechaEvento,
