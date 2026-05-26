@@ -108,6 +108,13 @@
             <span class="status-pill" [ngClass]="'status-' + estadoClass(s.estado)">
               {{ estadoLabel(s.estado) }}
             </span>
+            <!-- ↓ AQUÍ, solo aplica en aprobadas -->
+            @if (s.estado === 'APROBADA' && s.requiereInscripcion && totalInscritos[s.idActividad] !== undefined) {
+              <div class="inscripcion-total-badge">
+                <span class="material-symbols-rounded">groups</span>
+                {{ totalInscritos[s.idActividad] }} inscrito(s)
+              </div>
+            }
             <!-- Indicador de edición rápida para pendientes -->
             <div class="edit-hint" *ngIf="s.estado === 'PENDIENTE'">Editable</div>
             <div class="sol-date">ID: {{ s.idActividad }}</div>

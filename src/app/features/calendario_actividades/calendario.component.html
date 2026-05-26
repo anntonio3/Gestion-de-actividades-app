@@ -327,6 +327,33 @@
               <span class="status-dot"></span>
               Evento finalizado
             </div>
+          } @else if (ev.requiereInscripcion) {
+            <!-- Bloque de inscripcion formal -->
+            <div class="inscripcion-block" (click)="$event.stopPropagation()">
+              <div class="inscripcion-conteo">
+                {{ estadoInscripcion(ev.id).totalInscritos }} inscrito(s)
+              </div>
+              @if (estadoInscripcion(ev.id).inscrito) {
+                <div class="inscripcion-row">
+                  <div class="inscripcion-badge">
+                    <span class="material-symbols-rounded">check_circle</span>
+                    Inscrito
+                  </div>
+                  <button class="btn-cancelar-insc-sm"
+                          [disabled]="estaInscribiendose(ev.id)"
+                          (click)="cancelarInscripcion(ev, $event)">
+                    {{ estaInscribiendose(ev.id) ? '...' : 'Cancelar' }}
+                  </button>
+                </div>
+              } @else {
+                <button class="btn-inscribirse"
+                        [disabled]="estaInscribiendose(ev.id)"
+                        (click)="inscribirse(ev, $event)">
+                  <span class="material-symbols-rounded">how_to_reg</span>
+                  {{ estaInscribiendose(ev.id) ? 'Procesando...' : 'Inscribirse' }}
+                </button>
+              }
+            </div>
           } @else {
             <div class="asistencia-block" (click)="$event.stopPropagation()">
 

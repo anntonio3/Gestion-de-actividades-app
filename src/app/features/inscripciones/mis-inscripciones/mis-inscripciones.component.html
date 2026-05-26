@@ -1,0 +1,153 @@
+<app-navbar titulo="Mis Inscripciones"></app-navbar>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <h1>Mis Inscripciones</h1>
+      <p>Actividades a las que te has inscrito formalmente</p>
+    </div>
+    @if (!cargando && !error) {
+      <div class="header-stats">
+        <div class="hstat">
+          <span class="num">{{ proximas.length }}</span>
+          <span class="lbl">Proximas</span>
+        </div>
+        <div class="hstat">
+          <span class="num">{{ pasadas.length }}</span>
+          <span class="lbl">Pasadas</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<div class="content-wrap">
+
+  @if (error) {
+    <div class="alert-error">
+      <span class="material-symbols-rounded">warning</span>
+      {{ error }}
+    </div>
+  }
+
+  @if (cargando) {
+    <div class="state-box">
+      <div class="spinner"></div>
+      <p>Cargando tus inscripciones...</p>
+    </div>
+  }
+
+  @if (!cargando && !error && inscripciones.length === 0) {
+    <div class="state-box">
+      <span class="material-symbols-rounded big">event_busy</span>
+      <p>No tienes inscripciones activas.</p>
+      <a routerLink="/calendario" class="btn btn-primary">Ver actividades disponibles</a>
+    </div>
+  }
+
+  @if (!cargando && !error && proximas.length > 0) {
+  <!--<h2 class="seccion-titulo">
+      <span class="material-symbols-rounded">upcoming</span>
+      Actividades proximas
+    </h2>-->
+    <div class="inscripciones-grid">
+      @for (item of proximas; track item.idInscripcion) {
+        <div class="inscripcion-card">
+          <div class="card-img"
+               [style.background]="item.imagenPortada ? 'none' : getColorCategoria(item.categoria)">
+            @if (item.imagenPortada) {
+              <img [src]="item.imagenPortada" [alt]="item.nombreActividad" class="cover-img">
+            } @else {
+              <span class="material-symbols-rounded cat-icon">{{ getIconoCategoria(item.categoria) }}</span>
+            }
+            <span class="cat-badge">{{ item.categoria }}</span>
+          </div>
+
+          <div class="card-body">
+            <h3>{{ item.nombreActividad }}</h3>
+            <p class="tipo">{{ item.tipo }}</p>
+
+            <div class="meta-list">
+              <span class="meta-item">
+                <span class="material-symbols-rounded">calendar_month</span>
+                {{ formatFecha(item.fechaActividad) }}
+              </span>
+              <span class="meta-item">
+                <span class="material-symbols-rounded">schedule</span>
+                {{ formatHora(item.horaInicio) }} – {{ formatHora(item.horaFin) }}
+              </span>
+              @if (item.campus) {
+                <span class="meta-item">
+                  <span class="material-symbols-rounded">location_on</span>
+                  {{ item.campus }}
+                </span>
+              }
+            </div>
+
+            <div class="inscripcion-fecha">
+              <span class="material-symbols-rounded">check_circle</span>
+              Inscrito el {{ item.fechaInscripcion | date:'dd/MM/yyyy' }}
+            </div>
+
+            @if (confirmandoId === item.idInscripcion) {
+              <div class="confirm-box">
+                <p>¿Cancelar esta inscripcion?</p>
+                <div class="confirm-actions">
+                  <button class="btn btn-ghost btn-sm"
+                          (click)="cancelarConfirmacion()"
+                          [disabled]="procesandoId === item.idInscripcion">
+                    No
+                  </button>
+                  <button class="btn btn-danger btn-sm"
+                          (click)="ejecutarCancelacion(item)"
+                          [disabled]="procesandoId === item.idInscripcion">
+                    {{ procesandoId === item.idInscripcion ? 'Cancelando...' : 'Si, cancelar' }}
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <button class="btn-cancelar-insc"
+                      (click)="confirmarCancelacion(item)">
+                <span class="material-symbols-rounded">event_busy</span>
+                Cancelar inscripcion
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!cargando && !error && pasadas.length > 0) {
+    <h2 class="seccion-titulo pasadas">
+      <span class="material-symbols-rounded">history</span>
+      Actividades pasadas
+    </h2>
+    <div class="inscripciones-grid">
+      @for (item of pasadas; track item.idInscripcion) {
+        <div class="inscripcion-card pasada">
+          <div class="card-img"
+               [style.background]="getColorCategoria(item.categoria)">
+            <span class="material-symbols-rounded cat-icon">{{ getIconoCategoria(item.categoria) }}</span>
+            <span class="cat-badge past">Finalizada</span>
+          </div>
+          <div class="card-body">
+            <h3>{{ item.nombreActividad }}</h3>
+            <p class="tipo">{{ item.tipo }}</p>
+            <div class="meta-list">
+              <span class="meta-item">
+                <span class="material-symbols-rounded">calendar_month</span>
+                {{ formatFecha(item.fechaActividad) }}
+              </span>
+              <span class="meta-item">
+                <span class="material-symbols-rounded">schedule</span>
+                {{ formatHora(item.horaInicio) }} – {{ formatHora(item.horaFin) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

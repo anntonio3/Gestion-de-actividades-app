@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, HostListener, ElementRef, OnDestroy, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActividadPublica, CATEGORIA_COLOR, CATEGORIA_EMOJI } from '../../core/models/actividad.model';
@@ -8,9 +8,12 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { ModalDetalleEventoComponent } from './modal-detalle-evento/modal-detalle-evento.component';
 import { AsistenciaEstado, RespuestaAsistencia } from '../../core/models/asistencia.model';
 import { AsistenciaService } from '../../core/services/asistencia.service';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Aviso } from '../../core/models/aviso.model';
 import { CorchoService } from '../../core/services/corcho.service';
+import { InscripcionService } from '../../core/services/inscripcion.service';
+import { InscripcionEstado } from '../../core/models/inscripcion.model';
+import { SesionService } from '../../core/services/sesion.service';
 
 interface DayPill {
   date: Date;
@@ -88,6 +91,10 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   // Mapa idActividad -> estado de asistencia
   asistencias: Record<number, AsistenciaEstado> = {};
 
+  // Agrega en las propiedades del componente:
+  inscripciones: Record<number, InscripcionEstado> = {};
+  inscribiendoIds = new Set<number>();
+
   // Para deshabilitar botones mientras se procesa una respuesta
   respondiendoIds = new Set<number>();
 
@@ -102,6 +109,10 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   private avisosTimer?: ReturnType<typeof setInterval>;
   private readonly AVISOS_INTERVALO = 4000;  // 4 segundos
   
+
+  private inscripcionService = inject(InscripcionService);
+  private sesion = inject(SesionService);
+  private router = inject(Router);
   
 
   constructor(
@@ -450,6 +461,89 @@ export class CalendarioComponent implements OnInit, OnDestroy {
         // Los botones de US-12 mostraran 0 hasta que se reintente al cambiar de pagina.
       }
     });
+
+    this.cargarInscripcionesPagina();
+  }
+
+  // Agrega en cargarAsistenciasPagina() después de cargar asistencias:
+  private cargarInscripcionesPagina(): void {
+    const usuario = this.sesion.usuario();
+    const ids = this.pagedEvents
+      .filter(ev => ev.requiereInscripcion)
+      .map(ev => ev.id);
+
+    if (ids.length === 0) return;
+
+    this.inscripcionService.obtenerLote(
+      ids,
+      usuario?.id,
+      usuario?.tipo
+    ).subscribe({
+      next: data => { this.inscripciones = { ...this.inscripciones, ...data }; },
+      error: () => {}
+    });
+  }
+
+  estadoInscripcion(idActividad: number): InscripcionEstado {
+    return this.inscripciones[idActividad] ?? {
+      idActividad, inscrito: false, idInscripcion: null, totalInscritos: 0
+    };
+  }
+
+  inscribirse(ev: ActividadPublica, event: MouseEvent): void {
+    event.stopPropagation();
+    const usuario = this.sesion.usuario();
+    if (!usuario) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+    if (this.inscribiendoIds.has(ev.id)) return;
+
+    this.inscribiendoIds.add(ev.id);
+    this.inscripcionService.inscribir(ev.id, {
+      idActor: usuario.id,
+      tipoUsuario: usuario.tipo
+    }).subscribe({
+      next: estado => {
+        this.inscripciones[ev.id] = estado;
+        this.inscribiendoIds.delete(ev.id);
+      },
+      error: err => {
+        this.inscribiendoIds.delete(ev.id);
+        // Mostrar error amigable — puedes usar un toast si quieres
+        alert(err.mensajeAmigable ?? 'No se pudo completar la inscripcion.');
+      }
+    });
+  }
+
+  cancelarInscripcion(ev: ActividadPublica, event: MouseEvent): void {
+    event.stopPropagation();
+    const usuario = this.sesion.usuario();
+    if (!usuario || this.inscribiendoIds.has(ev.id)) return;
+
+    this.inscribiendoIds.add(ev.id);
+    this.inscripcionService.cancelar(ev.id, {
+      idActor: usuario.id,
+      tipoUsuario: usuario.tipo
+    }).subscribe({
+      next: () => {
+        this.inscripciones[ev.id] = {
+          idActividad: ev.id,
+          inscrito: false,
+          idInscripcion: null,
+          totalInscritos: Math.max(0, (this.inscripciones[ev.id]?.totalInscritos ?? 1) - 1)
+        };
+        this.inscribiendoIds.delete(ev.id);
+      },
+      error: err => {
+        this.inscribiendoIds.delete(ev.id);
+        alert(err.mensajeAmigable ?? 'No se pudo cancelar la inscripcion.');
+      }
+    });
+  }
+
+  estaInscribiendose(idActividad: number): boolean {
+    return this.inscribiendoIds.has(idActividad);
   }
 
   /**

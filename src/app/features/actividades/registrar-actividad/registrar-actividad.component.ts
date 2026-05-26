@@ -64,6 +64,7 @@ export class RegistrarActividadComponent implements OnInit {
       idTipo:       [{ value: null, disabled: true }, Validators.required],
       idCampus:     [null, Validators.required],
       descripcion:  ['', Validators.maxLength(5000)],
+      requiereInscripcion: [false],
 
       // Paso 2 — Fecha y hora
       fechaActividad: ['', Validators.required],
@@ -246,6 +247,7 @@ export class RegistrarActividadComponent implements OnInit {
       idCampus:       v.idCampus,
       nombre:         v.nombre,
       descripcion:    v.descripcion,
+      requiereInscripcion: v.requiereInscripcion ?? false,
       fechaActividad: v.fechaActividad,
       horaInicio:     v.horaInicio + ':00',
       horaFin:        v.horaFin + ':00',

@@ -31,7 +31,7 @@ export class NavbarComponent {
   private readonly router = inject(Router);
   private readonly elRef  = inject(ElementRef);
 
-  dropdownAbierto: 'profesor' | 'admin' | 'usuario' | null = null;
+  dropdownAbierto: 'profesor' | 'admin' | 'alumno' | 'usuario' | null = null;
 
   // Nombre a mostrar: preferir sesion real sobre el input
   get nombreMostrado(): string {
@@ -61,7 +61,11 @@ export class NavbarComponent {
     { label: 'Estadísticas',         ruta: '/admin/grafica',             icono: 'bar_chart' }
   ];
 
-  toggleDropdown(menu: 'profesor' | 'admin' | 'usuario', event: MouseEvent): void {
+  readonly menuAlumno: MenuItem[] = [
+    { label: 'Mis inscripciones', ruta: '/mis-inscripciones', icono: 'fact_check' }
+  ];
+
+  toggleDropdown(menu: 'profesor' | 'admin' | 'alumno' | 'usuario', event: MouseEvent): void {
     event.stopPropagation();
     this.dropdownAbierto = this.dropdownAbierto === menu ? null : menu;
   }
