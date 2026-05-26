@@ -71,6 +71,13 @@ export const routes: Routes = [
       import('./features/avisos/registrar-aviso/registrar-aviso.component')
         .then(m => m.RegistrarAvisoComponent)
   },
+  {
+    path: 'mis-inscripciones',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/inscripciones/mis-inscripciones/mis-inscripciones.component')
+        .then(m => m.MisInscripcionesComponent)
+  },
 
   // Rutas de ADMIN (requieren login y rol admin)
   {

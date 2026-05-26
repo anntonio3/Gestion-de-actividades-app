@@ -21,6 +21,7 @@ export interface ActividadRequest {
   idCampus: number;
   nombre: string;
   descripcion?: string;
+  requiereInscripcion?: boolean;
   fechaActividad: string;   // 'YYYY-MM-DD'
   horaInicio: string;       // 'HH:mm:ss'
   horaFin: string;          // 'HH:mm:ss'
@@ -60,6 +61,7 @@ export interface ActividadPublica {
   tipo: string;             // nombre del tipo
   categoria: string;        // nombre de la categoría
   imagenPortada?: string;   // url opcional
+  requiereInscripcion: boolean;
 }
 
 
@@ -88,6 +90,7 @@ export interface SolicitudActividad {
   idActividad: number;
   nombre: string;
   descripcion: string;
+  requiereInscripcion?: boolean;
   fechaActividad: string;
   horaInicio: string;
   horaFin: string;

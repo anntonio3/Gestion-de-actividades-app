@@ -1232,3 +1232,71 @@
 @media (max-width: 1024px) { .events-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 768px)  { .events-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px)  { .events-grid { grid-template-columns: 1fr; } }
+
+
+/* ── US-16: Bloque de inscripcion formal ── */
+.inscripcion-block {
+  margin-top: .8rem;
+}
+.inscripcion-conteo {
+  font-size: .7rem;
+  color: var(--gray);
+  text-align: center;
+  margin-bottom: .3rem;
+}
+.inscripcion-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.inscripcion-badge {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  padding: .5rem .8rem;
+  background: #edf7ee;
+  color: #2d7a30;
+  border: 1px solid #b7e0ba;
+  border-radius: 8px;
+  font-size: .8rem;
+  font-weight: 700;
+}
+.inscripcion-badge .material-symbols-rounded { font-size: 17px; }
+.btn-cancelar-insc-sm {
+  padding: .45rem .7rem;
+  background: transparent;
+  color: var(--danger);
+  border: 1.5px solid var(--danger);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-cancelar-insc-sm:hover:not(:disabled) { background: var(--danger-bg); }
+.btn-cancelar-insc-sm:disabled { opacity: .5; cursor: not-allowed; }
+.btn-inscribirse {
+  width: 100%;
+  padding: .55rem 1rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  transition: background .2s;
+}
+.btn-inscribirse:hover:not(:disabled) { background: var(--primary-dark); }
+.btn-inscribirse:disabled { opacity: .6; cursor: not-allowed; }
+.btn-inscribirse .material-symbols-rounded { font-size: 18px; }

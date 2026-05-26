@@ -134,11 +134,35 @@
           <span class="error-msg">Selecciona el campus.</span>
         </div>
 
+        <div class="form-group">
+
+          <label style="display:block; margin-bottom: .6rem;">
+            Requiere inscripción
+          </label>
+
+          <div style="display:flex; align-items:center; gap:.8rem;">
+
+            <input 
+              type="checkbox"
+              formControlName="requiereInscripcion"
+              style="margin:0; width:16px; height:16px; cursor:pointer;"
+            >
+
+            <span class="hint">
+              Si está activo, los usuarios deberán inscribirse formalmente.
+            </span>
+
+          </div>
+
+        </div>
+
         <div class="form-group full-width" [class.has-error]="invalido('descripcion')">
           <label>Descripción del Evento</label>
           <textarea formControlName="descripcion" rows="4"
                     placeholder="Describe el objetivo, a quién va dirigido, actividades principales..."></textarea>
         </div>
+
+        
 
       </div>
     </div>
