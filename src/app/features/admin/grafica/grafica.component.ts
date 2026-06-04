@@ -5,7 +5,8 @@ import {
   OnDestroy,
   ElementRef,
   ViewChild,
-  HostListener
+  HostListener,
+  ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -81,7 +82,10 @@ export class GraficaComponent implements OnInit, AfterViewInit, OnDestroy {
   private dataReady  = false;
   private chartReady = false;
 
-  constructor(private estadisticasService: EstadisticasService) {}
+  constructor(
+    private estadisticasService: EstadisticasService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     // Generar los 10 años al inicio (antes de que lleguen datos)
@@ -110,14 +114,16 @@ export class GraficaComponent implements OnInit, AfterViewInit, OnDestroy {
         ]);
         this.recalcularAnios([...conActividad]);
 
-        // Lista de carreras ordenada
-        this.listadoCarreras = [...new Set(carrera.map(d => d.nombreCarrera))].sort();
-        this.carreraSeleccionada = this.listadoCarreras[0] ?? '';
+        // Lista de carreras filtrada por año actual
+        this.recalcularCarreras();
 
         this.cargando  = false;
         this.dataReady = true;
 
-        // setTimeout = esperar 1 tick para que Angular renderice los @if y cree los canvas
+        // Forzar detección de cambios para que Angular cree los <canvas>
+        // del bloque @if (!cargando && !error) ANTES de intentar dibujar
+        this.cdr.detectChanges();
+
         if (this.viewReady && this.chartReady) {
           setTimeout(() => this.renderizarTodo(), 0);
         }
@@ -132,6 +138,7 @@ export class GraficaComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.viewReady = true;
     if (this.dataReady && this.chartReady) {
+      this.cdr.detectChanges();
       setTimeout(() => this.renderizarTodo(), 0);
     }
   }
@@ -169,10 +176,22 @@ export class GraficaComponent implements OnInit, AfterViewInit, OnDestroy {
     event.stopPropagation();
     this.anioActual        = anio;
     this.mostrarPickerAnio = false;
+    this.recalcularCarreras();
+    this.cdr.detectChanges();
     setTimeout(() => this.renderizarTodo(), 0);
   }
 
   // ── Carrera ──────────────────────────────────────────────
+
+  /** Recalcula la lista de carreras y selección según el año actual */
+  private recalcularCarreras(): void {
+    const carrerasDelAnio = this.dataCarrera.filter(d => d.anio === this.anioActual);
+    this.listadoCarreras = [...new Set(carrerasDelAnio.map(d => d.nombreCarrera))].sort();
+    // Si la carrera seleccionada no existe en el nuevo año, resetear
+    if (!this.listadoCarreras.includes(this.carreraSeleccionada)) {
+      this.carreraSeleccionada = this.listadoCarreras[0] ?? '';
+    }
+  }
 
   toggleListaCarreras(event: MouseEvent): void {
     event.stopPropagation();
