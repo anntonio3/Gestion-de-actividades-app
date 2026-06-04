@@ -5,6 +5,7 @@ import { ActualizarActividadRequest, SolicitudActividad } from '../../../core/mo
 import { ActividadService } from '../../../core/services/actividad.service';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { SesionService } from '../../../core/services/sesion.service';
+import { InscripcionService } from '../../../core/services/inscripcion.service';
 
 type FiltroEstado = '' | 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
 
@@ -55,6 +56,10 @@ export class MisSolicitudesComponent implements OnInit {
 
   private readonly sesion = inject(SesionService);
 
+  private inscripcionService = inject(InscripcionService);
+  totalInscritos: Record<number, number> = {};
+
+
   constructor(private actividadService: ActividadService) {}
 
   ngOnInit(): void {
@@ -64,8 +69,15 @@ export class MisSolicitudesComponent implements OnInit {
   cargarSolicitudes(): void {
     this.cargando = true;
     this.actividadService.getMisSolicitudes(this.sesion.getIdProfesor()).subscribe({
-      next: data => { this.todas = data; this.cargando = false; },
-      error: () => { this.error = 'Error al cargar las solicitudes. Intenta de nuevo.'; this.cargando = false; }
+      next: data => { 
+        this.todas = data; 
+        this.cargando = false; 
+        this.cargarTotalesInscritos();
+      },
+      error: () => { 
+        this.error = 'Error al cargar las solicitudes. Intenta de nuevo.'; 
+        this.cargando = false; 
+      }
     });
   }
 
@@ -299,6 +311,18 @@ export class MisSolicitudesComponent implements OnInit {
   estadoClass(estado: string): string {
     return { APROBADA: 'aprobada', RECHAZADA: 'rechazada', PENDIENTE: 'pendiente' }[estado] ?? '';
   }
+
+  private cargarTotalesInscritos(): void {
+    this.aprobadas
+      .filter(s => s.requiereInscripcion)
+      .forEach(s => {
+        this.inscripcionService.totalInscritos(s.idActividad).subscribe({
+          next: res => this.totalInscritos[s.idActividad] = res.total,
+          error: () => {}
+        });
+      });
+  }
+
 
   formatBytes(b: number): string {
     return b < 1024 * 1024 ? (b / 1024).toFixed(1) + ' KB' : (b / 1024 / 1024).toFixed(1) + ' MB';

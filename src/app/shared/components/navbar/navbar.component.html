@@ -47,6 +47,31 @@
       </div>
     }
 
+    @if (sesion.esAlumno()) {
+      <div class="role-dropdown">
+        <button class="role-btn"
+                [class.activo]="dropdownAbierto === 'alumno'"
+                (click)="toggleDropdown('alumno', $event)">
+          <span class="material-symbols-rounded">school</span>
+          <span class="role-label">Alumno</span>
+          <span class="material-symbols-rounded chevron">expand_more</span>
+        </button>
+        @if (dropdownAbierto === 'alumno') {
+          <div class="role-menu">
+            @for (item of menuAlumno; track item.ruta) {
+              <a [routerLink]="item.ruta"
+                routerLinkActive="activa"
+                class="role-menu-item"
+                (click)="cerrarDropdowns()">
+                <span class="material-symbols-rounded">{{ item.icono }}</span>
+                {{ item.label }}
+              </a>
+            }
+          </div>
+        }
+      </div>
+    }
+
     <!-- Menu ADMIN -->
     @if (sesion.esAdmin()) {
       <div class="role-dropdown">
