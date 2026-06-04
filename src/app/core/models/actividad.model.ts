@@ -84,6 +84,14 @@ export const CATEGORIA_COLOR: Record<string, string> = {
 
 // Bere
 
+export interface ImagenActividad {
+  idImagen: number;
+  url: string;
+  nombreArchivo?: string;
+  esPortada: boolean;
+  fechaSubida: string;
+}
+
 export interface SolicitudActividad {
   idActividad: number;
   nombre: string;
@@ -95,6 +103,13 @@ export interface SolicitudActividad {
   motivoRechazo: string | null;
   fechaRegistro: string;
   fechaActualizacion?: string | null;
+  // Campos adicionales del registro
+  campus?: string;
+  tipoActividad?: string;
+  categoria?: string;
+  organizadores?: string[];
+  recursos?: RecursoResumen[];
+  imagenes?: ImagenActividad[];
 }
  
 export interface ActualizarActividadRequest {
