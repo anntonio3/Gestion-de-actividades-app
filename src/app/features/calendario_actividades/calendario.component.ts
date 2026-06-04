@@ -14,6 +14,9 @@ import { CorchoService } from '../../core/services/corcho.service';
 import { InscripcionService } from '../../core/services/inscripcion.service';
 import { InscripcionEstado } from '../../core/models/inscripcion.model';
 import { SesionService } from '../../core/services/sesion.service';
+import { InscripcionExternoService } from '../../core/services/inscripcion-externo.service';
+import { InscripcionExternoResponse } from '../../core/models/inscripcion-externo.model';
+import { ModalInscripcionTipoComponent } from './modal-inscripcion-tipo/modal-inscripcion-tipo.component';
 
 interface DayPill {
   date: Date;
@@ -39,7 +42,7 @@ interface MiniCalDay {
 @Component({
   selector: 'app-calendario',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, ModalDetalleEventoComponent, RouterLink],
+  imports: [CommonModule, FormsModule, NavbarComponent, ModalDetalleEventoComponent, ModalInscripcionTipoComponent, RouterLink],
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css'],
   providers: [DatePipe]
@@ -109,10 +112,19 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   private avisosTimer?: ReturnType<typeof setInterval>;
   private readonly AVISOS_INTERVALO = 4000;  // 4 segundos
   
+  // US-24: modal de seleccion de tipo (interno / externo)
+  modalInscripcionTipoAbierto = false;
+  actividadParaInscribir: { id: number; nombre: string } | null = null;
+
+  cancelandoExternoIds = new Set<number>();
+  
+  // Mapa idActividad -> { inscrito: boolean, total: number } para externos
+  estadosExternos: Record<number, { inscrito: boolean; total: number }> = {};
 
   private inscripcionService = inject(InscripcionService);
-  private sesion = inject(SesionService);
+  public sesion = inject(SesionService);
   private router = inject(Router);
+  private readonly externoService = inject(InscripcionExternoService);
   
 
   constructor(
@@ -463,6 +475,7 @@ export class CalendarioComponent implements OnInit, OnDestroy {
     });
 
     this.cargarInscripcionesPagina();
+    this.cargarEstadoExternos();
   }
 
   // Agrega en cargarAsistenciasPagina() después de cargar asistencias:
@@ -492,28 +505,33 @@ export class CalendarioComponent implements OnInit, OnDestroy {
 
   inscribirse(ev: ActividadPublica, event: MouseEvent): void {
     event.stopPropagation();
+  
+    // Si el usuario ya esta logueado, puede inscribirse directamente sin el modal de tipo.
     const usuario = this.sesion.usuario();
-    if (!usuario) {
-      this.router.navigate(['/auth/login']);
+    if (usuario) {
+      // Flujo original de usuario autenticado (alumno / profesor / admin)
+      if (this.inscribiendoIds.has(ev.id)) return;
+      this.inscribiendoIds.add(ev.id);
+      this.inscripcionService.inscribir(ev.id, {
+        idActor:      usuario.id,
+        tipoUsuario:  usuario.tipo
+      }).subscribe({
+        next: estado => {
+          this.inscripciones[ev.id] = estado;
+          this.inscribiendoIds.delete(ev.id);
+        },
+        error: err => {
+          this.inscribiendoIds.delete(ev.id);
+          alert(err.mensajeAmigable ?? 'No se pudo completar la inscripcion.');
+        }
+      });
       return;
     }
-    if (this.inscribiendoIds.has(ev.id)) return;
-
-    this.inscribiendoIds.add(ev.id);
-    this.inscripcionService.inscribir(ev.id, {
-      idActor: usuario.id,
-      tipoUsuario: usuario.tipo
-    }).subscribe({
-      next: estado => {
-        this.inscripciones[ev.id] = estado;
-        this.inscribiendoIds.delete(ev.id);
-      },
-      error: err => {
-        this.inscribiendoIds.delete(ev.id);
-        // Mostrar error amigable — puedes usar un toast si quieres
-        alert(err.mensajeAmigable ?? 'No se pudo completar la inscripcion.');
-      }
-    });
+  
+    // Usuario no logueado: abrir modal de seleccion de tipo.
+    // El modal preguntara si es de la UNPA (redirige al login) o externo (formulario).
+    this.actividadParaInscribir = { id: ev.id, nombre: ev.nombre };
+    this.modalInscripcionTipoAbierto = true;
   }
 
   cancelarInscripcion(ev: ActividadPublica, event: MouseEvent): void {
@@ -717,6 +735,88 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   }
   formatHoraAviso(h?: string | null): string {
     return h ? h.substring(0, 5) : '';
+  }
+
+  // Agregar al final de la clase:
+ 
+  /** Cierra el modal de seleccion de tipo */
+  cerrarModalInscripcionTipo(): void {
+    this.modalInscripcionTipoAbierto = false;
+    this.actividadParaInscribir      = null;
+  }
+  
+  /**
+   * Callback cuando un externo completa la inscripcion.
+   * Actualiza el estado local para que el boton refleje "Ya inscrito".
+   */
+  onExternoInscrito(res: InscripcionExternoResponse): void {
+    this.estadosExternos[res.idActividad] = {
+      inscrito: true,
+      total:    res.totalExternos
+    };
+    // El modal maneja el paso 3 (exito) internamente.
+    // No cerramos aqui: el usuario cierra cuando hace click en "Cerrar" del paso exito.
+  }
+  
+  /**
+   * Carga el estado de inscripcion de externos para los eventos de la pagina actual.
+   * Usa withCredentials para enviar la cookie visitante_id.
+   */
+  private cargarEstadoExternos(): void {
+    const ids = this.pagedEvents
+      .filter(ev => ev.requiereInscripcion)
+      .map(ev => ev.id);
+  
+    if (ids.length === 0) return;
+  
+    ids.forEach(id => {
+      this.externoService.obtenerEstado(id).subscribe({
+        next: estado => {
+          // Solo sobreescribir si el usuario NO esta logueado.
+          // Si esta logueado, el estado lo maneja inscripciones (el flujo existente).
+          if (!this.sesion.usuario()) {
+            this.estadosExternos[id] = estado;
+          }
+        },
+        error: () => {} // falla silenciosa: el boton mostrara "Inscribirse" por defecto
+      });
+    });
+  }
+  
+  /**
+   * Indica si un externo (no logueado) ya esta inscrito en el evento dado.
+   * Lo usa el template para mostrar el badge "Ya inscrito" en lugar del boton.
+   */
+  externoYaInscrito(idActividad: number): boolean {
+    return this.estadosExternos[idActividad]?.inscrito ?? false;
+  }
+
+  cancelarExterna(ev: ActividadPublica, event: MouseEvent): void {
+    event.stopPropagation();
+  
+    if (this.cancelandoExternoIds.has(ev.id)) return;
+    this.cancelandoExternoIds.add(ev.id);
+  
+    this.externoService.cancelar(ev.id).subscribe({
+      next: () => {
+        // Limpiar el estado local para que el boton vuelva a "Inscribirse"
+        this.estadosExternos[ev.id] = { inscrito: false, total: 0 };
+        this.cancelandoExternoIds.delete(ev.id);
+  
+        // Recargar el conteo unificado para que el contador se actualice
+        this.cargarInscripcionesPagina();
+        this.cargarEstadoExternos();
+      },
+      error: err => {
+        this.cancelandoExternoIds.delete(ev.id);
+        alert(err.mensajeAmigable ?? 'No se pudo cancelar la inscripcion.');
+      }
+    });
+  }
+
+  // Helper para saber si se esta procesando la cancelacion de un externo
+  estaCancelandoExterna(idActividad: number): boolean {
+    return this.cancelandoExternoIds.has(idActividad);
   }
 
 }

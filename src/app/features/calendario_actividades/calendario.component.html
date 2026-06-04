@@ -328,12 +328,13 @@
               Evento finalizado
             </div>
           } @else if (ev.requiereInscripcion) {
-            <!-- Bloque de inscripcion formal -->
             <div class="inscripcion-block" (click)="$event.stopPropagation()">
               <div class="inscripcion-conteo">
                 {{ estadoInscripcion(ev.id).totalInscritos }} inscrito(s)
               </div>
+          
               @if (estadoInscripcion(ev.id).inscrito) {
+                <!-- Usuario logueado ya inscrito -->
                 <div class="inscripcion-row">
                   <div class="inscripcion-badge">
                     <span class="material-symbols-rounded">check_circle</span>
@@ -345,7 +346,21 @@
                     {{ estaInscribiendose(ev.id) ? '...' : 'Cancelar' }}
                   </button>
                 </div>
+              } @else if (!sesion.logueado() && externoYaInscrito(ev.id)) {
+                <!-- Externo ya inscrito desde este navegador -->
+                <div class="inscripcion-row">
+                  <div class="inscripcion-badge">
+                    <span class="material-symbols-rounded">check_circle</span>
+                    Inscrito
+                  </div>
+                  <button class="btn-cancelar-insc-sm"
+                          [disabled]="estaCancelandoExterna(ev.id)"
+                          (click)="cancelarExterna(ev, $event)">
+                    {{ estaCancelandoExterna(ev.id) ? '...' : 'Cancelar' }}
+                  </button>
+                </div>
               } @else {
+                <!-- Boton disponible para cualquier visitante o usuario no logueado -->
                 <button class="btn-inscribirse"
                         [disabled]="estaInscribiendose(ev.id)"
                         (click)="inscribirse(ev, $event)">
@@ -431,3 +446,14 @@
   [idActividad]="idActividadDetalle"
   (cerrado)="cerrarDetalleEvento()">
 </app-modal-detalle-evento>
+
+<!-- MODAL DE INSCRIPCION: seleccion de tipo (interno / externo) -->
+@if (modalInscripcionTipoAbierto && actividadParaInscribir !== null) {
+  <app-modal-inscripcion-tipo
+    [idActividad]="actividadParaInscribir.id"
+    [nombreActividad]="actividadParaInscribir.nombre"
+    (inscritoExterno)="onExternoInscrito($event)"
+    (cerrado)="cerrarModalInscripcionTipo()">
+  </app-modal-inscripcion-tipo>
+}
+

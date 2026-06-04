@@ -1,0 +1,223 @@
+<div class="modal-overlay open" (click)="cerrarSiOverlay($event)">
+  <div class="modal-card">
+
+    <!-- Boton de cierre -->
+    <button class="modal-close" (click)="cerrar()">
+      <span class="material-symbols-rounded">close</span>
+    </button>
+
+    <!-- ── PASO 1: Seleccion de tipo de usuario ── -->
+    @if (paso === 'seleccion') {
+      <div class="paso-seleccion">
+        <div class="modal-icon-wrap">
+          <span class="material-symbols-rounded modal-icon">how_to_reg</span>
+        </div>
+        <h2 class="modal-titulo">Inscribirse al evento</h2>
+        <p class="modal-subtitulo">
+          <strong>{{ nombreActividad }}</strong>
+        </p>
+        <p class="modal-desc">
+          Selecciona tu tipo de usuario para continuar con la inscripcion.
+        </p>
+
+        <div class="tipo-grid">
+          <!-- Opcion: soy de la UNPA (requiere login) -->
+          <button class="tipo-card" (click)="seleccionarTipo('interno')">
+            <div class="tipo-icon-wrap interno">
+              <span class="material-symbols-rounded">school</span>
+            </div>
+            <div class="tipo-info">
+              <strong>Soy de la UNPA</strong>
+              <span>Alumno, Profesor o Administrativo</span>
+            </div>
+            <span class="material-symbols-rounded tipo-arrow">chevron_right</span>
+          </button>
+
+          <!-- Opcion: soy externo (llena el formulario) -->
+          <button class="tipo-card" (click)="seleccionarTipo('externo')">
+            <div class="tipo-icon-wrap externo">
+              <span class="material-symbols-rounded">person_pin</span>
+            </div>
+            <div class="tipo-info">
+              <strong>Soy externo</strong>
+              <span>Visitante, invitado u otra institucion</span>
+            </div>
+            <span class="material-symbols-rounded tipo-arrow">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ── PASO 2: Formulario de externo ── -->
+    @if (paso === 'formulario') {
+      <div class="paso-formulario" [formGroup]="form">
+
+        <div class="form-header">
+          <button class="btn-volver" type="button" (click)="volverAlSeleccion()">
+            <span class="material-symbols-rounded">arrow_back</span>
+          </button>
+          <div>
+            <h2 class="modal-titulo">Registrar datos</h2>
+            <p class="modal-subtitulo">{{ nombreActividad }}</p>
+          </div>
+        </div>
+
+        <!-- Alerta de error -->
+        @if (errorGlobal) {
+          <div class="alert-error">
+            <span class="material-symbols-rounded">error</span>
+            {{ errorGlobal }}
+          </div>
+        }
+
+        <!-- Nombre -->
+        <div class="form-field" [class.has-error]="invalido('nombre')">
+          <label>
+            Nombre completo
+            <span class="req">*</span>
+          </label>
+          <input type="text"
+                 formControlName="nombre"
+                 placeholder="Ej: María García López"
+                 maxlength="150">
+          <span class="error-msg">El nombre es obligatorio.</span>
+        </div>
+
+        <!-- Edad y Sexo en fila -->
+        <div class="form-row">
+          <div class="form-field" [class.has-error]="invalido('edad')">
+            <label>
+              Edad
+              <span class="req">*</span>
+            </label>
+            <input type="number"
+                   formControlName="edad"
+                   placeholder="Ej: 25"
+                   min="1"
+                   max="120">
+            <span class="error-msg">Ingresa una edad valida.</span>
+          </div>
+
+          <div class="form-field" [class.has-error]="invalido('sexo')">
+            <label>
+              Sexo
+              <span class="req">*</span>
+            </label>
+            <select formControlName="sexo">
+              <option value="">— Selecciona —</option>
+              <option value="MASCULINO">Masculino</option>
+              <option value="FEMENINO">Femenino</option>
+              <option value="OTRO">Otro</option>
+            </select>
+            <span class="error-msg">Selecciona una opcion.</span>
+          </div>
+        </div>
+
+        <!-- Procedencia -->
+        <div class="form-field" [class.has-error]="invalido('procedencia')">
+          <label>
+            Ciudad / Institucion de origen
+            <span class="req">*</span>
+          </label>
+          <input type="text"
+                 formControlName="procedencia"
+                 placeholder="Ej: Tuxtepec, Oaxaca o UNAM"
+                 maxlength="150">
+          <span class="error-msg">La procedencia es obligatoria.</span>
+        </div>
+
+        <!-- Correo y Telefono en fila -->
+        <div class="form-row">
+          <div class="form-field" [class.has-error]="invalido('correo')">
+            <label>
+              Correo
+              <span class="opt">(opcional)</span>
+            </label>
+            <input type="email"
+                   formControlName="correo"
+                   placeholder="tu@correo.com"
+                   maxlength="150">
+            <span class="error-msg">Formato de correo invalido.</span>
+          </div>
+
+          <div class="form-field" [class.has-error]="invalido('telefono')">
+            <label>
+              Telefono
+              <span class="opt">(opcional)</span>
+            </label>
+            <input type="tel"
+                   formControlName="telefono"
+                   placeholder="Ej: 2871234567"
+                   maxlength="20">
+            <span class="error-msg">Maximo 20 caracteres.</span>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions">
+          <button type="button"
+                  class="btn btn-ghost"
+                  (click)="cerrar()"
+                  [disabled]="guardando">
+            Cancelar
+          </button>
+          <button type="button"
+                  class="btn btn-primary"
+                  (click)="enviar()"
+                  [disabled]="guardando">
+            @if (guardando) {
+              <span class="material-symbols-rounded spin">progress_activity</span>
+              Registrando...
+            } @else {
+              <span class="material-symbols-rounded">check_circle</span>
+              Confirmar inscripcion
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ── PASO 3: Exito ── -->
+    @if (paso === 'exito') {
+      <div class="paso-exito">
+        <div class="exito-ring">
+          <span class="material-symbols-rounded">task_alt</span>
+        </div>
+        <h2 class="modal-titulo">Inscripcion confirmada</h2>
+        <p class="modal-desc">
+          Tu inscripcion en <strong>{{ nombreActividad }}</strong>
+          ha sido registrada exitosamente.
+        </p>
+
+        <div class="exito-datos">
+          <div class="exito-fila">
+            <span class="material-symbols-rounded">person</span>
+            <span>{{ respuesta?.nombre }}</span>
+          </div>
+          <div class="exito-fila">
+            <span class="material-symbols-rounded">groups</span>
+            <span>{{ respuesta?.totalExternos }} persona(s) externas inscritas</span>
+          </div>
+          @if (respuesta?.correo) {
+            <div class="exito-fila">
+              <span class="material-symbols-rounded">mail</span>
+              <span>{{ respuesta?.correo }}</span>
+            </div>
+          }
+          @if (respuesta?.telefono) {
+            <div class="exito-fila">
+              <span class="material-symbols-rounded">phone</span>
+              <span>{{ respuesta?.telefono }}</span>
+            </div>
+          }
+        </div>
+
+        <button class="btn btn-primary btn-full" (click)="cerrar()">
+          <span class="material-symbols-rounded">done</span>
+          Cerrar
+        </button>
+      </div>
+    }
+
+  </div>
+</div>
