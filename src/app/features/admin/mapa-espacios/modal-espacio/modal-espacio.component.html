@@ -4,7 +4,13 @@
     <!-- Cabecera -->
     <div class="modal-top">
       <div>
-        <span class="modal-tag">Punto #{{ idPunto }}</span>
+        <span class="modal-tag">
+          @if (tipoUbicacion === 'interna' && campo('idPunto')?.value) {
+            Punto #{{ campo('idPunto')?.value }}
+          } @else {
+            {{ modoEdicion ? 'Editar espacio' : 'Nuevo espacio' }}
+          }
+        </span>
         <h2>{{ modoEdicion ? 'Editar espacio' : 'Registrar espacio' }}</h2>
       </div>
       <button class="modal-close" (click)="cerrar()">
@@ -19,9 +25,7 @@
           <div class="step-num">
             @if (pasoActual > 1) {
               <span class="material-symbols-rounded">check</span>
-            } @else {
-              1
-            }
+            } @else { 1 }
           </div>
           <span class="step-label">Datos del espacio</span>
         </div>
@@ -33,7 +37,7 @@
       </div>
     }
 
-    <!-- Cargando detalle (solo edicion) -->
+    <!-- Cargando detalle en modo edición -->
     @if (cargando) {
       <div class="loading-box">
         <div class="spinner"></div>
@@ -41,7 +45,7 @@
       </div>
     }
 
-    <!-- Form -->
+    <!-- Formulario -->
     @if (!cargando) {
       <form [formGroup]="form" (ngSubmit)="guardar()">
 
@@ -61,6 +65,8 @@
             </h3>
 
             <div class="form-grid">
+
+              <!-- Nombre -->
               <div class="form-field full" [class.has-error]="invalido('nombre')">
                 <label>Nombre <span class="req">*</span></label>
                 <input type="text" formControlName="nombre"
@@ -68,6 +74,7 @@
                 <span class="error-msg">El nombre es obligatorio.</span>
               </div>
 
+              <!-- Descripción -->
               <div class="form-field full">
                 <label>Descripción</label>
                 <textarea formControlName="descripcion" rows="2"
@@ -75,6 +82,7 @@
                           maxlength="250"></textarea>
               </div>
 
+              <!-- Capacidad y Ubicación -->
               <div class="form-field" [class.has-error]="invalido('capacidad')">
                 <label>Capacidad <span class="req">*</span></label>
                 <input type="number" formControlName="capacidad"
@@ -83,12 +91,112 @@
               </div>
 
               <div class="form-field" [class.has-error]="invalido('ubicacion')">
-                <label>Ubicación <span class="req">*</span></label>
+                <label>Descripción de ubicación <span class="req">*</span></label>
                 <input type="text" formControlName="ubicacion"
-                       placeholder="Ej. Edificio central" maxlength="150">
+                       placeholder="Ej. Edificio central, planta baja" maxlength="150">
                 <span class="error-msg">La ubicación es obligatoria.</span>
               </div>
+
             </div>
+
+            <!-- ── TOGGLE TIPO DE UBICACIÓN ── -->
+            <div class="ubicacion-toggle-section">
+              <p class="toggle-label">
+                <span class="material-symbols-rounded">location_on</span>
+                Tipo de ubicación <span class="req">*</span>
+              </p>
+
+              <div class="ubicacion-toggle">
+                <button type="button"
+                        class="toggle-opt"
+                        [class.active]="tipoUbicacion === 'interna'"
+                        (click)="seleccionarTipoUbicacion('interna')">
+                  <span class="material-symbols-rounded">map</span>
+                  <span class="toggle-opt-text">
+                    <strong>Mapa UNPA</strong>
+                    <small>El espacio está dentro del campus</small>
+                  </span>
+                </button>
+
+                <button type="button"
+                        class="toggle-opt"
+                        [class.active]="tipoUbicacion === 'externa'"
+                        (click)="seleccionarTipoUbicacion('externa')">
+                  <span class="material-symbols-rounded">travel_explore</span>
+                  <span class="toggle-opt-text">
+                    <strong>Externo (Google Maps)</strong>
+                    <small>El espacio está fuera del campus</small>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ── UBICACIÓN INTERNA: selector de punto ── -->
+            @if (tipoUbicacion === 'interna') {
+              <div class="ubicacion-detalle">
+                <div class="form-field" [class.has-error]="!campo('idPunto')?.value && form.touched">
+                  <label>Punto en el mapa <span class="req">*</span></label>
+                  <input type="number" formControlName="idPunto"
+                         placeholder="Número del punto (ej. 3)"
+                         min="1">
+                  <span class="field-hint">
+                    <span class="material-symbols-rounded">info</span>
+                    El número corresponde al punto marcado en el mapa del campus.
+                    Al cerrar este modal podrás seleccionarlo directamente desde el mapa.
+                  </span>
+                </div>
+              </div>
+            }
+
+            <!-- ── UBICACIÓN EXTERNA: coordenadas y URL ── -->
+            @if (tipoUbicacion === 'externa') {
+              <div class="ubicacion-detalle">
+
+                <div class="info-externa">
+                  <span class="material-symbols-rounded">info</span>
+                  <p>
+                    Abre <strong>Google Maps</strong>, busca el lugar, haz clic derecho sobre él
+                    y copia las coordenadas. Luego copia también el enlace
+                    desde el botón <em>Compartir</em>.
+                  </p>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-field" [class.has-error]="invalido('latitud')">
+                    <label>Latitud <span class="req">*</span></label>
+                    <input type="number" formControlName="latitud"
+                           placeholder="Ej. 18.1025" step="0.0000001">
+                    <span class="error-msg">
+                      @if (campo('latitud')?.errors?.['required']) { La latitud es obligatoria. }
+                      @else { Debe estar entre -90 y 90. }
+                    </span>
+                  </div>
+
+                  <div class="form-field" [class.has-error]="invalido('longitud')">
+                    <label>Longitud <span class="req">*</span></label>
+                    <input type="number" formControlName="longitud"
+                           placeholder="Ej. -96.1396" step="0.0000001">
+                    <span class="error-msg">
+                      @if (campo('longitud')?.errors?.['required']) { La longitud es obligatoria. }
+                      @else { Debe estar entre -180 y 180. }
+                    </span>
+                  </div>
+                </div>
+
+                <div class="form-field" [class.has-error]="invalido('urlMaps')">
+                  <label>URL de Google Maps <span class="req">*</span></label>
+                  <input type="url" formControlName="urlMaps"
+                         placeholder="https://maps.app.goo.gl/...">
+                  <span class="field-hint">
+                    <span class="material-symbols-rounded">info</span>
+                    Copia el enlace desde el botón "Compartir" de Google Maps.
+                  </span>
+                  <span class="error-msg">La URL no puede superar 1000 caracteres.</span>
+                </div>
+
+              </div>
+            }
+
           </div>
 
           <!-- Acciones paso 1 -->
@@ -128,12 +236,9 @@
               @for (item of equipamientoArray.controls; track $index) {
                 <div class="equip-row" [formGroupName]="$index">
                   <div class="equip-fields">
-
-                    <!-- SELECT con (change) para actualizar validador -->
                     <div class="form-field">
                       <label>Mobiliario <span class="req">*</span></label>
-                      <select formControlName="idRecurso"
-                              (change)="onRecursoChange($index)">
+                      <select formControlName="idRecurso" (change)="onRecursoChange($index)">
                         <option [ngValue]="null">— Selecciona —</option>
                         @for (m of recursosDisponibles($index); track m.idRecurso) {
                           <option [ngValue]="m.idRecurso">{{ m.nombre }}</option>
@@ -141,40 +246,32 @@
                       </select>
                     </div>
 
-                    <!-- INPUT cantidad con max dinámico y error -->
                     <div class="form-field qty-field"
-                        [class.has-error]="item.get('cantidad')?.invalid && item.get('cantidad')?.touched">
+                         [class.has-error]="item.get('cantidad')?.invalid && item.get('cantidad')?.touched">
                       <label>
                         Cantidad <span class="req">*</span>
                         @if (existenciasRecurso($index); as max) {
-                          <span style="font-weight:400; color: var(--gray)">
-                            (máx. {{ max }})
-                          </span>
+                          <span style="font-weight:400; color:var(--gray)">(máx. {{ max }})</span>
                         }
                       </label>
-                      <input type="number"
-                            formControlName="cantidad"
-                            min="1"
-                            [max]="existenciasRecurso($index) ?? ''">
+                      <input type="number" formControlName="cantidad"
+                             min="1" [max]="existenciasRecurso($index) ?? ''">
                       @if (item.get('cantidad')?.errors?.['min'] && item.get('cantidad')?.touched) {
-                        <span class="error-msg" style="display:block">
-                          La cantidad debe ser al menos 1.
-                        </span>
+                        <span class="error-msg" style="display:block">Mínimo 1.</span>
                       }
                       @if (item.get('cantidad')?.errors?.['max'] && item.get('cantidad')?.touched) {
                         <span class="error-msg" style="display:block">
-                          Máximo disponible: {{ existenciasRecurso($index) }}.
+                          Máx. {{ existenciasRecurso($index) }}.
                         </span>
                       }
                     </div>
-
                   </div>
 
                   <div class="form-field">
                     <label>Características</label>
                     <input type="text" formControlName="caracteristicas"
-                          placeholder="Ej. Sillas plegables fijas en gradas"
-                          maxlength="300">
+                           placeholder="Ej. Sillas plegables fijas en gradas"
+                           maxlength="300">
                   </div>
 
                   <button type="button" class="btn-remove" (click)="quitarEquipamiento($index)">
@@ -187,7 +284,8 @@
 
           <!-- Acciones paso 2 -->
           <div class="form-actions">
-            <button type="button" class="btn btn-ghost" (click)="pasoAnterior()" [disabled]="guardando">
+            <button type="button" class="btn btn-ghost"
+                    (click)="pasoAnterior()" [disabled]="guardando">
               <span class="material-symbols-rounded">arrow_back</span>
               Anterior
             </button>

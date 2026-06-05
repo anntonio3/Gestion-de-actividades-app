@@ -78,8 +78,17 @@ export class ModalDetalleEventoComponent implements OnInit {
     return tipo === 'CARRERA' ? 'Carrera' : 'Departamento';
   }
 
-  // Indica si el lugar tiene coordenadas para pintar el punto en el mapa
+  /**
+   * Indica si el lugar tiene coordenadas internas (mapa UNPA) para
+   * pintar el punto sobre la imagen del campus.
+   * Solo aplica a espacios internos (!esExterno).
+   */
   get lugarTieneCoords(): boolean {
-    return !!(this.detalle?.lugar?.coordX != null && this.detalle?.lugar?.coordY != null);
+    return !!(
+      this.detalle?.lugar &&
+      !this.detalle.lugar.esExterno &&
+      this.detalle.lugar.coordX != null &&
+      this.detalle.lugar.coordY != null
+    );
   }
 }

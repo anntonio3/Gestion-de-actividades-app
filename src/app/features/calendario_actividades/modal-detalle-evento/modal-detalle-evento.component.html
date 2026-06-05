@@ -67,7 +67,7 @@
           </div>
         }
 
-        <!-- Lugar + Mapa -->
+        <!-- Lugar + Mapa / Enlace externo -->
         <div class="seccion">
           <h3 class="seccion-titulo">
             <span class="material-symbols-rounded">location_on</span>
@@ -89,7 +89,8 @@
               </div>
             </div>
 
-            @if (lugarTieneCoords) {
+            <!-- Espacio INTERNO: mapa de la UNPA con punto marcado -->
+            @if (!detalle.lugar.esExterno && lugarTieneCoords) {
               <div class="mapa-mini">
                 <img src="assets/images/Mapa_UNPA.jpeg" alt="Mapa UNPA" class="mapa-mini-img">
                 <div
@@ -103,14 +104,34 @@
               </div>
               <p class="mapa-hint">
                 <span class="material-symbols-rounded">info</span>
-                Ubicación marcada en el mapa de la universidad
-              </p>
-            } @else {
-              <p class="mapa-hint">
-                <span class="material-symbols-rounded">info</span>
-                Este lugar aún no tiene ubicación en el mapa
+                Ubicación marcada en el mapa del campus de la UNPA
               </p>
             }
+
+            @if (!detalle.lugar.esExterno && !lugarTieneCoords) {
+              <p class="mapa-hint">
+                <span class="material-symbols-rounded">info</span>
+                Este lugar aún no tiene ubicación marcada en el mapa
+              </p>
+            }
+
+            <!-- Espacio EXTERNO: enlace a Google Maps -->
+            @if (detalle.lugar.esExterno && detalle.lugar.urlMaps) {
+              <a
+                [href]="detalle.lugar.urlMaps"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="maps-link">
+                <span class="material-symbols-rounded">travel_explore</span>
+                Ver ubicación en Google Maps
+                <span class="material-symbols-rounded maps-link-arrow">open_in_new</span>
+              </a>
+              <p class="mapa-hint">
+                <span class="material-symbols-rounded">info</span>
+                Este evento se realiza fuera del campus universitario
+              </p>
+            }
+
           } @else {
             <p class="empty-hint">
               <span class="material-symbols-rounded">info</span>

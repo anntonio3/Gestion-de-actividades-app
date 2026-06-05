@@ -74,6 +74,40 @@
             </span>
           </div>
 
+          <!-- Tipo de ubicación (interna o externa) -->
+          <div class="info-item full">
+            <span class="info-label">Tipo de ubicación</span>
+            @if (detalle.esExterno) {
+              <span class="info-value">
+                <span class="material-symbols-rounded">travel_explore</span>
+                Espacio externo (fuera del campus)
+              </span>
+            } @else {
+              <span class="info-value">
+                <span class="material-symbols-rounded">map</span>
+                Espacio interno (campus UNPA)
+                @if (detalle.etiquetaPunto) {
+                  &nbsp;— Punto #{{ detalle.etiquetaPunto }}
+                }
+              </span>
+            }
+          </div>
+
+          <!-- URL de Google Maps solo para externos -->
+          @if (detalle.esExterno && detalle.urlMaps) {
+            <div class="info-item full">
+              <span class="info-label">Ubicación Google Maps</span>
+              <a [href]="detalle.urlMaps"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 class="maps-link-admin">
+                <span class="material-symbols-rounded">travel_explore</span>
+                Ver en Google Maps
+                <span class="material-symbols-rounded" style="font-size:14px">open_in_new</span>
+              </a>
+            </div>
+          }
+
           @if (detalle.descripcion) {
             <div class="info-item full">
               <span class="info-label">Descripción</span>

@@ -309,3 +309,28 @@
   .modal-actions .btn { width: 100%; justify-content: center; }
   .equip-carac { margin-left: 0; margin-top: .5rem; }
 }
+
+
+
+/* Enlace de Google Maps en el panel admin */
+.maps-link-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  background: var(--primary-bg);
+  border: 1.5px solid var(--primary-light);
+  color: var(--accent);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.83rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.maps-link-admin:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.maps-link-admin .material-symbols-rounded { font-size: 16px; }

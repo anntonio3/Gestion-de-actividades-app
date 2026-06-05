@@ -142,18 +142,35 @@ export interface ActividadDetallePublica {
   organizadores: OrganizadorPublico[];
 }
 
+
+export interface OrganizadorPublico {
+  nombre: string;
+  tipo: 'CARRERA' | 'DEPARTAMENTO';
+}
+
+// Fragmento: solo los tipos que cambian en actividad.model.ts
+// Reemplazar la interfaz LugarPublico existente con esta versión.
+
 export interface LugarPublico {
   idEspacio: number;
   nombre: string;
   ubicacion: string;
   capacidad: number;
+  esExterno: boolean;
+
+  // Campos internos (mapa UNPA) — presentes si !esExterno
   idPunto?: number | null;
   etiquetaPunto?: string | null;
   coordX?: number | null;
   coordY?: number | null;
-}
 
-export interface OrganizadorPublico {
-  nombre: string;
-  tipo: 'CARRERA' | 'DEPARTAMENTO';
+  // Campos externos (Google Maps) — presentes si esExterno
+  latitud?: number | null;
+  longitud?: number | null;
+
+  /**
+   * URL directa de Google Maps para el lugar externo.
+   * El componente muestra un enlace "Ver en Google Maps" cuando tiene valor.
+   */
+  urlMaps?: string | null;
 }

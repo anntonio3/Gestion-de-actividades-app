@@ -196,4 +196,12 @@ export class MapaEspaciosComponent implements OnInit {
     this.mensajeFlash = mensaje;
     setTimeout(() => this.mensajeFlash = '', 3000);
   }
+
+  abrirModalExterno(): void {
+    this.idPuntoModal   = null;   // sin punto del mapa
+    this.idEspacioModal = null;
+    this.modoEdicion    = false;
+    this.modalEdicionAbierto = true;
+  }
+
 }
