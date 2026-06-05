@@ -169,6 +169,7 @@ export class CalendarioComponent implements OnInit, OnDestroy {
     this.applyFilter();
   }
 
+  /*
   applyFilter(): void {
     const q = this.searchQuery.toLowerCase();
     const filtrados = this.actividades.filter(ev => {
@@ -212,6 +213,45 @@ export class CalendarioComponent implements OnInit, OnDestroy {
     this.eventsPage = futuros.length > 0
       ? this.paginaFuturosInicio
       : Math.max(0, this.totalPages - 1);
+
+    this.cargarAsistenciasPagina();
+  } */
+
+  applyFilter(): void {
+    const q = this.searchQuery.toLowerCase();
+    const ahora = new Date();
+
+    const filtrados = this.actividades.filter(ev => {
+      // Excluir eventos ya finalizados
+      const finEvento = new Date(ev.fechaActividad + 'T' + ev.horaFin);
+      if (finEvento < ahora) return false;
+
+      return !q
+        || ev.nombre.toLowerCase().includes(q)
+        || ev.descripcion.toLowerCase().includes(q);
+    });
+
+    filtrados.sort((a, b) => {
+      const da = new Date(a.fechaActividad + 'T00:00:00').getTime();
+      const db = new Date(b.fechaActividad + 'T00:00:00').getTime();
+      if (da !== db) return da - db;
+      return a.horaInicio.localeCompare(b.horaInicio);
+    });
+
+    this.filteredEvents = filtrados;
+    this.calcularPaginas();
+  }
+
+  private calcularPaginas(): void {
+    this.paginas = [];
+    this.paginaFuturosInicio = 0;
+
+    for (let i = 0; i < this.filteredEvents.length; i += this.EVENTS_PER_PAGE) {
+      this.paginas.push(this.filteredEvents.slice(i, i + this.EVENTS_PER_PAGE));
+    }
+
+    this.totalPages = this.paginas.length;
+    this.eventsPage = 0;
 
     this.cargarAsistenciasPagina();
   }
