@@ -116,12 +116,12 @@
         <!-- Procedencia -->
         <div class="form-field" [class.has-error]="invalido('procedencia')">
           <label>
-            Ciudad / Institucion de origen
+            Institucion de origen
             <span class="req">*</span>
           </label>
           <input type="text"
                  formControlName="procedencia"
-                 placeholder="Ej: Tuxtepec, Oaxaca o UNAM"
+                 placeholder="Ej: CBTIS, Cobao..."
                  maxlength="150">
           <span class="error-msg">La procedencia es obligatoria.</span>
         </div>
@@ -131,13 +131,13 @@
           <div class="form-field" [class.has-error]="invalido('correo')">
             <label>
               Correo
-              <span class="opt">(opcional)</span>
+              <span class="req">*</span>
             </label>
             <input type="email"
                    formControlName="correo"
                    placeholder="tu@correo.com"
                    maxlength="150">
-            <span class="error-msg">Formato de correo invalido.</span>
+            <span class="error-msg">El correo es obligatorio y debe tener un formato valido.</span>
           </div>
 
           <div class="form-field" [class.has-error]="invalido('telefono')">

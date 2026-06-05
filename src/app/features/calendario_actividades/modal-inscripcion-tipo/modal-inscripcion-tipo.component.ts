@@ -54,7 +54,7 @@ export class ModalInscripcionTipoComponent implements OnInit {
       edad:        [null, [Validators.required, Validators.min(1), Validators.max(120)]],
       sexo:        ['', Validators.required],
       procedencia: ['', [Validators.required, Validators.maxLength(150)]],
-      correo:      ['', [Validators.email, Validators.maxLength(150)]],
+      correo: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
       telefono:    ['', [Validators.maxLength(20)]]
     });
   }

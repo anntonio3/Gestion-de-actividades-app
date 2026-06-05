@@ -18,6 +18,7 @@ import { InscripcionExternoService } from '../../core/services/inscripcion-exter
 import { InscripcionExternoResponse } from '../../core/models/inscripcion-externo.model';
 import { ModalInscripcionTipoComponent } from './modal-inscripcion-tipo/modal-inscripcion-tipo.component';
 
+
 interface DayPill {
   date: Date;
   dayName: string;
@@ -756,6 +757,7 @@ export class CalendarioComponent implements OnInit, OnDestroy {
     };
     // El modal maneja el paso 3 (exito) internamente.
     // No cerramos aqui: el usuario cierra cuando hace click en "Cerrar" del paso exito.
+    this.cargarInscripcionesPagina();
   }
   
   /**
