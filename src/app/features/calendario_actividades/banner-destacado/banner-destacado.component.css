@@ -1,0 +1,30 @@
+:host {
+  flex: 0 0 calc(70% - 0.75rem);
+  display: flex;
+}
+:host .highlighted-card { width: 100%; margin: 0; }
+
+/* Skeleton de carga del banner destacado */
+.destacado-skeleton {
+  pointer-events: none;
+}
+.destacado-skeleton-img {
+  background: linear-gradient(90deg, #e8f0ee 25%, #f0f9f7 50%, #e8f0ee 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e8f0ee 25%, #f0f9f7 50%, #e8f0ee 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  margin-bottom: 0.6rem;
+}
+.skeleton-badge { width: 90px; height: 22px; border-radius: 30px; }
+.skeleton-title { width: 70%; height: 22px; }
+.skeleton-text  { width: 90%; }
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

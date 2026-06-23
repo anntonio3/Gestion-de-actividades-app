@@ -199,6 +199,12 @@
               <span class="material-symbols-rounded">visibility</span>
               Ver detalle
             </button>
+            @if (s.estado === 'APROBADA') {
+              <button class="btn-destacar" (click)="iniciarDestacar(s, $event)">
+                <span class="material-symbols-rounded">star</span>
+                Destacar
+              </button>
+            }
           </div>
         </div>
       }
@@ -468,5 +474,72 @@
       {{ toastTipo === 'exito' ? 'check_circle' : 'error' }}
     </span>
     {{ toastMensaje }}
+  </div>
+}
+
+<!-- US-25: Modal de sugerencia tras aprobar un tipo DESTACADO -->
+@if (sugerenciaVisible && actividadSugerida) {
+  <div class="modal-overlay open" (click)="omitirSugerencia()">
+    <div class="confirm-modal" (click)="$event.stopPropagation()">
+      <div class="confirm-icon sugerencia">
+        <span class="material-symbols-rounded">star</span>
+      </div>
+      <h2>¿Destacar este evento?</h2>
+      <p>
+        <strong>{{ actividadSugerida.nombre }}</strong> es un evento importante.
+        ¿Quieres mostrarlo como destacado en la portada del calendario?
+      </p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" (click)="omitirSugerencia()">Omitir</button>
+        <button class="btn btn-primary" (click)="aceptarSugerencia()">
+          <span class="material-symbols-rounded">star</span>
+          Marcar como destacado
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- US-26: Primer modal (resumen) del destacado manual -->
+@if (destacandoId !== null && actividadSugerida) {
+  <div class="modal-overlay open" (click)="cancelarDestacar()">
+    <div class="confirm-modal" (click)="$event.stopPropagation()">
+      <div class="confirm-icon sugerencia">
+        <span class="material-symbols-rounded">star</span>
+      </div>
+      <h2>Destacar evento</h2>
+      <p>
+        Vas a destacar <strong>{{ actividadSugerida.nombre }}</strong> en la
+        portada del calendario público.
+      </p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" (click)="cancelarDestacar()">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmarPrimerModal()">Continuar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- US-26: Segundo modal — confirmación de reemplazo (doble validación) -->
+@if (confirmacionReemplazoVisible && conflictoDestacado) {
+  <div class="modal-overlay open" (click)="cancelarReemplazo()">
+    <div class="confirm-modal" (click)="$event.stopPropagation()">
+      <div class="confirm-icon advertencia">
+        <span class="material-symbols-rounded">warning</span>
+      </div>
+      <h2>¿Confirmar destacado?</h2>
+      <p>
+        Ya hay un evento destacado:
+        <strong>{{ conflictoDestacado.nombreActual }}</strong>.
+        Si continúas, será reemplazado y dejará de mostrarse en la portada.
+      </p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" (click)="cancelarReemplazo()">Cancelar</button>
+        <button class="btn btn-danger" (click)="confirmarReemplazo()">
+          <span class="material-symbols-rounded">swap_horiz</span>
+          Reemplazar destacado
+        </button>
+      </div>
+    </div>
   </div>
 }

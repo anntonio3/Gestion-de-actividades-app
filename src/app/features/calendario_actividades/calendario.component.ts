@@ -17,6 +17,7 @@ import { SesionService } from '../../core/services/sesion.service';
 import { InscripcionExternoService } from '../../core/services/inscripcion-externo.service';
 import { InscripcionExternoResponse } from '../../core/models/inscripcion-externo.model';
 import { ModalInscripcionTipoComponent } from './modal-inscripcion-tipo/modal-inscripcion-tipo.component';
+import { BannerDestacadoComponent } from './banner-destacado/banner-destacado.component';
 
 
 interface DayPill {
@@ -43,7 +44,7 @@ interface MiniCalDay {
 @Component({
   selector: 'app-calendario',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, ModalDetalleEventoComponent, ModalInscripcionTipoComponent, RouterLink],
+  imports: [CommonModule, FormsModule, NavbarComponent, ModalDetalleEventoComponent, ModalInscripcionTipoComponent, RouterLink, BannerDestacadoComponent],
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css'],
   providers: [DatePipe]
@@ -170,6 +171,12 @@ export class CalendarioComponent implements OnInit, OnDestroy {
         this.error   = true;
       }
     });
+  }
+
+  // US-27: abrir detalle del evento destacado desde el banner
+  abrirDestacado(idActividad: number): void {
+    this.idActividadDetalle = idActividad;
+    this.modalDetalleAbierto = true;
   }
 
   selectCategoria(cat?: Categoria): void {
@@ -860,5 +867,6 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   estaCancelandoExterna(idActividad: number): boolean {
     return this.cancelandoExternoIds.has(idActividad);
   }
+
 
 }

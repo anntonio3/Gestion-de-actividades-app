@@ -76,6 +76,8 @@ export interface SolicitudDecidida {
   fechaRevision: string;
   nombreVicerrector: string;
   version: number;
+
+  sugerirDestacado?: boolean;   // US-25
 }
 
 // Filtros UI -> query params

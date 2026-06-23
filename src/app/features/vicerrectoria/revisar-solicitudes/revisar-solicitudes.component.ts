@@ -11,6 +11,7 @@ import {
   EstadoSolicitud, FiltrosSolicitudes
 } from '../../../core/models/vicerrectoria.model';
 import { Categoria, Carrera, Departamento } from '../../../core/models/catalogo.model';
+import { DestacadoService } from '../../../core/services/destacado.service';
 
 type FiltroEstado = 'TODOS' | EstadoSolicitud;
 type Decision = 'APROBADA' | 'RECHAZADA';
@@ -27,6 +28,7 @@ export class RevisarSolicitudesComponent implements OnInit {
   private readonly vicerrectoriaService = inject(VicerrectoriaService);
   private readonly catalogoService = inject(CatalogoService);
   readonly sesion = inject(SesionService);
+  private readonly destacadoService = inject(DestacadoService);
 
   // Catalogos para filtros
   categorias: Categoria[] = [];
@@ -68,6 +70,17 @@ export class RevisarSolicitudesComponent implements OnInit {
   toastMensaje = '';
   toastTipo: 'exito' | 'error' = 'exito';
   toastVisible = false;
+
+  // US-25: modal de sugerencia tras aprobar un tipo DESTACADO
+  sugerenciaVisible = false;
+  actividadSugerida: { id: number; nombre: string } | null = null;
+
+  // US-26: estado del flujo de destacar manual
+  destacandoId: number | null = null;          // actividad en proceso de destacar
+  confirmacionReemplazoVisible = false;
+  conflictoDestacado: { idActual: number; nombreActual: string } | null = null;
+  // Guarda el id que el admin quiere destacar mientras confirma el reemplazo
+  pendienteDestacarId: number | null = null;
 
   ngOnInit(): void {
     this.cargarCatalogos();
@@ -296,15 +309,22 @@ export class RevisarSolicitudesComponent implements OnInit {
     obs.subscribe({
       next: res => {
         this.procesando = false;
-        // Actualiza el item en el set completo para que stats y vista filtrada queden al dia
         const idx = this.solicitudesTodas.findIndex(s => s.idActividad === idActividad);
         if (idx !== -1) {
           this.solicitudesTodas[idx] = { ...this.solicitudesTodas[idx], estado: res.estado };
         }
         const verbo = res.estado === 'APROBADA' ? 'aprobada' : 'rechazada';
         this.mostrarToast(`Solicitud ${verbo} correctamente.`, 'exito');
+
+        const nombreAct = this.detalle?.nombre ?? '';
         this.detalle = null;
         this.decisionPendiente = null;
+
+        // US-25: si el back sugiere destacar, abrir modal informativo
+        if (res.estado === 'APROBADA' && res.sugerirDestacado) {
+          this.actividadSugerida = { id: idActividad, nombre: nombreAct };
+          this.sugerenciaVisible = true;
+        }
       },
       error: err => {
         this.procesando = false;
@@ -368,4 +388,93 @@ export class RevisarSolicitudesComponent implements OnInit {
     this.toastVisible = true;
     setTimeout(() => this.toastVisible = false, 3000);
   }
+
+  // ── US-25: acciones del modal de sugerencia ──────────────────
+
+  // El admin acepta destacar el evento recién aprobado
+  aceptarSugerencia(): void {
+    if (!this.actividadSugerida) return;
+    const id = this.actividadSugerida.id;
+    this.sugerenciaVisible = false;
+    this.ejecutarDestacar(id, false);
+  }
+
+  // El admin omite: aprueba sin destacar
+  omitirSugerencia(): void {
+    this.sugerenciaVisible = false;
+    this.actividadSugerida = null;
+  }
+
+  // ── US-26: destacar manual desde la ficha ────────────────────
+
+  // Boton "Destacar" en una solicitud aprobada -> primer modal (resumen)
+  iniciarDestacar(s: SolicitudListItem, event: MouseEvent): void {
+    event.stopPropagation();
+    this.actividadSugerida = { id: s.idActividad, nombre: s.nombre };
+    // Reutilizamos el modal de confirmacion final directamente:
+    // primer modal = resumen, segundo = confirmacion (doble validacion del ticket)
+    this.destacandoId = s.idActividad;
+  }
+
+  // El admin confirma en el primer modal -> intenta destacar
+  confirmarPrimerModal(): void {
+    if (!this.actividadSugerida) return;
+    const id = this.actividadSugerida.id;
+    this.destacandoId = null;
+    this.ejecutarDestacar(id, false);
+  }
+
+  cancelarDestacar(): void {
+    this.destacandoId = null;
+    this.actividadSugerida = null;
+  }
+
+  // Llama al back; maneja el 409 de reemplazo
+  private ejecutarDestacar(idActividad: number, confirmarReemplazo: boolean): void {
+    const idAdmin = this.sesion.getIdAdmin();
+    this.pendienteDestacarId = idActividad;
+
+    this.destacadoService.destacar(idActividad, { idAdmin, confirmarReemplazo }).subscribe({
+      next: res => {
+        this.mostrarToast(`"${res.nombre}" es ahora el evento destacado.`, 'exito');
+        this.limpiarFlujoDestacar();
+      },
+      error: err => {
+        if (err.status === 409 && err.error?.idDestacadoActual) {
+          // Ya hay otro destacado: pedir confirmacion de reemplazo
+          this.conflictoDestacado = {
+            idActual: err.error.idDestacadoActual,
+            nombreActual: err.error.nombreDestacadoActual
+          };
+          this.confirmacionReemplazoVisible = true;
+        } else {
+          this.mostrarToast(
+            err.error?.mensaje ?? 'No se pudo destacar el evento.', 'error');
+          this.limpiarFlujoDestacar();
+        }
+      }
+    });
+  }
+
+  // El admin confirma el reemplazo en el modal de advertencia
+  confirmarReemplazo(): void {
+    if (this.pendienteDestacarId == null) return;
+    this.confirmacionReemplazoVisible = false;
+    this.conflictoDestacado = null;
+    this.ejecutarDestacar(this.pendienteDestacarId, true);
+  }
+
+  cancelarReemplazo(): void {
+    this.confirmacionReemplazoVisible = false;
+    this.conflictoDestacado = null;
+    this.limpiarFlujoDestacar();
+  }
+
+  private limpiarFlujoDestacar(): void {
+    this.destacandoId = null;
+    this.actividadSugerida = null;
+    this.pendienteDestacarId = null;
+    this.conflictoDestacado = null;
+  }
+
 }

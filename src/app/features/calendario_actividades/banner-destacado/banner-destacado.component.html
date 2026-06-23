@@ -1,0 +1,62 @@
+<!-- US-27: Banner del evento destacado.
+     Si no hay destacado activo no se renderiza nada (sin hueco). -->
+
+@if (cargando) {
+  <div class="highlighted-card destacado-skeleton">
+    <div class="highlighted-img destacado-skeleton-img"></div>
+    <div class="highlighted-body">
+      <div class="skeleton-line skeleton-badge"></div>
+      <div class="skeleton-line skeleton-title"></div>
+      <div class="skeleton-line skeleton-text"></div>
+    </div>
+  </div>
+}
+
+@if (!cargando && destacado) {
+  <div class="highlighted-card" (click)="onVerDetalle()">
+    <div class="highlighted-img"
+         [style.background]="destacado.imagenPortada ? 'none' : ''">
+      @if (destacado.imagenPortada) {
+        <img [src]="destacado.imagenPortada"
+             [alt]="destacado.nombre"
+             class="highlighted-event-img">
+      } @else {
+        <span class="material-symbols-rounded">
+          {{ getIconoCategoria(destacado.categoria) }}
+        </span>
+      }
+    </div>
+
+    <div class="highlighted-body">
+      <span class="highlighted-badge">
+        <span class="material-symbols-rounded">star</span>
+        Destacado
+      </span>
+      <h2>{{ destacado.nombre }}</h2>
+      <p>{{ destacado.descripcion }}</p>
+
+      <div class="highlighted-meta">
+        <span class="meta-tag">
+          <span class="material-symbols-rounded">calendar_month</span>
+          {{ formatFecha(destacado.fechaActividad) }}
+        </span>
+        @if (destacado.lugar) {
+          <span class="meta-tag">
+            <span class="material-symbols-rounded">location_on</span>
+            {{ destacado.lugar }}
+          </span>
+        }
+        @if (destacado.capacidad) {
+          <span class="meta-tag">
+            <span class="material-symbols-rounded">groups</span>
+            {{ destacado.capacidad }} lugares
+          </span>
+        }
+        <span class="meta-tag">
+          <span class="material-symbols-rounded">schedule</span>
+          {{ formatHora(destacado.horaInicio) }} – {{ formatHora(destacado.horaFin) }} hrs
+        </span>
+      </div>
+    </div>
+  </div>
+}
