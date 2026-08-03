@@ -4,6 +4,9 @@ export interface InscripcionEstado {
   inscrito: boolean;
   idInscripcion: number | null;
   totalInscritos: number;
+  aforo?: number | null;
+  lugaresDisponibles?: number | null;
+  cupoLleno?: boolean;
 }
 
 export interface InscripcionResponse {

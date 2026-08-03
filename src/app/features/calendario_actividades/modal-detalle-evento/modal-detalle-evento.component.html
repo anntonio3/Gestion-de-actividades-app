@@ -87,6 +87,21 @@
                   Capacidad: {{ detalle.lugar.capacidad }}
                 </span>
               </div>
+
+              <!-- US-29: indicador de cupo / lugares disponibles -->
+              @if (detalle.requiereInscripcion) {
+                @if (detalle.cupoLleno) {
+                  <div class="cupo-pill cupo-lleno">
+                    <span class="material-symbols-rounded">block</span>
+                    Cupo lleno
+                  </div>
+                } @else if (detalle.lugaresDisponibles != null) {
+                  <div class="cupo-pill cupo-disponible">
+                    <span class="material-symbols-rounded">event_seat</span>
+                    Lugares disponibles: {{ detalle.lugaresDisponibles }}
+                  </div>
+                }
+              }
             </div>
 
             <!-- Espacio INTERNO: mapa de la UNPA con punto marcado -->

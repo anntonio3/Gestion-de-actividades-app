@@ -140,6 +140,11 @@ export interface ActividadDetallePublica {
   imagenPortada?: string;
   lugar: LugarPublico | null;
   organizadores: OrganizadorPublico[];
+
+  requiereInscripcion?: boolean;
+  totalInscritos?: number;
+  lugaresDisponibles?: number | null;
+  cupoLleno?: boolean;
 }
 
 

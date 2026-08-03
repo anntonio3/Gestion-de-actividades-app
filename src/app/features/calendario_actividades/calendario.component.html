@@ -285,6 +285,7 @@
         *ngFor="let ev of pagedEvents; let i = index"
         [style.animation-delay]="(i * 0.07) + 's'"
         [class.past-card]="isPast(ev)"
+        [class.cupo-lleno-card]="!isPast(ev) && estadoInscripcion(ev.id).cupoLleno"
         (click)="abrirDetalleEvento(ev)"
       >
         <!-- Imagen / color de portada -->
@@ -367,6 +368,13 @@
                   <span class="material-symbols-rounded">how_to_reg</span>
                   {{ estaInscribiendose(ev.id) ? 'Procesando...' : 'Inscribirse' }}
                 </button>
+              }
+              <!-- US-29: banner de error inline (cupo lleno u otro error de inscripcion) -->
+              @if (erroresInscripcion[ev.id]) {
+                <div class="inscripcion-error-banner">
+                  <span class="material-symbols-rounded">error</span>
+                  {{ erroresInscripcion[ev.id] }}
+                </div>
               }
             </div>
           } @else {
@@ -456,4 +464,3 @@
     (cerrado)="cerrarModalInscripcionTipo()">
   </app-modal-inscripcion-tipo>
 }
-
