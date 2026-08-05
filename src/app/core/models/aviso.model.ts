@@ -1,5 +1,3 @@
-// ─── Modelo de aviso para el corcho digital (US-17/US-18/US-19/US-20) ───
-
 export interface Aviso {
   idAviso: number;
   titulo: string;
