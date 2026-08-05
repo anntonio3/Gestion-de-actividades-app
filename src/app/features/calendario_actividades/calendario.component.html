@@ -360,21 +360,20 @@
                     {{ estaCancelandoExterna(ev.id) ? '...' : 'Cancelar' }}
                   </button>
                 </div>
+              } @else if (estadoInscripcion(ev.id).cupoLleno) {
+                <!-- Cupo lleno: botón deshabilitado -->
+                <button class="btn-inscribirse" disabled>
+                  <span class="material-symbols-rounded">block</span>
+                  Cupo lleno
+                </button>
               } @else {
-                <!-- Boton disponible para cualquier visitante o usuario no logueado -->
+                <!-- Botón disponible para cualquier visitante o usuario no logueado -->
                 <button class="btn-inscribirse"
                         [disabled]="estaInscribiendose(ev.id)"
                         (click)="inscribirse(ev, $event)">
                   <span class="material-symbols-rounded">how_to_reg</span>
                   {{ estaInscribiendose(ev.id) ? 'Procesando...' : 'Inscribirse' }}
                 </button>
-              }
-              <!-- US-29: banner de error inline (cupo lleno u otro error de inscripcion) -->
-              @if (erroresInscripcion[ev.id]) {
-                <div class="inscripcion-error-banner">
-                  <span class="material-symbols-rounded">error</span>
-                  {{ erroresInscripcion[ev.id] }}
-                </div>
               }
             </div>
           } @else {
