@@ -99,6 +99,9 @@ export class CalendarioComponent implements OnInit, OnDestroy {
   inscripciones: Record<number, InscripcionEstado> = {};
   inscribiendoIds = new Set<number>();
 
+  // US-29: mapa idActividad -> mensaje de error inline (cupo lleno, etc.)
+  erroresInscripcion: Record<number, string> = {};
+
   // Para deshabilitar botones mientras se procesa una respuesta
   respondiendoIds = new Set<number>();
 
@@ -560,10 +563,13 @@ export class CalendarioComponent implements OnInit, OnDestroy {
         next: estado => {
           this.inscripciones[ev.id] = estado;
           this.inscribiendoIds.delete(ev.id);
+          delete this.erroresInscripcion[ev.id];
         },
         error: err => {
           this.inscribiendoIds.delete(ev.id);
-          alert(err.mensajeAmigable ?? 'No se pudo completar la inscripcion.');
+          this.erroresInscripcion[ev.id] = err.mensajeAmigable ?? 'No se pudo completar la inscripcion.';
+          // Limpiar el mensaje después de 5 segundos
+          setTimeout(() => delete this.erroresInscripcion[ev.id], 5000);
         }
       });
       return;
@@ -596,7 +602,8 @@ export class CalendarioComponent implements OnInit, OnDestroy {
       },
       error: err => {
         this.inscribiendoIds.delete(ev.id);
-        alert(err.mensajeAmigable ?? 'No se pudo cancelar la inscripcion.');
+        this.erroresInscripcion[ev.id] = err.mensajeAmigable ?? 'No se pudo cancelar la inscripcion.';
+        setTimeout(() => delete this.erroresInscripcion[ev.id], 5000);
       }
     });
   }
@@ -851,7 +858,8 @@ export class CalendarioComponent implements OnInit, OnDestroy {
       },
       error: err => {
         this.cancelandoExternoIds.delete(ev.id);
-        alert(err.mensajeAmigable ?? 'No se pudo cancelar la inscripcion.');
+        this.erroresInscripcion[ev.id] = err.mensajeAmigable ?? 'No se pudo cancelar la inscripcion.';
+        setTimeout(() => delete this.erroresInscripcion[ev.id], 5000);
       }
     });
   }

@@ -285,6 +285,7 @@
         *ngFor="let ev of pagedEvents; let i = index"
         [style.animation-delay]="(i * 0.07) + 's'"
         [class.past-card]="isPast(ev)"
+        [class.cupo-lleno-card]="!isPast(ev) && estadoInscripcion(ev.id).cupoLleno"
         (click)="abrirDetalleEvento(ev)"
       >
         <!-- Imagen / color de portada -->
@@ -359,8 +360,14 @@
                     {{ estaCancelandoExterna(ev.id) ? '...' : 'Cancelar' }}
                   </button>
                 </div>
+              } @else if (estadoInscripcion(ev.id).cupoLleno) {
+                <!-- Cupo lleno: botón deshabilitado -->
+                <button class="btn-inscribirse" disabled>
+                  <span class="material-symbols-rounded">block</span>
+                  Cupo lleno
+                </button>
               } @else {
-                <!-- Boton disponible para cualquier visitante o usuario no logueado -->
+                <!-- Botón disponible para cualquier visitante o usuario no logueado -->
                 <button class="btn-inscribirse"
                         [disabled]="estaInscribiendose(ev.id)"
                         (click)="inscribirse(ev, $event)">
@@ -456,4 +463,3 @@
     (cerrado)="cerrarModalInscripcionTipo()">
   </app-modal-inscripcion-tipo>
 }
-

@@ -577,6 +577,30 @@
 .event-card:hover { box-shadow: var(--card-hover); transform: translateY(-4px); }
 .past-card { opacity: 0.72; }
 
+/* US-29: tarjeta con cupo lleno — gris + marca de agua diagonal */
+.cupo-lleno-card {
+  filter: grayscale(85%);
+  position: relative;
+}
+.cupo-lleno-card:hover {
+  transform: translateY(-2px);
+}
+.cupo-lleno-card::after {
+  content: 'CUPO LLENO';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-35deg);
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: .18em;
+  color: rgba(150, 0, 0, 0.18);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
