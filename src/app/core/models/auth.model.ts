@@ -37,6 +37,7 @@ export interface LoginResponse {
   iniciales: string;
   tipo: TipoSesion;
   rol?: RolUsuario;   // solo para PROFESOR y ADMIN
+  token: string;      // JWT 
 }
 
 export interface RecuperacionResponse {

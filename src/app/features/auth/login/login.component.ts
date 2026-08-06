@@ -40,6 +40,10 @@ export class LoginComponent {
     return !!c && c.invalid && c.touched;
   }
 
+  irAlCalendario(): void {
+    this.router.navigate(['/calendario']);
+  }
+
   enviar(): void {
     this.form.markAllAsTouched();
     if (this.form.invalid) return;

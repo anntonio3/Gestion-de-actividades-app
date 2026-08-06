@@ -2,20 +2,24 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoginResponse } from '../models/auth.model';
 
-// Clave usada en localStorage para persistir la sesion entre recargas
-const SESION_KEY = 'unpa_sesion';
-
 /**
- * Servicio de sesion.
- * Almacena el usuario autenticado en un signal reactivo y en localStorage
- * para que la sesion sobreviva a recargas de pagina.
+ * US-00: Servicio de sesión.
+ *
+ * El token JWT se guarda en el signal en memoria (no en localStorage).
+ * Los datos NO sensibles (nombre, tipo, iniciales) se persisten en
+ * sessionStorage para sobrevivir a F5 dentro de la misma pestaña.
+ * Al cerrar la pestaña/navegador la sesión se limpia automáticamente.
+ *
+ * El rol se lee del objeto de sesión — que proviene del payload del JWT
+ * que devuelve el backend — nunca se asume desde localStorage directamente.
  */
 @Injectable({ providedIn: 'root' })
 export class SesionService {
 
   private readonly router = inject(Router);
+  private readonly SESSION_KEY = 'unpa_sesion_meta';
 
-  // Signal reactivo con el usuario actual (null = sin sesion)
+  // Signal reactivo con el usuario actual (null = sin sesión)
   private readonly _usuario = signal<LoginResponse | null>(this.cargarDesdeStorage());
 
   // Computadas de solo lectura para los componentes
@@ -25,37 +29,37 @@ export class SesionService {
   readonly esProfesor = computed(() => this._usuario()?.tipo === 'PROFESOR');
   readonly esAlumno   = computed(() => this._usuario()?.tipo === 'ALUMNO');
 
-  // ── Iniciar sesion ─────────────────────────────────────────────
+  // ── Iniciar sesión ──────────────────────────────────────────────
 
   iniciarSesion(respuesta: LoginResponse): void {
     this._usuario.set(respuesta);
-    localStorage.setItem(SESION_KEY, JSON.stringify(respuesta));
+    // Guardar en sessionStorage (no localStorage) para sobrevivir F5
+    sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(respuesta));
   }
 
-  // ── Cerrar sesion ──────────────────────────────────────────────
+  // ── Cerrar sesión ───────────────────────────────────────────────
 
   cerrarSesion(): void {
     this._usuario.set(null);
-    localStorage.removeItem(SESION_KEY);
+    sessionStorage.removeItem(this.SESSION_KEY);
+    localStorage.removeItem('unpa_sesion');   // limpiar legado si existe
     this.router.navigate(['/auth/login']);
   }
 
-  // ── Getters de compatibilidad (reemplazan los valores hardcodeados) ─
+  // ── Getters de compatibilidad ────────────────────────────────────
 
   getIdUsuario(): number {
     const u = this._usuario();
-    if (!u) throw new Error('No hay sesion activa');
+    if (!u) throw new Error('No hay sesión activa');
     return u.id;
   }
 
-  /** Devuelve el id del profesor autenticado. Lanza error si no es PROFESOR. */
   getIdProfesor(): number {
     const u = this._usuario();
     if (!u || u.tipo !== 'PROFESOR') throw new Error('El usuario no es PROFESOR');
     return u.id;
   }
 
-  /** Devuelve el id del admin autenticado. Lanza error si no es ADMIN. */
   getIdAdmin(): number {
     const u = this._usuario();
     if (!u || u.tipo !== 'ADMIN') throw new Error('El usuario no es ADMIN');
@@ -75,39 +79,41 @@ export class SesionService {
   getNombreCorto(): string {
     const u = this._usuario();
     if (!u) return '';
-    // Toma solo el primer apellido para que no sea tan largo en el navbar
     const apellidoCorto = u.apellidos?.split(' ')[0] ?? '';
     return `${u.nombre} ${apellidoCorto}.`;
   }
 
-  getInicialesAdmin(): string {
-    return this._usuario()?.iniciales ?? 'AD';
-  }
+  getInicialesAdmin(): string { return this._usuario()?.iniciales ?? 'AD'; }
+  getIniciales(): string      { return this._usuario()?.iniciales ?? ''; }
 
-  getIniciales(): string {
-    return this._usuario()?.iniciales ?? '';
-  }
-
-  // ── Persistencia ───────────────────────────────────────────────
+  // ── Persistencia (sessionStorage) ────────────────────────────────
 
   private cargarDesdeStorage(): LoginResponse | null {
     try {
-      const raw = localStorage.getItem(SESION_KEY);
+      // Intentar sessionStorage primero (US-00)
+      const raw = sessionStorage.getItem(this.SESSION_KEY)
+               ?? localStorage.getItem('unpa_sesion');   // fallback legado
+
       if (!raw) return null;
 
       const parsed = JSON.parse(raw) as LoginResponse;
 
-      // Validacion minima: si el objeto no tiene los campos esperados
-      // (por ejemplo, viene de una sesion del sistema anterior sin "tipo"),
-      // lo descartamos para forzar un nuevo login limpio.
       if (!parsed.id || !parsed.tipo || !parsed.nombre) {
-        localStorage.removeItem(SESION_KEY);
+        sessionStorage.removeItem(this.SESSION_KEY);
+        localStorage.removeItem('unpa_sesion');
+        return null;
+      }
+
+      // Si venía del legacy (sin token), forzar nuevo login
+      if (!parsed.token) {
+        sessionStorage.removeItem(this.SESSION_KEY);
+        localStorage.removeItem('unpa_sesion');
         return null;
       }
 
       return parsed;
     } catch {
-      localStorage.removeItem(SESION_KEY);
+      sessionStorage.removeItem(this.SESSION_KEY);
       return null;
     }
   }

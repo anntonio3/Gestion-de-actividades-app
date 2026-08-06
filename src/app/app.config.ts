@@ -5,6 +5,7 @@ import { routes } from './app.routes';
 import localeEs from '@angular/common/locales/es';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { registerLocaleData } from '@angular/common';
+import { jwtInterceptor } from './core/interceptors/Jwt.interceptor';
 
 // Registrar el locale español globalmente
 registerLocaleData(localeEs, 'es-MX');
@@ -13,7 +14,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([errorInterceptor])),
-    { provide: LOCALE_ID, useValue: 'es-MX' }   // ← NUEVO
+    provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor])),
+    { provide: LOCALE_ID, useValue: 'es-MX' } 
   ]
 };

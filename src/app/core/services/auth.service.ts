@@ -45,9 +45,15 @@ export class AuthService {
     return this.http.post<{ mensaje: string }>(`${this.base}/restablecer`, request);
   }
 
-  /** Cerrar sesion */
+   /**
+   * US-00: Logout real.
+   * El jwtInterceptor adjunta automáticamente el header Authorization,
+   * el backend agrega el token a la blacklist y lo invalida en BD.
+   */
   logout(): void {
-    this.http.post(`${this.base}/logout`, {}).subscribe();
+    this.http.post(`${this.base}/logout`, {}).subscribe({
+      error: () => {} // ignorar errores de red en logout
+    });
     this.sesion.cerrarSesion();
   }
 }
