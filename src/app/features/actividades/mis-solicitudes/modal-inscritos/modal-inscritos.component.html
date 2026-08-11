@@ -1,0 +1,89 @@
+<!-- US-04: Modal de lista de inscritos -->
+<div class="modal-overlay" (click)="onCerrar()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <span class="material-symbols-rounded header-icon">group</span>
+      <div class="header-text">
+        <h2>Lista de inscritos</h2>
+        <p class="header-sub">{{ nombreActividad }}</p>
+      </div>
+      <button class="btn-icon-close" (click)="onCerrar()">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <!-- Cuerpo -->
+    <div class="modal-body">
+
+      @if (cargando) {
+        <div class="estado-carga">
+          <span class="material-symbols-rounded spin">autorenew</span>
+          Cargando lista...
+        </div>
+      } @else if (error) {
+        <div class="estado-error">
+          <span class="material-symbols-rounded">error</span>
+          {{ error }}
+        </div>
+      } @else if (lista.length === 0) {
+        <div class="estado-vacio">
+          <span class="material-symbols-rounded">person_off</span>
+          <p>Aún no hay inscritos en este evento.</p>
+        </div>
+      } @else {
+        <p class="total-badge">
+          <span class="material-symbols-rounded">groups</span>
+          {{ lista.length }} inscrito{{ lista.length !== 1 ? 's' : '' }}
+        </p>
+
+        <div class="tabla-wrapper">
+          <table class="tabla-inscritos">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Identificador</th>
+                <th>Inscrito el</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of lista; track item.numero) {
+                <tr>
+                  <td class="col-num">{{ item.numero }}</td>
+                  <td class="col-nombre">{{ item.nombre }}</td>
+                  <td>
+                    <span class="tipo-pill" [ngClass]="'tipo-' + item.tipoParticipante.toLowerCase().replace('/', '-')">
+                      {{ item.tipoParticipante }}
+                    </span>
+                  </td>
+                  <td class="col-id">{{ item.identificador }}</td>
+                  <td class="col-fecha">{{ item.fechaInscripcion }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      @if (!cargando && !error && lista.length > 0) {
+        <button class="btn-descarga" (click)="descargarPdf()">
+          <span class="material-symbols-rounded">picture_as_pdf</span>
+          Descargar PDF
+        </button>
+        <button class="btn-descarga btn-csv" (click)="descargarCsv()">
+          <span class="material-symbols-rounded">table_view</span>
+          Descargar CSV
+        </button>
+      }
+      <button class="btn-cerrar" (click)="onCerrar()">Cerrar</button>
+    </div>
+
+  </div>
+</div>

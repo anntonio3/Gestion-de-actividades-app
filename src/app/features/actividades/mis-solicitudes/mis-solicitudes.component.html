@@ -123,7 +123,9 @@
             </span>
             <!-- ↓ AQUÍ, solo aplica en aprobadas -->
             @if (s.estado === 'APROBADA' && s.requiereInscripcion && totalInscritos[s.idActividad] !== undefined) {
-              <div class="inscripcion-total-badge">
+              <div class="inscripcion-total-badge"
+                   (click)="abrirModalInscritos(s, $event)"
+                   title="Ver lista de inscritos">
                 <span class="material-symbols-rounded">groups</span>
                 {{ totalInscritos[s.idActividad] }} inscrito(s)
               </div>
@@ -343,6 +345,13 @@
     <!-- Pie modal – detalle -->
     <div class="modal-footer" *ngIf="!modoEdicion">
       <button class="btn-editar" *ngIf="detalle.estado === 'PENDIENTE'" (click)="abrirEdicion()"> Editar</button>
+      <!-- US-04: ver lista de inscritos -->
+      <button class="btn-inscritos"
+              *ngIf="detalle.estado === 'APROBADA' && detalle.requiereInscripcion"
+              (click)="abrirModalInscritos(detalle, $event)">
+        <span class="material-symbols-rounded">group</span>
+        Ver inscritos
+      </button>
       <button class="btn-cerrar" (click)="cerrarDetalle()">Cerrar</button>
     </div>
 
@@ -363,3 +372,13 @@
   <img *ngIf="imagenAmpliada" [src]="imagenAmpliada" alt="Imagen ampliada" (click)="$event.stopPropagation()">
   <button class="lightbox-close" (click)="cerrarImagenAmpliada()">✕</button>
 </div>
+
+<!-- US-04: Modal de lista de inscritos -->
+@if (modalInscritosAbierto && actividadParaInscritos) {
+  <app-modal-inscritos
+    [idActividad]="actividadParaInscritos.idActividad"
+    [idSolicitante]="sesion.getIdUsuario()"
+    [nombreActividad]="actividadParaInscritos.nombre"
+    (cerrar)="cerrarModalInscritos()">
+  </app-modal-inscritos>
+}

@@ -750,6 +750,28 @@
 }
 .btn-cerrar:hover { border-color: var(--primary); background: var(--primary-bg); }
 
+/* US-04: botón ver inscritos en modal footer */
+.btn-inscritos {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .5rem 1.1rem;
+  background: #e8f5e9; border: 1.5px solid var(--primary, #2e7d52);
+  border-radius: 9px; font-family: 'DM Sans', sans-serif;
+  font-size: .88rem; font-weight: 600; color: var(--primary, #2e7d52);
+  cursor: pointer; transition: background .2s, color .2s;
+}
+.btn-inscritos:hover { background: var(--primary, #2e7d52); color: #fff; }
+.btn-inscritos .material-symbols-rounded { font-size: 18px; }
+ 
+/* Badge de inscritos clickeable en tarjeta */
+.inscripcion-total-badge {
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.inscripcion-total-badge:hover {
+  background: #c8e6c9;
+  transform: scale(1.03);
+}
+
 @media (max-width: 500px) {
   .modal-grid-2 { grid-template-columns: 1fr; }
 }

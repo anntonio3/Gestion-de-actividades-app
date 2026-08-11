@@ -6,13 +6,15 @@ import { ActividadService } from '../../../core/services/actividad.service';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { SesionService } from '../../../core/services/sesion.service';
 import { InscripcionService } from '../../../core/services/inscripcion.service';
+import { ModalInscritosComponent } from './modal-inscritos/modal-inscritos.component';
+
 
 type FiltroEstado = '' | 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
 
 @Component({
   selector: 'app-mis-solicitudes',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, ModalInscritosComponent],
   templateUrl: './mis-solicitudes.component.html',
   styleUrls: ['./mis-solicitudes.component.css']
 })
@@ -54,10 +56,25 @@ export class MisSolicitudesComponent implements OnInit {
     horaFin: ''
   };
 
-  private readonly sesion = inject(SesionService);
+  protected readonly sesion = inject(SesionService);
 
   private inscripcionService = inject(InscripcionService);
   totalInscritos: Record<number, number> = {};
+
+   // US-pdf: modal de lista de inscritos
+  modalInscritosAbierto = false;
+  actividadParaInscritos: SolicitudActividad | null = null;
+
+  abrirModalInscritos(actividad: SolicitudActividad, evento: Event): void {
+    evento.stopPropagation();
+    this.actividadParaInscritos = actividad;
+    this.modalInscritosAbierto = true;
+  }
+
+  cerrarModalInscritos(): void {
+    this.modalInscritosAbierto = false;
+    this.actividadParaInscritos = null;
+  }
 
 
   constructor(private actividadService: ActividadService) {}
