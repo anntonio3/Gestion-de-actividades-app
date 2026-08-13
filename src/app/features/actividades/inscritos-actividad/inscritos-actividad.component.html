@@ -1,0 +1,61 @@
+<app-navbar
+  nombreUsuario="Sandro G."
+  inicialesUsuario="SG"
+  rutaRegresar="/mis-solicitudes"
+  [mostrarRegresar]="true"
+  titulo="Inscritos">
+</app-navbar>
+
+<div class="content-wrap">
+
+  <div class="empty-state" *ngIf="cargando">
+    <span class="icon">⏳</span>
+    <p>Cargando inscritos...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!cargando && error">
+    <span class="icon">⚠️</span>
+    <p style="color:var(--danger)">{{ error }}</p>
+  </div>
+
+  <ng-container *ngIf="!cargando && !error && datos">
+
+    <div class="evento-header">
+      <h2>{{ datos.nombreEvento }}</h2>
+      <p>{{ datos.fechaEvento }} · {{ datos.horaInicio }} – {{ datos.horaFin }}</p>
+      <p class="total">{{ datos.totalInscritos }} inscrito(s)</p>
+
+      <div class="acciones">
+        <button class="btn-descarga" [disabled]="descargando" (click)="descargar('pdf')">
+          <span class="material-symbols-rounded">picture_as_pdf</span> Descargar PDF
+        </button>
+        <button class="btn-descarga" [disabled]="descargando" (click)="descargar('csv')">
+          <span class="material-symbols-rounded">table_view</span> Descargar CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="datos.inscritos.length === 0">
+      <span class="icon">📭</span>
+      <p>Aún no hay inscritos en este evento.</p>
+    </div>
+
+    <table class="tabla-inscritos" *ngIf="datos.inscritos.length > 0">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Fecha de inscripción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let i of datos.inscritos">
+          <td>{{ i.nombre }}</td>
+          <td>{{ tipoLabel(i.tipoParticipante) }}</td>
+          <td>{{ i.fechaInscripcion | date:'dd/MM/yyyy HH:mm' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </ng-container>
+</div>

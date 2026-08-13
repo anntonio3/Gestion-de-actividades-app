@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { CalendarioComponent } from './features/calendario_actividades/calendario.component';
 import { authGuard, profesorGuard, adminGuard } from './core/guards/auth.guard';
+import { InscritosActividadComponent } from './features/actividades/inscritos-actividad/inscritos-actividad.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'calendario', pathMatch: 'full' },
@@ -127,6 +128,16 @@ export const routes: Routes = [
       import('./features/admin/grafica/grafica.component')
         .then(m => m.GraficaComponent) 
   },
+  {
+    path: 'mis-publicaciones/aprobadas',
+    canActivate: [profesorGuard],
+    data: { soloPublicadas: true },
+    loadComponent: () =>
+      import('./features/actividades/mis-solicitudes/mis-solicitudes.component')
+        .then(m => m.MisSolicitudesComponent)
+  },
+  { path: 'mis-solicitudes/:idActividad/inscritos', component: InscritosActividadComponent }
+  ,
   { path: '**', redirectTo: 'calendario' },
 
 ];

@@ -824,3 +824,83 @@
   background: var(--primary-bg);
   border-color: var(--primary);
 }
+
+.btn-ir-solicitudes {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin: 0 auto 1.2rem;
+  max-width: 1100px;
+  padding: .5rem 1.1rem;
+  background: white;
+  border: 1.5px solid var(--primary-light);
+  border-radius: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-ir-solicitudes:hover {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+}
+
+
+/* ================================================================
+   BADGE DE INSCRITOS + BOTON VER INSCRITOS (US-28)
+   ================================================================ */
+.inscripcion-total-badge {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .74rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  background: var(--primary-bg);
+  border: 1px solid var(--primary-light);
+  border-radius: 20px;
+  padding: .22rem .65rem;
+  margin-top: .4rem;
+}
+.inscripcion-total-badge .material-symbols-rounded {
+  font-size: 15px;
+}
+
+.btn-ver-inscritos {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  margin-top: .4rem;
+  background: white;
+  border: 1.5px solid var(--primary-light);
+  border-radius: 8px;
+  padding: .3rem .7rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .74rem;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-ver-inscritos:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+.btn-ver-inscritos .material-symbols-rounded {
+  font-size: 15px;
+}
+
+.alert-success, .alert-info {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.alert-success .material-symbols-rounded,
+.alert-info .material-symbols-rounded {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.btn-editar { display: inline-flex; align-items: center; gap: .3rem; }

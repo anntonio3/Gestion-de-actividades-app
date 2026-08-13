@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ActualizarActividadRequest, SolicitudActividad } from '../../../core/models/actividad.model';
 import { ActividadService } from '../../../core/services/actividad.service';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
@@ -26,6 +27,9 @@ export class MisSolicitudesComponent implements OnInit {
   busqueda = '';
   detalle: SolicitudActividad | null = null;
 
+  // NUEVO (US-28): modo "solo publicadas" activado por route.data
+  soloPublicadas = false;
+
   // Paginación
   readonly PAGE_SIZE = 10;
   paginaActual = 1;
@@ -39,11 +43,10 @@ export class MisSolicitudesComponent implements OnInit {
   // Imagen en edición (solo una)
   nuevasImagenes: File[] = [];
   previasImagenes: string[] = [];
-  imagenActual: string | null = null;      // URL de imagen existente
-  nuevaImagenPrevia: string | null = null; // preview de imagen nueva seleccionada
-  imagenActualEliminada = false;           // flag para saber si se quitó la actual
+  imagenActual: string | null = null;
+  nuevaImagenPrevia: string | null = null;
+  imagenActualEliminada = false;
 
-  // Vista de imagen ampliada
   imagenAmpliada: string | null = null;
 
   formEdicion: ActualizarActividadRequest = {
@@ -55,28 +58,34 @@ export class MisSolicitudesComponent implements OnInit {
   };
 
   private readonly sesion = inject(SesionService);
-
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private inscripcionService = inject(InscripcionService);
   totalInscritos: Record<number, number> = {};
-
 
   constructor(private actividadService: ActividadService) {}
 
   ngOnInit(): void {
+    // NUEVO (US-28): si la ruta trae soloPublicadas, arrancamos ya filtrado
+    // en APROBADA y ocultamos los contadores de Pendientes/Rechazadas.
+    this.soloPublicadas = this.route.snapshot.data['soloPublicadas'] === true;
+    if (this.soloPublicadas) {
+      this.filtroActivo = 'APROBADA';
+    }
     this.cargarSolicitudes();
   }
 
   cargarSolicitudes(): void {
     this.cargando = true;
     this.actividadService.getMisSolicitudes(this.sesion.getIdProfesor()).subscribe({
-      next: data => { 
-        this.todas = data; 
-        this.cargando = false; 
+      next: data => {
+        this.todas = data;
+        this.cargando = false;
         this.cargarTotalesInscritos();
       },
-      error: () => { 
-        this.error = 'Error al cargar las solicitudes. Intenta de nuevo.'; 
-        this.cargando = false; 
+      error: () => {
+        this.error = 'Error al cargar las solicitudes. Intenta de nuevo.';
+        this.cargando = false;
       }
     });
   }
@@ -88,47 +97,40 @@ export class MisSolicitudesComponent implements OnInit {
 
   // ── Lista filtrada ──
   get listaFiltrada(): SolicitudActividad[] {
-    let base = this.filtroActivo
-      ? this.todas.filter(s => s.estado === this.filtroActivo)
-      : this.todas;
+    // NUEVO (US-28): en modo publicadas, siempre forzamos APROBADA
+    // sin importar que filtroActivo cambie por algun otro flujo.
+    let base = this.soloPublicadas
+      ? this.aprobadas
+      : (this.filtroActivo ? this.todas.filter(s => s.estado === this.filtroActivo) : this.todas);
     const q = this.busqueda.trim().toLowerCase();
     return q ? base.filter(s => s.nombre.toLowerCase().includes(q)) : base;
   }
 
-  // ── Paginación ──
+  // ── Paginación (sin cambios) ──
   get totalPaginas(): number {
     return Math.max(1, Math.ceil(this.listaFiltrada.length / this.PAGE_SIZE));
   }
-
   get listaActiva(): SolicitudActividad[] {
     const inicio = (this.paginaActual - 1) * this.PAGE_SIZE;
     return this.listaFiltrada.slice(inicio, inicio + this.PAGE_SIZE);
   }
-
   get rangoInicio(): number {
     return this.listaFiltrada.length === 0 ? 0 : (this.paginaActual - 1) * this.PAGE_SIZE + 1;
   }
-
   get rangoFin(): number {
     return Math.min(this.paginaActual * this.PAGE_SIZE, this.listaFiltrada.length);
   }
-
-  /** Páginas visibles con ellipsis representado como -1 */
   get paginasVisibles(): number[] {
     const total = this.totalPaginas;
     const cur = this.paginaActual;
     if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-
     const pages: number[] = [1];
     if (cur > 3) pages.push(-1);
-    for (let p = Math.max(2, cur - 1); p <= Math.min(total - 1, cur + 1); p++) {
-      pages.push(p);
-    }
+    for (let p = Math.max(2, cur - 1); p <= Math.min(total - 1, cur + 1); p++) pages.push(p);
     if (cur < total - 2) pages.push(-1);
     pages.push(total);
     return pages;
   }
-
   irPagina(p: number): void {
     if (p >= 1 && p <= this.totalPaginas) {
       this.paginaActual = p;
@@ -137,13 +139,22 @@ export class MisSolicitudesComponent implements OnInit {
   }
 
   cambiarFiltro(f: FiltroEstado): void {
+    if (this.soloPublicadas) return; // NUEVO: en este modo no se cambia el filtro
     this.filtroActivo = f;
     this.busqueda = '';
     this.paginaActual = 1;
   }
 
-  onBusqueda(): void {
-    this.paginaActual = 1;
+  onBusqueda(): void { this.paginaActual = 1; }
+
+  // ── Navegar a Mis Solicitudes completas (NUEVO, boton en modo publicadas) ──
+  irAMisSolicitudes(): void {
+    this.router.navigate(['/mis-publicaciones']);
+  }
+
+  // ── Ver inscritos (NUEVO US-28) ──
+  verInscritos(idActividad: number): void {
+    this.router.navigate(['/mis-solicitudes', idActividad, 'inscritos']);
   }
 
   // ── Modal detalle ──
