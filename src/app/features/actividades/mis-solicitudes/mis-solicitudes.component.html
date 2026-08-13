@@ -345,6 +345,15 @@
     <!-- Pie modal – detalle -->
     <div class="modal-footer" *ngIf="!modoEdicion">
       <button class="btn-editar" *ngIf="detalle.estado === 'PENDIENTE'" (click)="abrirEdicion()"> Editar</button>
+      
+        <!-- US-07: botón recordatorio -->
+  <button class="btn-recordatorio"
+          *ngIf="detalle.estado === 'APROBADA' && detalle.requiereInscripcion"
+          (click)="abrirModalRecordatorio(detalle, $event)">
+    <span class="material-symbols-rounded">notifications_active</span>
+    Recordatorio
+  </button>
+      
       <!-- US-04: ver lista de inscritos -->
       <button class="btn-inscritos"
               *ngIf="detalle.estado === 'APROBADA' && detalle.requiereInscripcion"
@@ -381,4 +390,15 @@
     [nombreActividad]="actividadParaInscritos.nombre"
     (cerrar)="cerrarModalInscritos()">
   </app-modal-inscritos>
+}
+
+  <!-- US-07: Modal de envío de recordatorio -->
+@if (modalRecordatorioAbierto && actividadParaRecordatorio) {
+  <app-modal-recordatorio
+    [idActividad]="actividadParaRecordatorio.idActividad"
+    [idUsuario]="sesion.getIdUsuario()"
+    [token]="sesion.usuario()?.token ?? ''"
+    [nombreActividad]="actividadParaRecordatorio.nombre"
+    (cerrar)="cerrarModalRecordatorio()">
+  </app-modal-recordatorio>
 }

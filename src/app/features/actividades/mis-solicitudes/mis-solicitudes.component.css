@@ -776,6 +776,22 @@
   .modal-grid-2 { grid-template-columns: 1fr; }
 }
 
+/* US-07: botón recordatorio en pie de modal */
+.btn-recordatorio {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .5rem 1.1rem;
+  background: #e8f5e9; border: 1.5px solid var(--primary, #2e7d52);
+  border-radius: 9px; font-family: 'DM Sans', sans-serif;
+  font-size: .88rem; font-weight: 600; color: var(--primary, #2e7d52);
+  cursor: pointer; transition: background .2s, color .2s;
+}
+.btn-recordatorio:hover { background: var(--primary, #2e7d52); color: #fff; }
+.btn-recordatorio .material-symbols-rounded { font-size: 18px; }
+
+@media (max-width: 500px) {
+  .modal-grid-2 { grid-template-columns: 1fr; }
+}
+
 /* Zona scrolleable del modal */
 .modal-body {
   flex: 1;

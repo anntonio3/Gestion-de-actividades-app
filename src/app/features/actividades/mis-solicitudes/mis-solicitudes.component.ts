@@ -7,6 +7,8 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
 import { SesionService } from '../../../core/services/sesion.service';
 import { InscripcionService } from '../../../core/services/inscripcion.service';
 import { ModalInscritosComponent } from './modal-inscritos/modal-inscritos.component';
+import { ModalRecordatorioComponent } from './modal-recordatorio/modal-recordatorio.component';
+
 
 
 type FiltroEstado = '' | 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
@@ -14,7 +16,7 @@ type FiltroEstado = '' | 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
 @Component({
   selector: 'app-mis-solicitudes',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, ModalInscritosComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, ModalInscritosComponent, ModalRecordatorioComponent],
   templateUrl: './mis-solicitudes.component.html',
   styleUrls: ['./mis-solicitudes.component.css']
 })
@@ -74,6 +76,21 @@ export class MisSolicitudesComponent implements OnInit {
   cerrarModalInscritos(): void {
     this.modalInscritosAbierto = false;
     this.actividadParaInscritos = null;
+  }
+
+   // US-07: modal de recordatorio
+  modalRecordatorioAbierto = false;
+  actividadParaRecordatorio: SolicitudActividad | null = null;
+
+  abrirModalRecordatorio(actividad: SolicitudActividad, evento: Event): void {
+    evento.stopPropagation();
+    this.actividadParaRecordatorio = actividad;
+    this.modalRecordatorioAbierto  = true;
+  }
+
+  cerrarModalRecordatorio(): void {
+    this.modalRecordatorioAbierto  = false;
+    this.actividadParaRecordatorio = null;
   }
 
 
