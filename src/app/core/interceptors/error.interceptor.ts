@@ -2,29 +2,29 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
+import { SesionService } from '../services/sesion.service';
 
 /**
  * Interceptor global de errores HTTP.
- * Ademas de construir mensajes amigables, redirige al login si el backend
- * devuelve 401 (sesion expirada o no autorizado).
+ * US-00: maneja 401 (token expirado/inválido) y 403 (sin permiso).
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
+  const sesion = inject(SesionService);
 
   return next(req).pipe(
     catchError(error => {
       let mensaje = 'Error inesperado. Intenta de nuevo.';
 
       if (error.status === 401) {
-        // Sesion expirada o no autenticado: limpiar storage y redirigir
-        localStorage.removeItem('unpa_sesion');
-        router.navigate(['/auth/login'], { queryParams: { returnUrl: router.url } });
-        mensaje = 'Tu sesion ha expirado. Inicia sesion de nuevo.';
+        // Token ausente, inválido o expirado — cerrar sesión y redirigir
+        sesion.cerrarSesion();
+        mensaje = 'Tu sesión ha expirado. Inicia sesión de nuevo.';
       } else if (error.status === 403) {
-        mensaje = 'No tienes permiso para realizar esta accion.';
+        mensaje = 'No tienes permiso para realizar esta acción.';
+        router.navigate(['/sin-permiso']);
       } else if (error.status === 400 && error.error?.errores) {
-        const errores = Object.values(error.error.errores).join(', ');
-        mensaje = `Errores de validacion: ${errores}`;
+        mensaje = `Errores de validación: ${Object.values(error.error.errores).join(', ')}`;
       } else if (error.status === 400 && error.error?.mensaje) {
         mensaje = error.error.mensaje;
       } else if (error.status === 404) {

@@ -58,7 +58,8 @@ export class NavbarComponent {
     { label: 'Espacios',            ruta: '/admin/espacios',            icono: 'map' },
     { label: 'Inmobiliario',        ruta: '/admin/inmobiliario',        icono: 'chair' },
     { label: 'Usuarios',            ruta: '/admin/usuarios',            icono: 'manage_accounts' },
-    { label: 'Estadísticas',         ruta: '/admin/grafica',             icono: 'bar_chart' }
+    { label: 'Estadísticas',         ruta: '/admin/grafica',             icono: 'bar_chart' },
+    { label: 'Inscripciones',       ruta: '/admin/inscripciones',       icono: 'groups' }
   ];
 
   readonly menuAlumno: MenuItem[] = [

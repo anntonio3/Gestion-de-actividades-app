@@ -26,10 +26,10 @@
       <p class="total">{{ datos.totalInscritos }} inscrito(s)</p>
 
       <div class="acciones">
-        <button class="btn-descarga" [disabled]="descargando" (click)="descargar('pdf')">
+        <button class="btn-descarga" (click)="descargar('pdf')">
           <span class="material-symbols-rounded">picture_as_pdf</span> Descargar PDF
         </button>
-        <button class="btn-descarga" [disabled]="descargando" (click)="descargar('csv')">
+        <button class="btn-descarga" (click)="descargar('csv')">
           <span class="material-symbols-rounded">table_view</span> Descargar CSV
         </button>
       </div>

@@ -4,7 +4,7 @@
   inicialesUsuario="SG"
   rutaRegresar="/"
   [mostrarRegresar]="true"
-  [titulo]="soloPublicadas ? 'Mis Publicaciones' : 'Mis Solicitudes'">
+  titulo="Mis Solicitudes">
 </app-navbar>
 
 <!-- PAGE HEADER -->
@@ -25,7 +25,7 @@
     </div>
 
     <!-- Botones filtro / contadores -->
-    <div class="filter-stats" *ngIf="!cargando && !error && !soloPublicadas">
+    <div class="filter-stats" *ngIf="!cargando && !error">
 
       <button class="stat-btn" [class.active]="filtroActivo === ''" (click)="cambiarFiltro('')">
         <span class="stat-num">{{ todas.length }}</span>
@@ -54,7 +54,7 @@
 <!-- ESTADO: cargando -->
 <div class="content-wrap" *ngIf="cargando">
   <div class="empty-state">
-    <span class="material-symbols-rounded icon">hourglass_empty</span>
+    <span class="icon">⏳</span>
     <p>Cargando solicitudes...</p>
   </div>
 </div>
@@ -62,16 +62,10 @@
 <!-- ESTADO: error -->
 <div class="content-wrap" *ngIf="!cargando && error">
   <div class="empty-state">
-    <span class="material-symbols-rounded icon">warning</span>
+    <span class="icon">⚠️</span>
     <p style="color:var(--danger)">{{ error }}</p>
   </div>
 </div>
-
-<!-- Acceso a Mis Solicitudes completas (solo en modo Mis Publicaciones) -->
-<button class="btn-ir-solicitudes" *ngIf="soloPublicadas && !cargando && !error" (click)="irAMisSolicitudes()">
-  <span class="material-symbols-rounded">history</span>
-  Ver todas mis solicitudes
-</button>
 
 <!-- LISTA -->
 <div class="content-wrap" *ngIf="!cargando && !error">
@@ -106,55 +100,51 @@
         <img [src]="getPortada(s)" [alt]="s.nombre">
       </div>
       <div class="sol-thumb sol-thumb--empty" *ngIf="!getPortada(s)">
-        <span class="material-symbols-rounded">event_note</span>
+        <span>📋</span>
       </div>
 
       <div class="sol-info">
         <h3>{{ s.nombre }}</h3>
         <p>{{ s.descripcion }}</p>
         <div class="sol-meta">
-          <span class="smeta"><span class="material-symbols-rounded">calendar_today</span> {{ s.fechaActividad }}</span>
-          <span class="smeta"><span class="material-symbols-rounded">schedule</span> {{ s.horaInicio }} – {{ s.horaFin }}</span>
-          <span class="smeta" *ngIf="s.campus"><span class="material-symbols-rounded">location_on</span> {{ s.campus }}</span>
-          <span class="smeta" *ngIf="s.tipoActividad"><span class="material-symbols-rounded">sell</span> {{ s.tipoActividad }}</span>
+          <span class="smeta">📅 {{ s.fechaActividad }}</span>
+          <span class="smeta">🕐 {{ s.horaInicio }} – {{ s.horaFin }}</span>
+          <span class="smeta" *ngIf="s.campus">📍 {{ s.campus }}</span>
+          <span class="smeta" *ngIf="s.tipoActividad">🏷️ {{ s.tipoActividad }}</span>
         </div>
         <div class="reason-box" *ngIf="s.estado === 'RECHAZADA' && s.motivoRechazo">
           {{ s.motivoRechazo }}
         </div>
       </div>
 
-      <div class="sol-status">
-        <span class="status-pill" [ngClass]="'status-' + estadoClass(s.estado)">
-          {{ estadoLabel(s.estado) }}
-        </span>
-
-        <!-- US-28: badge de inscritos + boton ver inscritos -->
-        @if (s.estado === 'APROBADA' && s.requiereInscripcion && totalInscritos[s.idActividad] !== undefined) {
-          <div class="inscripcion-total-badge">
-            <span class="material-symbols-rounded">groups</span>
-            {{ totalInscritos[s.idActividad] }} inscrito(s)
+          <div class="sol-status">
+            <span class="status-pill" [ngClass]="'status-' + estadoClass(s.estado)">
+              {{ estadoLabel(s.estado) }}
+            </span>
+            <!-- ↓ AQUÍ, solo aplica en aprobadas -->
+            @if (s.estado === 'APROBADA' && s.requiereInscripcion && totalInscritos[s.idActividad] !== undefined) {
+              <div class="inscripcion-total-badge"
+                   (click)="abrirModalInscritos(s, $event)"
+                   title="Ver lista de inscritos">
+                <span class="material-symbols-rounded">groups</span>
+                {{ totalInscritos[s.idActividad] }} inscrito(s)
+              </div>
+            }
+            <!-- Indicador de edición rápida para pendientes -->
+            <div class="edit-hint" *ngIf="s.estado === 'PENDIENTE'">Editable</div>
+            <div class="sol-date">ID: {{ s.idActividad }}</div>
           </div>
-          <button class="btn-ver-inscritos" (click)="verInscritos(s.idActividad); $event.stopPropagation()">
-            <span class="material-symbols-rounded">list_alt</span> Ver inscritos
-          </button>
-        }
-
-        <!-- Indicador de edición rápida para pendientes -->
-        <div class="edit-hint" *ngIf="s.estado === 'PENDIENTE'">Editable</div>
-        <div class="sol-date">ID: {{ s.idActividad }}</div>
-      </div>
 
     </div>
   </div>
 
   <!-- Empty state -->
   <div class="empty-state" *ngIf="listaActiva.length === 0">
-    <span class="material-symbols-rounded icon">inbox</span>
-    <p *ngIf="soloPublicadas">Aún no tienes eventos publicados.</p>
-    <p *ngIf="!soloPublicadas && filtroActivo === 'APROBADA'">No tienes solicitudes aprobadas aún.</p>
-    <p *ngIf="!soloPublicadas && filtroActivo === 'RECHAZADA'">¡Ninguna solicitud rechazada!</p>
-    <p *ngIf="!soloPublicadas && filtroActivo === 'PENDIENTE'">No tienes solicitudes pendientes.</p>
-    <p *ngIf="!soloPublicadas && filtroActivo === ''">No hay solicitudes registradas.</p>
+    <span class="icon">📭</span>
+    <p *ngIf="filtroActivo === 'APROBADA'">No tienes solicitudes aprobadas aún.</p>
+    <p *ngIf="filtroActivo === 'RECHAZADA'">¡Ninguna solicitud rechazada!</p>
+    <p *ngIf="filtroActivo === 'PENDIENTE'">No tienes solicitudes pendientes.</p>
+    <p *ngIf="filtroActivo === ''">No hay solicitudes registradas.</p>
   </div>
 
 </div>
@@ -169,9 +159,7 @@
     <!-- Cabecera -->
     <div class="modal-top">
       <h2>{{ modoEdicion ? 'Editar Actividad' : detalle.nombre }}</h2>
-      <button class="modal-close" (click)="cerrarDetalle()">
-        <span class="material-symbols-rounded">close</span>
-      </button>
+      <button class="modal-close" (click)="cerrarDetalle()">✕</button>
     </div>
 
     <!-- Contenido scrolleable -->
@@ -181,8 +169,7 @@
     <ng-container *ngIf="!modoEdicion">
 
       <div class="alert-success" *ngIf="exitoEdicion">
-        <span class="material-symbols-rounded">check_circle</span>
-        Actividad actualizada correctamente.
+        ✅ Actividad actualizada correctamente.
       </div>
 
       <!-- Portada -->
@@ -196,9 +183,10 @@
           {{ estadoLabel(detalle.estado) }}
         </span>
         <span class="revision-hint" *ngIf="detalle.fechaActualizacion && detalle.estado !== 'PENDIENTE'">
-          <span class="material-symbols-rounded" style="font-size:15px">history</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           Revisada el {{ detalle.fechaActualizacion | date:'dd/MM/yyyy HH:mm' }}
         </span>
+
       </div>
 
       <!-- Categoria/Tipo | Campus -->
@@ -245,8 +233,8 @@
         <div class="recursos-list">
           <div class="recurso-item" *ngFor="let r of detalle.recursos">
             <div class="recurso-icono">
-              <span class="material-symbols-rounded" *ngIf="r.tipoRecurso === 'ESPACIO'" style="font-size:18px">meeting_room</span>
-              <span class="material-symbols-rounded" *ngIf="r.tipoRecurso !== 'ESPACIO'" style="font-size:18px">inventory_2</span>
+              <svg *ngIf="r.tipoRecurso === 'ESPACIO'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+              <svg *ngIf="r.tipoRecurso !== 'ESPACIO'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
             </div>
             <div class="recurso-info">
               <span class="recurso-nombre">{{ r.nombre }}</span>
@@ -270,8 +258,7 @@
       <div class="edit-form">
 
         <div class="alert-info">
-          <span class="material-symbols-rounded">info</span>
-          Solo puedes editar actividades en estado <strong>Pendiente</strong>.
+          ℹ️ Solo puedes editar actividades en estado <strong>Pendiente</strong>.
         </div>
 
         <div class="form-field">
@@ -310,7 +297,7 @@
             <div class="img-actual-wrap">
               <img [src]="imagenActual" alt="Imagen actual" class="img-actual-preview">
               <button class="img-quitar-btn" (click)="quitarImagenActual()" title="Quitar imagen">
-                <span class="material-symbols-rounded" style="font-size:15px">close</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 Quitar imagen
               </button>
             </div>
@@ -321,7 +308,7 @@
             <div class="img-actual-wrap">
               <img [src]="nuevaImagenPrevia" alt="Nueva imagen" class="img-actual-preview">
               <button class="img-quitar-btn" (click)="quitarNuevaImagen(0)" title="Quitar">
-                <span class="material-symbols-rounded" style="font-size:15px">close</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 Quitar imagen
               </button>
             </div>
@@ -333,7 +320,7 @@
                  (dragover)="$event.preventDefault()"
                  (drop)="onDrop($event)"
                  (click)="imgInput.click()">
-              <span class="material-symbols-rounded drop-icon">add_photo_alternate</span>
+              <span class="drop-icon">🖼️</span>
               <p>Arrastra una imagen o <span class="drop-link">haz clic para seleccionar</span></p>
               <small>JPG, PNG, WEBP · máx 5 MB</small>
             </div>
@@ -341,7 +328,7 @@
 
           <!-- Botón cambiar imagen (cuando hay imagen actual pero no nueva) -->
           <button class="img-cambiar-btn" *ngIf="imagenActual && !nuevaImagenPrevia" (click)="imgInput.click()">
-            <span class="material-symbols-rounded" style="font-size:15px">sync</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Cambiar imagen
           </button>
 
@@ -357,8 +344,22 @@
 
     <!-- Pie modal – detalle -->
     <div class="modal-footer" *ngIf="!modoEdicion">
-      <button class="btn-editar" *ngIf="detalle.estado === 'PENDIENTE'" (click)="abrirEdicion()">
-        <span class="material-symbols-rounded" style="font-size:15px">edit</span> Editar
+      <button class="btn-editar" *ngIf="detalle.estado === 'PENDIENTE'" (click)="abrirEdicion()"> Editar</button>
+      
+        <!-- US-07: botón recordatorio -->
+  <button class="btn-recordatorio"
+          *ngIf="detalle.estado === 'APROBADA' && detalle.requiereInscripcion"
+          (click)="abrirModalRecordatorio(detalle, $event)">
+    <span class="material-symbols-rounded">notifications_active</span>
+    Recordatorio
+  </button>
+      
+      <!-- US-04: ver lista de inscritos -->
+      <button class="btn-inscritos"
+              *ngIf="detalle.estado === 'APROBADA' && detalle.requiereInscripcion"
+              (click)="abrirModalInscritos(detalle, $event)">
+        <span class="material-symbols-rounded">group</span>
+        Ver inscritos
       </button>
       <button class="btn-cerrar" (click)="cerrarDetalle()">Cerrar</button>
     </div>
@@ -378,7 +379,25 @@
 <!-- Lightbox -->
 <div class="lightbox" [class.open]="imagenAmpliada !== null" (click)="cerrarImagenAmpliada()">
   <img *ngIf="imagenAmpliada" [src]="imagenAmpliada" alt="Imagen ampliada" (click)="$event.stopPropagation()">
-  <button class="lightbox-close" (click)="cerrarImagenAmpliada()">
-    <span class="material-symbols-rounded">close</span>
-  </button>
+  <button class="lightbox-close" (click)="cerrarImagenAmpliada()">✕</button>
 </div>
+
+<!-- US-04: Modal de lista de inscritos -->
+@if (modalInscritosAbierto && actividadParaInscritos) {
+  <app-modal-inscritos
+    [idActividad]="actividadParaInscritos.idActividad"
+    [nombreActividad]="actividadParaInscritos.nombre"
+    (cerrar)="cerrarModalInscritos()">
+  </app-modal-inscritos>
+}
+
+  <!-- US-07: Modal de envío de recordatorio -->
+@if (modalRecordatorioAbierto && actividadParaRecordatorio) {
+  <app-modal-recordatorio
+    [idActividad]="actividadParaRecordatorio.idActividad"
+    [idUsuario]="sesion.getIdUsuario()"
+    [token]="sesion.usuario()?.token ?? ''"
+    [nombreActividad]="actividadParaRecordatorio.nombre"
+    (cerrar)="cerrarModalRecordatorio()">
+  </app-modal-recordatorio>
+}

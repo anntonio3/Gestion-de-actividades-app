@@ -136,8 +136,18 @@ export const routes: Routes = [
       import('./features/actividades/mis-solicitudes/mis-solicitudes.component')
         .then(m => m.MisSolicitudesComponent)
   },
-  { path: 'mis-solicitudes/:idActividad/inscritos', component: InscritosActividadComponent }
-  ,
+  {
+    path: 'admin/inscripciones/:idActividad',
+    canActivate: [adminGuard],
+    component: InscritosActividadComponent
+  },
+  {
+    path: 'admin/inscripciones',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/admin/inscripciones/admin-inscripciones/admin-inscripciones.component')
+        .then(m => m.AdminInscripcionesComponent)
+  },
   { path: '**', redirectTo: 'calendario' },
 
 ];

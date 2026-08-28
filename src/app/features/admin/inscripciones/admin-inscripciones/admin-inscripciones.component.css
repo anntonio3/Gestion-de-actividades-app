@@ -1,0 +1,63 @@
+.page-header {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  padding: 1.6rem 2rem 2rem;
+}
+.page-header-inner { max-width: 1100px; margin: 0 auto; }
+
+.search-wrap { position: relative; }
+.search-icon {
+  position: absolute; left: .85rem; top: 50%; transform: translateY(-50%);
+  color: var(--gray); pointer-events: none;
+}
+.search-input {
+  width: 100%; padding: .65rem 1rem .65rem 2.4rem; border: none; border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: .88rem; background: white; color: var(--dark);
+  outline: none; box-shadow: 0 2px 8px rgba(0,0,0,.08); box-sizing: border-box;
+}
+
+.content-wrap { max-width: 1100px; margin: 1.6rem auto 3rem; padding: 0 2rem; }
+.results-label { font-size: .83rem; color: var(--gray); display: block; margin-bottom: 1rem; }
+
+.evt-list { display: flex; flex-direction: column; gap: .9rem; }
+
+.evt-card {
+  background: white; border: 1.5px solid var(--primary-bg); border-radius: 14px;
+  padding: 1.2rem 1.4rem; display: flex; justify-content: space-between; align-items: center;
+  gap: 1.2rem; cursor: pointer; transition: all .25s;
+  box-shadow: 0 2px 10px rgba(113,182,167,.07);
+}
+.evt-card:hover {
+  border-color: var(--primary-light); box-shadow: 0 4px 18px rgba(113,182,167,.15);
+  transform: translateY(-1px);
+}
+
+.evt-info h3 {
+  font-family: 'Playfair Display', serif; font-size: 1.02rem; color: var(--dark); margin-bottom: .4rem;
+}
+.evt-meta { display: flex; gap: 1.1rem; flex-wrap: wrap; }
+.smeta {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .78rem; color: var(--gray);
+}
+.smeta .material-symbols-rounded { font-size: 15px; }
+
+.evt-total {
+  flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+  background: var(--primary-bg); border: 1px solid var(--primary-light);
+  border-radius: 12px; padding: .6rem 1.1rem; min-width: 90px;
+}
+.evt-total .material-symbols-rounded { font-size: 20px; color: var(--primary-dark); }
+.evt-total-num {
+  font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--accent);
+  line-height: 1.2;
+}
+.evt-total-lbl { font-size: .65rem; color: var(--gray); text-transform: uppercase; letter-spacing: .04em; }
+
+.empty-state { text-align: center; padding: 3.5rem 1rem; color: var(--gray); }
+.empty-state .icon { font-size: 2.5rem; margin-bottom: .8rem; display: block; }
+.empty-state p { font-size: .88rem; }
+
+@media (max-width: 640px) {
+  .evt-card { flex-direction: column; align-items: flex-start; }
+  .evt-total { width: 100%; flex-direction: row; justify-content: center; gap: .4rem; }
+}

@@ -1,0 +1,71 @@
+<div class="modal-overlay" (click)="onCerrar()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <span class="material-symbols-rounded header-icon">notifications_active</span>
+      <div class="header-text">
+        <h2>Enviar recordatorio</h2>
+        <p class="header-sub">{{ nombreActividad }}</p>
+      </div>
+      <button class="btn-close" (click)="onCerrar()" [disabled]="estado === 'EN_PROGRESO'">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <!-- Cuerpo -->
+    <div class="modal-body">
+
+      @if (estado === 'IDLE') {
+        <div class="estado-idle">
+          <span class="material-symbols-rounded idle-icon">mail</span>
+          <p>Se enviará un correo de recordatorio a <strong>todos los inscritos</strong> con correo registrado.</p>
+          <p class="nota">⚠️ Solo se puede enviar un recordatorio por evento cada 24 horas.</p>
+        </div>
+      }
+
+      @if (estado === 'EN_PROGRESO') {
+        <div class="estado-progreso">
+          <p class="progreso-msg">{{ mensaje }}</p>
+          <div class="progress-track">
+            <div class="progress-bar" [style.width.%]="porcentaje"></div>
+          </div>
+          <span class="progreso-num">{{ enviados }} / {{ total }}</span>
+        </div>
+      }
+
+      @if (estado === 'COMPLETADO') {
+        <div class="estado-resultado estado-ok">
+          <span class="material-symbols-rounded result-icon">check_circle</span>
+          <p>{{ mensaje }}</p>
+        </div>
+      }
+
+      @if (estado === 'ERROR') {
+        <div class="estado-resultado estado-error">
+          <span class="material-symbols-rounded result-icon">error</span>
+          <p>{{ mensaje }}</p>
+        </div>
+      }
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      @if (estado === 'IDLE') {
+        <button class="btn-secundario" (click)="onCerrar()">Cancelar</button>
+        <button class="btn-primario" (click)="iniciarEnvio()">
+          <span class="material-symbols-rounded">send</span>
+          Enviar recordatorio
+        </button>
+      }
+      @if (estado === 'EN_PROGRESO') {
+        <button class="btn-secundario" disabled>Enviando...</button>
+      }
+      @if (estado === 'COMPLETADO' || estado === 'ERROR') {
+        <button class="btn-primario" (click)="onCerrar()">Cerrar</button>
+      }
+    </div>
+
+  </div>
+</div>

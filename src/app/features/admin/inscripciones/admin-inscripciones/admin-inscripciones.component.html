@@ -1,0 +1,82 @@
+<app-navbar
+  nombreUsuario="Admin"
+  inicialesUsuario="AD"
+  rutaRegresar="/"
+  [mostrarRegresar]="true"
+  titulo="Inscripciones por Evento">
+</app-navbar>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="search-wrap">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        type="text"
+        [(ngModel)]="busqueda"
+        placeholder="Buscar por evento o profesor..."
+        class="search-input">
+    </div>
+  </div>
+</div>
+
+<!-- ESTADO: cargando -->
+<div class="content-wrap" *ngIf="cargando">
+  <div class="empty-state">
+    <span class="material-symbols-rounded icon">hourglass_empty</span>
+    <p>Cargando eventos...</p>
+  </div>
+</div>
+
+<!-- ESTADO: error -->
+<div class="content-wrap" *ngIf="!cargando && error">
+  <div class="empty-state">
+    <span class="material-symbols-rounded icon">warning</span>
+    <p style="color:var(--danger)">{{ error }}</p>
+  </div>
+</div>
+
+<!-- LISTA -->
+<div class="content-wrap" *ngIf="!cargando && !error">
+
+  <span class="results-label" *ngIf="listaFiltrada.length > 0">
+    {{ listaFiltrada.length }} evento(s) con inscripción activa
+  </span>
+
+  <div class="evt-list" *ngIf="listaFiltrada.length > 0">
+    <div class="evt-card" *ngFor="let e of listaFiltrada" (click)="verInscritos(e.idActividad)">
+
+      <div class="evt-info">
+        <h3>{{ e.nombreEvento }}</h3>
+        <div class="evt-meta">
+          <span class="smeta">
+            <span class="material-symbols-rounded">person</span> {{ e.nombreProfesor }}
+          </span>
+          <span class="smeta">
+            <span class="material-symbols-rounded">calendar_today</span> {{ e.fechaActividad }}
+          </span>
+          <span class="smeta">
+            <span class="material-symbols-rounded">schedule</span> {{ e.horaInicio }} – {{ e.horaFin }}
+          </span>
+        </div>
+      </div>
+
+      <div class="evt-total">
+        <span class="material-symbols-rounded">groups</span>
+        <span class="evt-total-num">{{ e.totalInscritos }}</span>
+        <span class="evt-total-lbl">inscrito(s)</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="listaFiltrada.length === 0">
+    <span class="material-symbols-rounded icon">inbox</span>
+    <p *ngIf="busqueda">No se encontraron eventos que coincidan con "{{ busqueda }}".</p>
+    <p *ngIf="!busqueda">No hay eventos aprobados con inscripción activa por el momento.</p>
+  </div>
+
+</div>
